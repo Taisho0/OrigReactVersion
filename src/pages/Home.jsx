@@ -1,15 +1,9 @@
-import { useEffect } from 'react'
 import SiteHeader from '../components/SiteHeader.jsx'
 import DashboardSidebar from '../components/DashboardSidebar.jsx'
 import SiteFooter from '../components/SiteFooter.jsx'
 import '../styles/Dashboard.css'
 
-export default function Home({ isLoggedIn = false, onLogout = null, onLogin = null }) {
-  useEffect(() => {
-    if (onLogin) {
-      onLogin()
-    }
-  }, [onLogin])
+export default function Home() {
   const masterRecords = [
     { id: '10001', name: 'Team Name', date: '02/09/2023', status: 'Status', actions: '✎ 🗑' },
     { id: '10002', name: 'Team Name', date: '02/09/2023', status: 'Status', actions: '✎ 🗑' },
@@ -31,7 +25,7 @@ export default function Home({ isLoggedIn = false, onLogout = null, onLogin = nu
 
   return (
     <div className="dashboard-wrapper">
-      <SiteHeader isLoggedIn={isLoggedIn} onLogout={onLogout} />
+      <SiteHeader />
       <div className="dashboard-container">
         <DashboardSidebar />
         <main className="dashboard-main">

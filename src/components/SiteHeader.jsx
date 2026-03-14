@@ -1,15 +1,11 @@
+import { useState } from 'react'
 import { HashLink } from './hashLink.jsx'
-import { Link, useNavigate } from 'react-router-dom'
+import LoginModal from './LoginModal/LoginModal.jsx'
+import { useAuth } from '../auth/AuthContext.jsx'
 
-export default function SiteHeader({ isLoggedIn = false, onLogout = null }) {
-  const navigate = useNavigate()
-
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout()
-    }
-    navigate('/')
-  }
+export default function SiteHeader() {
+  const [open, setOpen] = useState(false)
+  const { user, signOut } = useAuth()
 
   return (
     <header className="site-header">
@@ -25,30 +21,41 @@ export default function SiteHeader({ isLoggedIn = false, onLogout = null }) {
         </div>
       </div>
 
-      {!isLoggedIn && (
-        <nav className="site-nav">
-          <HashLink to="/#home" className="active">
-            Home
-          </HashLink>
-          <HashLink to="/#getting-started">Getting Started</HashLink>
-          <HashLink to="/#why-choose-us">Why Us?</HashLink>
-        </nav>
-      )}
+      <nav className="site-nav">
+        <HashLink to="/#home" className="active">
+          Home
+        </HashLink>
+        <HashLink to="/#getting-started">Getting Started</HashLink>
+        <HashLink to="/#why-choose-us">Why Us?</HashLink>
+      </nav>
 
       <div className="auth-section">
-        {!isLoggedIn ? (
-          <Link to="/home" className="login-button">
+        {!user ? (
+          <a
+            href="#"
+            className="login-button"
+            onClick={(e) => {
+              e.preventDefault()
+              setOpen(true)
+            }}
+          >
             Login
-          </Link>
+          </a>
         ) : (
-          <div className="user-menu">
-            <span className="user-name">Welcome</span>
-            <button className="logout-button" onClick={handleLogout}>
-              Logout
-            </button>
-          </div>
+          <a
+            href="#"
+            className="login-button"
+            onClick={(e) => {
+              e.preventDefault()
+              signOut()
+            }}
+          >
+            Logout
+          </a>
         )}
       </div>
+
+      <LoginModal open={open} onClose={() => setOpen(false)} />
     </header>
   )
 }

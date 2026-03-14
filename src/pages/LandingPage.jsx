@@ -2,12 +2,12 @@ import SiteHeader from '../components/SiteHeader.jsx'
 import SiteFooter from '../components/SiteFooter.jsx'
 import { useHashScroll } from '../components/useHashScroll.js'
 
-export default function LandingPage({ isLoggedIn = false, onLogout = null }) {
+export default function LandingPage() {
   useHashScroll()
 
   return (
     <div className="app-container">
-      <SiteHeader isLoggedIn={isLoggedIn} onLogout={onLogout} />
+      <SiteHeader />
 
       <main>
         <section id="home" className="hero">
