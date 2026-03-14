@@ -1,80 +1,199 @@
+import { useEffect } from 'react'
 import SiteHeader from '../components/SiteHeader.jsx'
+import DashboardSidebar from '../components/DashboardSidebar.jsx'
 import SiteFooter from '../components/SiteFooter.jsx'
-import { useHashScroll } from '../components/useHashScroll.js'
+import '../styles/Dashboard.css'
 
-export default function Home() {
-  useHashScroll()
+export default function Home({ isLoggedIn = false, onLogout = null, onLogin = null }) {
+  useEffect(() => {
+    if (onLogin) {
+      onLogin()
+    }
+  }, [onLogin])
+  const masterRecords = [
+    { id: '10001', name: 'Team Name', date: '02/09/2023', status: 'Status', actions: '✎ 🗑' },
+    { id: '10002', name: 'Team Name', date: '02/09/2023', status: 'Status', actions: '✎ 🗑' },
+    { id: '10003', name: 'Amorn John', date: '09/18/2022', status: 'New', actions: '✎ 🗑' },
+    { id: '10004', name: 'Boren Name', date: '12-08-2023', status: 'Status', actions: '✎ 🗑' }
+  ]
+
+  const recentActivityItems = [
+    { icon: '👤', text: 'Recent decoded', time: '2 hours ago' },
+    { icon: '📊', text: 'Millned calomorth activity', time: '1 hour ago' },
+    { icon: '📋', text: 'Recent print inrecet', time: '1 hour ago' }
+  ]
+
+  const teamMembers = [
+    { icon: '👤', name: 'Alerson Anner', role: 'Team Member' },
+    { icon: '👤', name: 'Jiann Danner', role: 'Team Member' },
+    { icon: '👤', name: 'Jean Smith', role: 'Team Member' }
+  ]
 
   return (
-    <div className="app-container">
-      <SiteHeader />
+    <div className="dashboard-wrapper">
+      <SiteHeader isLoggedIn={isLoggedIn} onLogout={onLogout} />
+      <div className="dashboard-container">
+        <DashboardSidebar />
+        <main className="dashboard-main">
+          <div className="dashboard-top">
+            {/* Data Analytics Section */}
+            <section className="analytics-section">
+              <div className="section-header">
+                <h2>Data Analytics</h2>
+                <div className="controls">
+                  <button className="btn-small">All ▼</button>
+                  <button className="btn-small">Filters ▼</button>
+                </div>
+              </div>
+              
+              <div className="metrics-row">
+                <div className="metric">
+                  <div className="metric-label">Total</div>
+                  <div className="metric-value">$12.9B</div>
+                  <div className="metric-change positive">↑ 8.8%</div>
+                </div>
+                <div className="metric">
+                  <div className="metric-label">Average</div>
+                  <div className="metric-value">$24.6K</div>
+                  <div className="metric-change positive">↑ 28.7%</div>
+                </div>
+                <div className="metric">
+                  <div className="metric-label">Earnings analysis</div>
+                  <div className="metric-value">$1.00%</div>
+                  <div className="metric-change positive">↑ 4.88%</div>
+                </div>
+              </div>
 
-      <main>
-        <section id="home" className="hero">
-          <div className="hero-content">
-            <h1>Your Vision, Our Passion, Unforgettable Prints.</h1>
-            <p>
-              We are a modern printing company that brings your ideas to life.
-              From custom apparel to promotional products, we&apos;ve got you covered.
-            </p>
-            <a href="#" className="cta-button" onClick={(e) => e.preventDefault()}>
-              Get a Quote
-            </a>
+              <div className="charts-row">
+                <div className="chart-placeholder">
+                  <div className="chart-title">Line Chart</div>
+                  <svg viewBox="0 0 300 150" style={{width: '100%', height: '120px'}}>
+                    <polyline points="10,100 60,80 110,70 160,85 210,60 260,75" fill="none" stroke="#00d4ff" strokeWidth="2"/>
+                    <polyline points="10,110 60,95 110,90 160,105 210,85 260,95" fill="none" stroke="#a78bfa" strokeWidth="2" opacity="0.6"/>
+                  </svg>
+                </div>
+                <div className="chart-placeholder">
+                  <div className="chart-title">Bar Chart</div>
+                  <svg viewBox="0 0 300 150" style={{width: '100%', height: '120px'}}>
+                    <rect x="40" y="80" width="30" height="50" fill="#00d4ff"/>
+                    <rect x="80" y="60" width="30" height="70" fill="#a78bfa"/>
+                    <rect x="120" y="70" width="30" height="60" fill="#06b6d4"/>
+                    <rect x="160" y="40" width="30" height="90" fill="#10b981"/>
+                    <rect x="200" y="65" width="30" height="65" fill="#f59e0b"/>
+                  </svg>
+                </div>
+                <div className="chart-placeholder pie-chart">
+                  <div className="chart-title">Pie Chart</div>
+                  <svg viewBox="0 0 120 120" style={{width: '100%', height: '120px'}}>
+                    <circle cx="60" cy="60" r="45" fill="none" stroke="#00d4ff" strokeWidth="20" strokeDasharray="70.7 141.4"/>
+                    <circle cx="60" cy="60" r="45" fill="none" stroke="#a78bfa" strokeWidth="20" strokeDasharray="70.7 141.4" style={{transform: 'rotate(180deg)', transformOrigin: '60px 60px'}}/>
+                  </svg>
+                  <div className="pie-legend">
+                    <div><span style={{color: '#00d4ff'}}>●</span> Real from - 55%</div>
+                    <div><span style={{color: '#a78bfa'}}>●</span> Alternatives - 65%</div>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
-        </section>
 
-        <section id="getting-started" className="getting-started">
-          <h2>Getting Started is Easy</h2>
-          <div className="steps-container">
-            <div className="step">
-              <div className="step-icon">🎨</div>
-              <h3>1. Choose a Product</h3>
-              <p>
-                Explore our wide range of customizable products, from t-shirts and hoodies
-                to mugs and phone cases.
-              </p>
-            </div>
+          <div className="dashboard-bottom">
+            {/* Master Record Section */}
+            <section className="master-section">
+              <div className="section-header">
+                <h2>Master Record</h2>
+                <button className="btn-add">+ Add New</button>
+              </div>
+              <div className="master-controls">
+                <input type="search" placeholder="Search..." className="search-input"/>
+                <div className="controls-right">
+                  <span className="control-dots">⋯</span>
+                </div>
+              </div>
+              <div className="table-scroll">
+                <table className="master-table">
+                  <thead>
+                    <tr>
+                      <th>ID ↑</th>
+                      <th>Name</th>
+                      <th>Date ↓</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {masterRecords.map((record) => (
+                      <tr key={record.id}>
+                        <td>{record.id}</td>
+                        <td>{record.name}</td>
+                        <td>{record.date}</td>
+                        <td><span className="status-badge">{record.status}</span></td>
+                        <td>{record.actions}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
 
-            <div className="step">
-              <div className="step-icon">✏️</div>
-              <h3>2. Customize Your Design</h3>
-              <p>
-                Upload your own artwork or use our design tools to create a unique design
-                that reflects your brand or personality.
-              </p>
-            </div>
+            {/* Right Sidebar Widgets */}
+            <div className="dashboard-widgets">
+              {/* Recent Activity */}
+              <section className="widget">
+                <div className="widget-header">
+                  <h3>Recent Activity</h3>
+                  <span className="widget-menu">⋯</span>
+                </div>
+                <div className="activity-list">
+                  {recentActivityItems.map((item, idx) => (
+                    <div key={idx} className="activity-item">
+                      <span className="activity-icon">{item.icon}</span>
+                      <div className="activity-info">
+                        <p>{item.text}</p>
+                        <small>{item.time}</small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
 
-            <div className="step">
-              <div className="step-icon">🚀</div>
-              <h3>3. Place Your Order</h3>
-              <p>
-                Once you&apos;re happy with your design, simply place your order and we&apos;ll take care
-                of the rest. Fast, reliable shipping guaranteed.
-              </p>
+              {/* System Status */}
+              <section className="widget">
+                <div className="widget-header">
+                  <h3>System Status</h3>
+                  <span className="widget-menu">⋯</span>
+                </div>
+                <div className="status-gauge">
+                  <svg viewBox="0 0 200 120" style={{width: '100%', height: '100px'}}>
+                    <path d="M 30 100 A 70 70 0 0 1 170 100" fill="none" stroke="#e5e7eb" strokeWidth="8" strokeLinecap="round"/>
+                    <path d="M 30 100 A 70 70 0 0 1 130 50" fill="none" stroke="#00d4ff" strokeWidth="8" strokeLinecap="round"/>
+                  </svg>
+                  <p className="status-text">Status</p>
+                </div>
+              </section>
+
+              {/* Team Members */}
+              <section className="widget">
+                <div className="widget-header">
+                  <h3>Team Members</h3>
+                  <span className="widget-menu">⋯</span>
+                </div>
+                <div className="members-list">
+                  {teamMembers.map((member, idx) => (
+                    <div key={idx} className="member-item">
+                      <span className="member-icon">{member.icon}</span>
+                      <div>
+                        <p className="member-name">{member.name}</p>
+                        <small>{member.role}</small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
           </div>
-        </section>
-
-        <section id="why-choose-us" className="why-choose-us">
-          <div className="why-choose-us-content">
-            <div className="image-container">
-              <img src="/images/logo.png" alt="ORIGINALS Printing Co. Logo" />
-            </div>
-            <div className="text-container">
-              <h2>Why Choose ORIGINALS?</h2>
-              <ul>
-                <li><strong>Unmatched Quality:</strong> We use only the finest materials and printing techniques to ensure your products look amazing.</li>
-                <li><strong>Endless Customization:</strong> From custom logos to full-color prints, we offer a wide range of options to bring your vision to life.</li>
-                <li><strong>Fast &amp; Reliable:</strong> We pride ourselves on our quick turnaround times and reliable shipping.</li>
-                <li><strong>Eco-Friendly:</strong> We are committed to sustainability and use eco-friendly inks and materials whenever possible.</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <h1 className="visually-hidden">ORIGINALS Printing Co.</h1>
-      </main>
-
+        </main>
+      </div>
       <SiteFooter />
     </div>
   )
