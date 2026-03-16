@@ -1,9 +1,27 @@
+import React from 'react'
+import { userAuth } from '../auth/AuthContext.jsx'
+import { useNavigate } from 'react-router-dom';
 import SiteHeader from '../components/SiteHeader.jsx'
-import DashboardSidebar from '../components/DashboardSidebar.jsx'
 import SiteFooter from '../components/SiteFooter.jsx'
+import DashboardSidebar from '../components/DashboardSidebar.jsx'
 import '../styles/Dashboard.css'
 
-export default function Home() {
+
+const Home = () => {
+  const { session, signOut } = userAuth();
+  const navigate =  useNavigate();
+  console.log(session);
+
+  const handleSignOut = async (e) => {
+    e.preventDefault();
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   const masterRecords = [
     { id: '10001', name: 'Team Name', date: '02/09/2023', status: 'Status', actions: '✎ 🗑' },
     { id: '10002', name: 'Team Name', date: '02/09/2023', status: 'Status', actions: '✎ 🗑' },
@@ -28,6 +46,12 @@ export default function Home() {
       <SiteHeader />
       <div className="dashboard-container">
         <DashboardSidebar />
+        <div>
+          <h2>Welcome, {session?.user?.email}</h2>
+          <p className='hover:cursor-pointer border inline-block px-4 py-3 mt-4' onClick={handleSignOut}>
+            Signout
+          </p>
+        </div>
         <main className="dashboard-main">
           <div className="dashboard-top">
             {/* Data Analytics Section */}
@@ -190,5 +214,7 @@ export default function Home() {
       </div>
       <SiteFooter />
     </div>
-  )
+  );
 }
+
+export default Home ;

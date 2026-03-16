@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { HashLink } from './hashLink.jsx'
-import LoginModal from './LoginModal/LoginModal.jsx'
-import { useAuth } from '../auth/AuthContext.jsx'
+
 
 export default function SiteHeader() {
-  const [open, setOpen] = useState(false)
-  const { user, signOut } = useAuth()
 
+  const [open, setOpen] = useState(false)
+
+  
   return (
     <header className="site-header">
       <div className="logo-container">
@@ -29,33 +29,9 @@ export default function SiteHeader() {
         <HashLink to="/#why-choose-us">Why Us?</HashLink>
       </nav>
 
-      <div className="auth-section">
-        {!user ? (
-          <a
-            href="#"
-            className="login-button"
-            onClick={(e) => {
-              e.preventDefault()
-              setOpen(true)
-            }}
-          >
-            Login
-          </a>
-        ) : (
-          <a
-            href="#"
-            className="login-button"
-            onClick={(e) => {
-              e.preventDefault()
-              signOut()
-            }}
-          >
-            Logout
-          </a>
-        )}
-      </div>
-
-      <LoginModal open={open} onClose={() => setOpen(false)} />
+      <button>
+        <a href="/signin" className='w-2'>Sign In</a>
+      </button>
     </header>
   )
 }
