@@ -29,8 +29,12 @@ export default function SiteHeader() {
         <HashLink to="/#why-choose-us">Why Us?</HashLink>
       </nav>
 
-      <button>
-        <a href="/signin" className='w-2'>Sign In</a>
+      <a href="/signup" className="select-none hover:text-blue-400 text-amber-300">
+        Don't have an account yet?
+      </a>
+
+      <button className='border group  hover:border-amber-400 rounded-[20px] p-2 w-[120px]'>
+        <a href="/signin" className='w-2 select-none group-hover:text-amber-400'>Sign In</a>
       </button>
     </header>
   )

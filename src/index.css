@@ -7,6 +7,10 @@
   --shadow-color: oklch(27.45% 0.223 248.63 / 50%);
 }
 
+*{
+  user-select: none;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   margin: 0;
@@ -78,7 +82,6 @@ main {
 
 .logo-text .originals { color: white; }
 .logo-text .printing-co { color: var(--accent-color); }
-
 .site-nav a {
   margin: 0 1rem;
   color: white;
@@ -92,19 +95,6 @@ main {
 .site-nav a.active {
   color: var(--accent-color);
 }
-
-.login-button {
-  background-color: var(--accent-color);
-  color: black;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  text-decoration: none;
-}
-
-.login-button:hover { background-color: white; }
-
 .user-menu {
   display: flex;
   align-items: center;

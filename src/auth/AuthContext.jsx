@@ -15,8 +15,14 @@ export const AuthContextProvider = ({ children }) => {
 
     if (error) {
       console.error("Error signing up:", error);
-      return {success: false, error};
-    } 
+      return {success: false, error: error.message};
+    }
+
+    const identities = data?.user?.identities;
+    if (Array.isArray(identities) && identities.length === 0) {
+      return {success: false, error: "This email is already registered. Please sign in instead."};
+    }
+
     return {success: true, data};
   };
 
@@ -35,8 +41,7 @@ export const AuthContextProvider = ({ children }) => {
       return {success: true, data};
     } catch (error) {
       console.error("Error signing in:", error);
-      setError(error.message);
-      return {success: false, error};
+      return {success: false, error: error.message || "Unable to sign in."};
     }
   };
 
@@ -54,10 +59,11 @@ export const AuthContextProvider = ({ children }) => {
   const signOut = async () => {
     const { error } =  await supabase.auth.signOut();
     if(error){
-      setError(error.message);
       console.error("Error signing out:", error);
-      return {success: false, error};
+      return {success: false, error: error.message || "Unable to sign out."};
     }
+
+    return {success: true};
   };
   
   return(
