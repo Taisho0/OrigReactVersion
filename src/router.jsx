@@ -9,7 +9,7 @@ import { ProductDetail } from "./pages/Product";
 import { Cart } from "./pages/Cart";
 import { Checkout } from "./pages/Checkout";
 import { Tracking } from "./pages/Tracking";
-// import PrivateRoute from "./pages/PrivateRoute";
+import PrivateRoute from "./pages/PrivateRoute";
 
 export const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -18,12 +18,12 @@ export const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
-      { path: "/homepage", element: <Home />
-        // element:(
-        //   <PrivateRoute>
-        //     <Home />
-        //   </PrivateRoute>
-        // ),
+      { path: "/homepage", 
+        element:(
+          <PrivateRoute>
+            <Home />
+          </PrivateRoute>
+        ),
       },
       { path: "/shop", element: <Shop /> },
       { path: "/product/:id", element: <ProductDetail /> },
