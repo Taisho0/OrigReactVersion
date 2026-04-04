@@ -18,6 +18,24 @@ const SignUp = () => {
     const db = getFirestore(app);
     const navigate =  useNavigate();
 
+    const normalizePhone = (value) => {
+        const digitsOnly = value.replace(/\D/g, "");
+
+        if (digitsOnly.startsWith("09") && digitsOnly.length === 11) {
+            return `+63${digitsOnly.slice(1)}`;
+        }
+
+        if (digitsOnly.startsWith("639") && digitsOnly.length === 12) {
+            return `+${digitsOnly}`;
+        }
+
+        if (digitsOnly.startsWith("9") && digitsOnly.length === 10) {
+            return `+63${digitsOnly}`;
+        }
+
+        return null;
+    };
+
     const validations = {
         length: password.length >= 8,
         uppercase: /[A-Z]/.test(password),
@@ -28,7 +46,8 @@ const SignUp = () => {
 
     const strengthScore = Object.values(validations).filter(Boolean).length;
     const isPasswordValid = Object.values(validations).every(Boolean);
-    const isPhoneValid = /^(09|\+639)\d{9}$/.test(phone);
+    const normalizedPhone = normalizePhone(phone);
+    const isPhoneValid = normalizedPhone !== null;
     const doPasswordsMatch = confirmPassword.length > 0 && password === confirmPassword;
     const isFormValid = isPasswordValid && isPhoneValid && doPasswordsMatch;
 
@@ -53,6 +72,11 @@ const SignUp = () => {
         setError("");
         setSuccessMessage("");
 
+        if (!isPhoneValid) {
+            setError("Please enter a valid PH phone number (09XXXXXXXXX, 9XXXXXXXXX, 639XXXXXXXXX, or +639XXXXXXXXX).");
+            return;
+        }
+
         if (!isFormValid) {
             setError("Please ensure all fields are correct and password requirements are met.");
             return;
@@ -62,12 +86,25 @@ const SignUp = () => {
         try {
             const result =  await signUpNewUser(email, password);
             if (result.success) {
-                await setDoc(doc(db, "users", result.data.user.uid), {
-                    email,
-                    phone,
-                }, { merge: true });
+                const uid = result?.data?.user?.uid;
+                const safePhone = normalizedPhone || phone;
 
-                setSuccessMessage(result.message || "Account created. Verify your email before signing in.");
+                // Do not block redirect if profile write is slow or fails.
+                if (uid) {
+                    setDoc(
+                        doc(db, "users", uid),
+                        {
+                            email,
+                            phone: safePhone,
+                        },
+                        { merge: true },
+                    ).catch((writeError) => {
+                        console.error("Unable to save profile details:", writeError);
+                    });
+                }
+
+                setSuccessMessage(result.message || "Account created successfully.");
+                navigate("/homepage");
                 return;
             }
             setError(result.error || "Unable to sign up. Please try again.");
@@ -123,12 +160,10 @@ const SignUp = () => {
                                 required
                                 autoComplete="tel"
                                 inputMode="numeric"
-                                pattern="^(09\\d{9}|\\+639\\d{9})$"
-                                title="Use 09xxxxxxxxx or +639xxxxxxxxx"
-                                placeholder="Phone (e.g., 09xxxxxxxxx or +639xxxxxxxxx)"
+                                placeholder="Phone (09XXXXXXXXX, 9XXXXXXXXX, 639XXXXXXXXX, or +639XXXXXXXXX)"
                             />
                             {phone.length > 0 && !isPhoneValid && (
-                                <p className="mt-2 text-xs text-red-400">Use 09xxxxxxxxx or +639xxxxxxxxx.</p>
+                                <p className="mt-2 text-xs text-red-400">Use 09XXXXXXXXX, 9XXXXXXXXX, 639XXXXXXXXX, or +639XXXXXXXXX.</p>
                             )}
                         </div>
                     </div>
@@ -137,9 +172,6 @@ const SignUp = () => {
                     <div>
                         <div className="flex items-center justify-between">
                             <label htmlFor="password" className="block text-sm/6 font-medium text-gray-100">Password</label>
-                            <div className="text-sm">
-                                <a href="#" className="font-semibold text-amber-400 hover:text-amber-300">Forgot password?</a>
-                            </div>
 
                         </div>
 

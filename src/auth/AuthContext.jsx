@@ -74,14 +74,6 @@ export const AuthContextProvider = ({ children }) => {
       const data = await signInWithEmailAndPassword(auth, email, password);
       await reload(data.user);
 
-      if (!data.user.emailVerified) {
-        return {
-          success: false,
-          error: mapFirebaseAuthError({ code: "auth/email-not-verified" }),
-          code: "auth/email-not-verified",
-        };
-      }
-
       console.log("sign-in success", data);
       return { success: true, data };
     } catch (error) {
@@ -123,7 +115,7 @@ export const AuthContextProvider = ({ children }) => {
         }
 
         await reload(user);
-        setSession(user.emailVerified ? user : null);
+        setSession(user);
         setAuthReady(true);
       },
       (error) => {
