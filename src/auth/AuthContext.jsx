@@ -223,6 +223,15 @@ export const AuthContextProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    const canReadUsersCollection =
+      Boolean(session?.uid) &&
+      (userProfile?.role === "admin" || isConfiguredAdminEmail(session?.email || ""));
+
+    if (!canReadUsersCollection) {
+      setUsers([]);
+      return undefined;
+    }
+
     const usersCollection = collection(db, "users");
 
     const unsubscribe = onSnapshot(
@@ -249,13 +258,15 @@ export const AuthContextProvider = ({ children }) => {
         }
       },
       (error) => {
-        console.error("Error listening to users:", error);
+        if (error?.code !== "permission-denied") {
+          console.error("Error listening to users:", error);
+        }
         setUsers([]);
       }
     );
 
     return () => unsubscribe();
-  }, [auth, db, session?.uid]);
+  }, [db, session?.uid, session?.email, userProfile?.role]);
 
   //Sign Up
   const signUpNewUser = async (email, password) => {

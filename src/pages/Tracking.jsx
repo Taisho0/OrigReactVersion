@@ -108,11 +108,12 @@ export const Tracking = () => {
             {/* Order Items Preview */}
             <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {order.items.slice(0, 4).map(item => (
-                <div key={item.product.id} className="aspect-3/4 bg-zinc-900 rounded-sm overflow-hidden border border-zinc-800 relative group">
+                <div key={`${item.product.id}-${item.size || 'default'}`} className="aspect-3/4 bg-zinc-900 rounded-sm overflow-hidden border border-zinc-800 relative group">
                   <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-zinc-950/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 text-center backdrop-blur-sm">
                     <p className="text-xs font-bold uppercase">{item.product.name}</p>
                     <p className="text-xs text-emerald-400 mt-1">Qty {item.quantity}</p>
+                    <p className="text-[10px] text-zinc-400 mt-1 uppercase tracking-widest">{item.size || 'One size'}</p>
                   </div>
                 </div>
               ))}

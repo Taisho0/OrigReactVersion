@@ -35,7 +35,7 @@ export const Cart = () => {
           <AnimatePresence initial={false}>
             {cart.map((item) => (
               <motion.div 
-                key={item.product.id}
+                key={`${item.product.id}-${item.size || 'default'}`}
                 layout
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -51,6 +51,7 @@ export const Cart = () => {
                     <div>
                       <p className="text-xs text-emerald-500 font-bold uppercase tracking-widest mb-1">{item.product.category}</p>
                       <h3 className="text-xl md:text-2xl font-bold">{item.product.name}</h3>
+                      <p className="mt-1 text-xs uppercase tracking-widest text-zinc-500">Size: {item.size || 'One size'}</p>
                     </div>
                     <p className="text-xl font-light">${item.product.price * item.quantity}</p>
                   </div>
@@ -58,14 +59,14 @@ export const Cart = () => {
                   <div className="flex justify-between items-center mt-6">
                     <div className="flex items-center gap-4 bg-zinc-900 rounded-full px-4 py-2 w-max">
                       <button 
-                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.size)}
                         className="text-zinc-400 hover:text-zinc-50 transition-colors"
                       >
                         <Minus size={16} />
                       </button>
                       <span className="w-4 text-center text-sm font-bold">{item.quantity}</span>
                       <button 
-                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.size)}
                         className="text-zinc-400 hover:text-zinc-50 transition-colors"
                       >
                         <Plus size={16} />
@@ -73,7 +74,7 @@ export const Cart = () => {
                     </div>
                     
                     <button 
-                      onClick={() => removeFromCart(item.product.id)}
+                      onClick={() => removeFromCart(item.product.id, item.size)}
                       className="text-zinc-500 hover:text-red-500 transition-colors p-2"
                     >
                       <Trash2 size={20} />

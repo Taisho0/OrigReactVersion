@@ -1,24 +1,62 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'motion/react';
-import { ArchiveRestore, BarChart3, ShieldCheck, ShoppingBag, Users, UserRoundCog } from 'lucide-react';
+import { ArchiveRestore, BarChart3, ShieldCheck, ShoppingBag, Users, UserRoundCog, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { userAuth } from '../auth/AuthContext';
 import { useStore } from '../context/StoreContext';
 
 export default function Admin() {
   const { session, userProfile, users, signOut, suspendUser, deleteUser, restoreUser, setUserRole } = userAuth();
-  const { activeProducts, archivedProducts, archiveProduct, restoreProduct, orders, cartTotal } = useStore();
+  const { activeProducts, archivedProducts, archiveProduct, restoreProduct, updateProduct, orders } = useStore();
   const [busyUserId, setBusyUserId] = useState('');
   const [busyProductId, setBusyProductId] = useState('');
+  const [selectedProductId, setSelectedProductId] = useState('');
+  const [productForm, setProductForm] = useState({
+    name: '',
+    price: '',
+    image: '',
+    sizes: '',
+    description: '',
+  });
+  const [productMessage, setProductMessage] = useState('');
+
+  useEffect(() => {
+    if (activeProducts.length === 0) {
+      setSelectedProductId('');
+      return;
+    }
+
+    if (!selectedProductId || !activeProducts.some((product) => product.id === selectedProductId)) {
+      setSelectedProductId(activeProducts[0].id);
+    }
+  }, [activeProducts, selectedProductId]);
+
+  useEffect(() => {
+    const product = activeProducts.find((entry) => entry.id === selectedProductId);
+
+    if (!product) {
+      return;
+    }
+
+    setProductForm({
+      name: product.name || '',
+      price: String(product.price ?? ''),
+      image: product.image || '',
+      sizes: Array.isArray(product.sizes) ? product.sizes.join(', ') : '',
+      description: product.description || '',
+    });
+  }, [activeProducts, selectedProductId]);
 
   const metrics = useMemo(() => {
-    const totalUsers = users.length;
     const activeUsers = users.filter((user) => user.status === 'active').length;
     const suspendedUsers = users.filter((user) => user.status === 'suspended').length;
     const deletedUsers = users.filter((user) => user.status === 'deleted').length;
     const collaborators = users.filter((user) => user.role === 'collaborator' && user.status === 'active').length;
-    const revenue = orders.reduce((sum, order) => sum + order.total, 0);
+    const soldItems = orders.reduce((sum, order) => sum + order.items.reduce((itemSum, item) => itemSum + item.quantity, 0), 0);
+    const revenueFromNormalUsers = orders
+      .filter((order) => order.purchaserRole !== 'admin')
+      .reduce((sum, order) => sum + order.total, 0);
     const categoryTotals = activeProducts.reduce((accumulator, product) => {
       const next = { ...accumulator };
       next[product.category] = (next[product.category] || 0) + 1;
@@ -26,12 +64,12 @@ export default function Admin() {
     }, {});
 
     return {
-      totalUsers,
       activeUsers,
       suspendedUsers,
       deletedUsers,
       collaborators,
-      revenue,
+      soldItems,
+      revenueFromNormalUsers,
       categoryTotals,
     };
   }, [activeProducts, orders, users]);
@@ -78,6 +116,36 @@ export default function Admin() {
     }
   };
 
+  const handleProductUpload = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setProductForm((current) => ({ ...current, image: String(reader.result || '') }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveProduct = (event) => {
+    event.preventDefault();
+
+    if (!selectedProductId) {
+      return;
+    }
+
+    updateProduct(selectedProductId, {
+      ...productForm,
+      price: Number(productForm.price) || 0,
+      sizes: productForm.sizes,
+    });
+    setProductMessage('Product updated successfully.');
+    window.setTimeout(() => setProductMessage(''), 2500);
+  };
+
   if (!session) {
     return null;
   }
@@ -111,10 +179,10 @@ export default function Admin() {
       <main className="mx-auto max-w-7xl px-6 md:px-10 py-10 space-y-10">
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: 'Users', value: metrics.totalUsers, icon: Users },
-            { label: 'Collaborators', value: metrics.collaborators, icon: UserRoundCog },
-            { label: 'Active products', value: activeProducts.length, icon: ShoppingBag },
-            { label: 'Revenue', value: `$${metrics.revenue.toFixed(2)}`, icon: BarChart3 },
+            { label: 'Active users', value: metrics.activeUsers, icon: Users },
+            { label: 'Items sold', value: metrics.soldItems, icon: ShoppingBag },
+            { label: 'Active products', value: activeProducts.length, icon: UserRoundCog },
+            { label: 'Normal user revenue', value: `$${metrics.revenueFromNormalUsers.toFixed(2)}`, icon: BarChart3 },
           ].map((item) => {
             const Icon = item.icon;
 
@@ -258,6 +326,101 @@ export default function Admin() {
             </div>
 
             <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
+              <div className="flex items-center justify-between gap-4 mb-6">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Product editor</p>
+                  <h2 className="mt-2 text-2xl font-black uppercase tracking-tight">Edit image, price, sizes</h2>
+                </div>
+                <Upload size={20} className="text-emerald-300" />
+              </div>
+
+              {activeProducts.length === 0 ? (
+                <div className="rounded-3xl border border-dashed border-white/10 p-8 text-center text-zinc-500">
+                  No active products available to edit.
+                </div>
+              ) : (
+                <form onSubmit={handleSaveProduct} className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="space-y-2 text-sm text-zinc-300">
+                      <span>Choose product</span>
+                      <select
+                        value={selectedProductId}
+                        onChange={(event) => setSelectedProductId(event.target.value)}
+                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-50 outline-none focus:border-emerald-400"
+                      >
+                        {activeProducts.map((product) => (
+                          <option key={product.id} value={product.id} className="bg-slate-950 text-zinc-50">
+                            {product.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="space-y-2 text-sm text-zinc-300">
+                      <span>Price</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={productForm.price}
+                        onChange={(event) => setProductForm((current) => ({ ...current, price: event.target.value }))}
+                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-50 outline-none focus:border-emerald-400"
+                      />
+                    </label>
+                  </div>
+
+                  <label className="space-y-2 text-sm text-zinc-300 block">
+                    <span>Image URL or upload</span>
+                    <input
+                      type="url"
+                      value={productForm.image}
+                      onChange={(event) => setProductForm((current) => ({ ...current, image: event.target.value }))}
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-50 outline-none focus:border-emerald-400"
+                      placeholder="https://..."
+                    />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProductUpload}
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-400 file:mr-4 file:rounded-full file:border-0 file:bg-emerald-400 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-slate-950"
+                    />
+                  </label>
+
+                  <label className="space-y-2 text-sm text-zinc-300 block">
+                    <span>Sizes</span>
+                    <input
+                      type="text"
+                      value={productForm.sizes}
+                      onChange={(event) => setProductForm((current) => ({ ...current, sizes: event.target.value }))}
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-50 outline-none focus:border-emerald-400"
+                      placeholder="S, M, L"
+                    />
+                    <p className="text-xs text-zinc-500">Separate sizes with commas.</p>
+                  </label>
+
+                  <label className="space-y-2 text-sm text-zinc-300 block">
+                    <span>Description</span>
+                    <textarea
+                      rows="4"
+                      value={productForm.description}
+                      onChange={(event) => setProductForm((current) => ({ ...current, description: event.target.value }))}
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-50 outline-none focus:border-emerald-400"
+                    />
+                  </label>
+
+                  <button
+                    type="submit"
+                    className="rounded-2xl bg-emerald-400 px-5 py-3 text-sm font-bold uppercase tracking-[0.25em] text-slate-950 hover:bg-emerald-300"
+                  >
+                    Save Product
+                  </button>
+
+                  {productMessage && <p className="text-sm text-emerald-300">{productMessage}</p>}
+                </form>
+              )}
+            </div>
+
+            <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <BarChart3 size={20} className="text-emerald-300" />
                 <h2 className="text-2xl font-black uppercase tracking-tight">Analytics</h2>
@@ -281,8 +444,8 @@ export default function Admin() {
                   <span className="font-semibold text-zinc-100">{orders.length}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-zinc-400">Cart value in session</span>
-                  <span className="font-semibold text-zinc-100">${cartTotal.toFixed(2)}</span>
+                  <span className="text-zinc-400">Normal user revenue</span>
+                  <span className="font-semibold text-zinc-100">${metrics.revenueFromNormalUsers.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -306,6 +469,42 @@ export default function Admin() {
                   <div className="rounded-2xl border border-dashed border-white/10 p-5 text-sm text-zinc-500">
                     No active products to analyze yet.
                   </div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <BarChart3 size={20} className="text-emerald-300" />
+                <h2 className="text-2xl font-black uppercase tracking-tight">Recent sales</h2>
+              </div>
+
+              <div className="space-y-3 max-h-96 overflow-auto pr-1">
+                {orders.length === 0 ? (
+                  <div className="rounded-3xl border border-dashed border-white/10 p-5 text-sm text-zinc-500">
+                    No purchases recorded yet.
+                  </div>
+                ) : (
+                  orders.map((order) => {
+                    const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+
+                    return (
+                      <div key={order.id} className="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="font-semibold text-zinc-100">{order.purchaserEmail || 'Unknown buyer'}</p>
+                            <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">
+                              {order.purchaserRole || 'customer'} · {new Date(order.date).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-emerald-300">${order.total.toFixed(2)}</p>
+                            <p className="text-xs text-zinc-500">{itemCount} items sold</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
                 )}
               </div>
             </div>

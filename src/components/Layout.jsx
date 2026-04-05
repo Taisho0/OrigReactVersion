@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router';
-import { ShoppingBag, Box, Menu, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Outlet, Link, useNavigate } from 'react-router';
+import { Menu, X } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { userAuth } from '../auth/AuthContext';
-import { motion, AnimatePresence } from 'motion/react';
 
 export const Layout = () => {
   const { cart } = useStore();
-  const { isAdmin } = userAuth();
+  const { isAdmin, session, signOut } = userAuth();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);

@@ -1,10 +1,14 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useEffect, useState, useContext } from 'react';
 import { PRODUCTS } from '../data/products';
+import { userAuth } from '../auth/AuthContext';
 
 const StoreContext = createContext(undefined);
 
 const CATALOG_STORAGE_KEY = 'theoriginals.catalog';
+const ORDERS_STORAGE_KEY = 'theoriginals.orders';
+
+const getCartItemKey = (productId, size) => `${productId}::${size || 'default'}`;
 
 const createInitialCatalog = () => {
   if (typeof window === 'undefined') {
@@ -49,10 +53,26 @@ const createInitialCatalog = () => {
   }
 };
 
+const createInitialOrders = () => {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  try {
+    const storedOrders = window.localStorage.getItem(ORDERS_STORAGE_KEY);
+    const parsedOrders = storedOrders ? JSON.parse(storedOrders) : [];
+    return Array.isArray(parsedOrders) ? parsedOrders : [];
+  } catch (error) {
+    console.error('Unable to load order history:', error);
+    return [];
+  }
+};
+
 export const StoreProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState(createInitialOrders);
   const [catalog, setCatalog] = useState(createInitialCatalog);
+  const { userProfile } = userAuth();
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -62,38 +82,46 @@ export const StoreProvider = ({ children }) => {
     window.localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(catalog));
   }, [catalog]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+  }, [orders]);
+
   const activeProducts = catalog.filter((product) => !product.isArchived);
   const archivedProducts = catalog.filter((product) => product.isArchived);
-  const { session } = userAuth();
 
   const addToCart = (product) => {
-    if (!session) {
-      return false; // User not signed in
-    }
     setCart((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
+      const existing = prev.find((item) => getCartItemKey(item.product.id, item.size) === getCartItemKey(product.id, product.selectedSize));
       if (existing) {
         return prev.map((item) =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          getCartItemKey(item.product.id, item.size) === getCartItemKey(product.id, product.selectedSize)
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
         );
       }
-      return [...prev, { product, quantity: 1 }];
+      return [...prev, { product, quantity: 1, size: product.selectedSize || product.size || product.variantSize || '' }];
     });
     return true;
   };
 
-  const removeFromCart = (productId) => {
-    setCart((prev) => prev.filter((item) => item.product.id !== productId));
+  const removeFromCart = (productId, size) => {
+    setCart((prev) => prev.filter((item) => getCartItemKey(item.product.id, item.size) !== getCartItemKey(productId, size)));
   };
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = (productId, quantity, size) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(productId, size);
       return;
     }
     setCart((prev) =>
       prev.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
+        getCartItemKey(item.product.id, item.size) === getCartItemKey(productId, size)
+          ? { ...item, quantity }
+          : item
       )
     );
   };
@@ -114,6 +142,37 @@ export const StoreProvider = ({ children }) => {
     );
   };
 
+  const updateProduct = (productId, updates) => {
+    setCatalog((previousCatalog) =>
+      previousCatalog.map((product) =>
+        product.id === productId
+          ? {
+              ...product,
+              ...updates,
+              price: typeof updates.price === 'string' ? Number(updates.price) : updates.price ?? product.price,
+              sizes: Array.isArray(updates.sizes)
+                ? updates.sizes
+                : typeof updates.sizes === 'string'
+                  ? updates.sizes.split(',').map((size) => size.trim()).filter(Boolean)
+                  : product.sizes,
+            }
+          : product
+      )
+    );
+  };
+
+  const addProduct = (product) => {
+    setCatalog((previousCatalog) => [
+      ...previousCatalog,
+      {
+        ...product,
+        id: product.id || `p-${Date.now()}`,
+        isArchived: Boolean(product.isArchived),
+        sizes: Array.isArray(product.sizes) ? product.sizes : [],
+      },
+    ]);
+  };
+
   const restoreProduct = (productId) => {
     setCatalog((previousCatalog) =>
       previousCatalog.map((product) =>
@@ -132,6 +191,8 @@ export const StoreProvider = ({ children }) => {
       status: 'Processing',
       date: new Date().toISOString(),
       estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      purchaserRole: userProfile?.role || 'customer',
+      purchaserEmail: userProfile?.email || '',
     };
     
     setOrders((prev) => [newOrder, ...prev]);
@@ -167,6 +228,9 @@ export const StoreProvider = ({ children }) => {
         getProductById,
         archiveProduct,
         restoreProduct,
+        updateProduct,
+        addProduct,
+        getCartItemKey,
         orders,
         placeOrder,
       }}

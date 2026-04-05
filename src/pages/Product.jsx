@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'motion/react';
 import { useStore } from '../context/StoreContext';
-import { userAuth } from '../auth/AuthContext';
 import { ArrowLeft, Check } from 'lucide-react';
 
 export const ProductDetail = () => {
@@ -12,8 +11,16 @@ export const ProductDetail = () => {
   const { getProductById } = useStore();
   const product = getProductById(id);
   const { addToCart } = useStore();
-  const { session } = userAuth();
   const [added, setAdded] = useState(false);
+  const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || '');
+
+  useEffect(() => {
+    if (!product) {
+      return;
+    }
+
+    setSelectedSize(product.sizes?.[0] || '');
+  }, [product]);
 
   if (!product) {
     return (
@@ -28,12 +35,11 @@ export const ProductDetail = () => {
   }
 
   const handleAdd = () => {
-    const success = addToCart(product);
+    const success = addToCart({ ...product, selectedSize });
     if (success) {
       setAdded(true);
       setTimeout(() => setAdded(false), 2000);
     }
-    // If not signed in, do nothing (button remains clickable but doesn't add)
   };
 
   return (
@@ -75,15 +81,33 @@ export const ProductDetail = () => {
             {product.description}
           </p>
 
+          <div className="mb-8">
+            <p className="text-sm font-semibold uppercase tracking-widest text-zinc-500 mb-4">Size</p>
+            <div className="flex flex-wrap gap-3">
+              {product.sizes?.map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setSelectedSize(size)}
+                  className={`rounded-full border px-4 py-2 text-sm font-semibold uppercase tracking-widest transition-colors ${
+                    selectedSize === size
+                      ? 'border-emerald-400 bg-emerald-400 text-zinc-950'
+                      : 'border-zinc-800 text-zinc-300 hover:border-zinc-500 hover:text-zinc-50'
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="space-y-6">
             <button 
               onClick={handleAdd}
-              disabled={added || !session}
+              disabled={added}
               className={`w-full py-5 px-8 flex items-center justify-center gap-3 text-lg font-bold tracking-widest uppercase transition-all duration-300 ${
                 added 
                   ? 'bg-zinc-800 text-emerald-400 cursor-default' 
-                  : !session
-                  ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
                   : 'bg-zinc-50 text-zinc-950 hover:bg-emerald-400 hover:text-zinc-950'
               }`}
             >
@@ -92,8 +116,6 @@ export const ProductDetail = () => {
                   <Check size={24} />
                   Added to Cart
                 </>
-              ) : !session ? (
-                'Sign In to Add to Cart'
               ) : (
                 'Add to Cart'
               )}

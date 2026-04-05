@@ -1,38 +1,17 @@
-import { useRef } from 'react';
 // eslint-disable-next-line no-unused-vars
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion } from 'motion/react';
 import { Link } from 'react-router';
 import { ArrowRight } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 
 export const Home = () => {
   const { activeProducts } = useStore();
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
-  });
-
-  // Parallax effect for the hero text
-  const heroY = useTransform(scrollYProgress, [0, 0.5], [0, 150]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-
-  // Horizontal scroll for featured section
-  const sectionRef = useRef(null);
-  const { scrollYProgress: horizontalScroll } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  });
-  const xTransform = useTransform(horizontalScroll, [0, 1], ['10%', '-30%']);
 
   return (
-    <div ref={containerRef} className="relative bg-zinc-950">
+    <div className="relative bg-zinc-950">
       {/* Hero Section */}
       <section className="h-[90vh] flex flex-col justify-center px-6 md:px-12 relative overflow-hidden pt-24">
-        <motion.div 
-          style={{ y: heroY, opacity: heroOpacity }}
-          className="z-10 relative"
-        >
+        <motion.div className="z-10 relative">
           <h1 className="text-7xl md:text-9xl font-extrabold tracking-tighter uppercase leading-[0.85] text-zinc-50">
             Design <br />
             <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-cyan-500">
@@ -59,16 +38,13 @@ export const Home = () => {
       </section>
 
       {/* Featured Horizontal Scroller */}
-      <section ref={sectionRef} className="py-32 overflow-hidden bg-zinc-900 border-y border-zinc-800">
+      <section className="py-32 overflow-hidden bg-zinc-900 border-y border-zinc-800">
         <div className="px-6 md:px-12 mb-16 flex justify-between items-end">
           <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">Featured Objects</h2>
           <Link to="/shop" className="text-sm tracking-widest uppercase hover:text-emerald-400">View All</Link>
         </div>
         
-        <motion.div 
-          style={{ x: xTransform }}
-          className="flex gap-8 px-6 md:px-12 w-max"
-        >
+        <motion.div className="flex gap-8 px-6 md:px-12 w-max">
           {activeProducts.slice(0, 4).map((product) => (
             <Link 
               key={product.id} 

@@ -110,7 +110,7 @@ export const Checkout = () => {
         <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-500 mb-8">Order Summary</h2>
         <div className="space-y-6 mb-8 max-h-[40vh] overflow-y-auto hide-scrollbar">
           {cart.map(item => (
-            <div key={item.product.id} className="flex gap-4">
+            <div key={`${item.product.id}-${item.size || 'default'}`} className="flex gap-4">
               <div className="w-16 h-20 bg-zinc-950 rounded-sm overflow-hidden shrink-0">
                 <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
               </div>
@@ -119,7 +119,7 @@ export const Checkout = () => {
                   <h3 className="font-bold text-sm uppercase tracking-wider">{item.product.name}</h3>
                   <p className="font-medium">${item.product.price}</p>
                 </div>
-                <p className="text-zinc-500 text-xs mt-1">Qty: {item.quantity}</p>
+                <p className="text-zinc-500 text-xs mt-1">Qty: {item.quantity} • Size: {item.size || 'One size'}</p>
               </div>
             </div>
           ))}
