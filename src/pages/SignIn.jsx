@@ -11,7 +11,7 @@ const SignIn = () => {
     const [errorCode, setErrorCode] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const {session, userProfile, authReady, signInUser, signUpNewUser, checkEmailVerification} = userAuth();
+    const {session, userProfile, authReady, signInUser, signUpNewUser, checkEmailVerification, isConfiguredAdminEmail} = userAuth();
     const navigate =  useNavigate();
 
     const handleSignIn = async (e) => {
@@ -59,9 +59,10 @@ const SignIn = () => {
 
     useEffect(() => {
         if (authReady && session) {
-            navigate(userProfile?.role === "admin" ? "/admin" : "/homepage");
+            const isAdmin = userProfile?.role === "admin" || isConfiguredAdminEmail(session.email);
+            navigate(isAdmin ? "/admin" : "/homepage");
         }
-    }, [authReady, session, userProfile, navigate]);
+    }, [authReady, session, userProfile, navigate, isConfiguredAdminEmail]);
 
     useEffect(() => {
         if (errorCode !== "auth/email-not-verified") {

@@ -43,13 +43,14 @@ const AdminSignUp = () => {
       return;
     }
 
-    if (userProfile?.role === "admin") {
+    const isAdmin = userProfile?.role === "admin" || isConfiguredAdminEmail(session.email);
+    if (isAdmin) {
       navigate("/admin", { replace: true });
       return;
     }
 
     navigate("/homepage", { replace: true });
-  }, [authReady, navigate, session, userProfile]);
+  }, [authReady, navigate, session, userProfile, isConfiguredAdminEmail]);
 
   const checks = passwordChecks(password);
   const validPassword = Object.values(checks).every(Boolean);

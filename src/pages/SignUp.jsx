@@ -15,15 +15,16 @@ const SignUp = () => {
     const [successMessage, setSuccessMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const {session, userProfile, authReady, signUpNewUser} = userAuth();
+    const {session, userProfile, authReady, signUpNewUser, isConfiguredAdminEmail} = userAuth();
     const db = getFirestore(app);
     const navigate =  useNavigate();
 
     useEffect(() => {
         if (authReady && session) {
-            navigate(userProfile?.role === "admin" ? "/admin" : "/homepage");
+            const isAdmin = userProfile?.role === "admin" || isConfiguredAdminEmail(session.email);
+            navigate(isAdmin ? "/admin" : "/homepage");
         }
-    }, [authReady, navigate, session, userProfile]);
+    }, [authReady, navigate, session, userProfile, isConfiguredAdminEmail]);
 
     const normalizePhone = (value) => {
         const digitsOnly = value.replace(/\D/g, "");
