@@ -1,12 +1,17 @@
 import { createContext, useContext, useState } from 'react';
+import { userAuth } from '../auth/AuthContext';
 
 const StoreContext = createContext(undefined);
 
 export const StoreProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
+  const { session } = userAuth();
 
   const addToCart = (product) => {
+    if (!session) {
+      return false; // User not signed in
+    }
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
@@ -16,6 +21,7 @@ export const StoreProvider = ({ children }) => {
       }
       return [...prev, { product, quantity: 1 }];
     });
+    return true;
   };
 
   const removeFromCart = (productId) => {

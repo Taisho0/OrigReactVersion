@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import { PRODUCTS } from '../data/products';
 import { useStore } from '../context/StoreContext';
+import { userAuth } from '../auth/AuthContext';
 import { ArrowLeft, Check } from 'lucide-react';
 
 export const ProductDetail = () => {
@@ -10,6 +11,7 @@ export const ProductDetail = () => {
   const navigate = useNavigate();
   const product = PRODUCTS.find((p) => p.id === id);
   const { addToCart } = useStore();
+  const { session } = userAuth();
   const [added, setAdded] = useState(false);
 
   if (!product) {
@@ -22,9 +24,12 @@ export const ProductDetail = () => {
   }
 
   const handleAdd = () => {
-    addToCart(product);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+    const success = addToCart(product);
+    if (success) {
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
+    }
+    // If not signed in, do nothing (button remains clickable but doesn't add)
   };
 
   return (
@@ -69,10 +74,12 @@ export const ProductDetail = () => {
           <div className="space-y-6">
             <button 
               onClick={handleAdd}
-              disabled={added}
+              disabled={added || !session}
               className={`w-full py-5 px-8 flex items-center justify-center gap-3 text-lg font-bold tracking-widest uppercase transition-all duration-300 ${
                 added 
                   ? 'bg-zinc-800 text-emerald-400 cursor-default' 
+                  : !session
+                  ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
                   : 'bg-zinc-50 text-zinc-950 hover:bg-emerald-400 hover:text-zinc-950'
               }`}
             >
@@ -81,6 +88,8 @@ export const ProductDetail = () => {
                   <Check size={24} />
                   Added to Cart
                 </>
+              ) : !session ? (
+                'Sign In to Add to Cart'
               ) : (
                 'Add to Cart'
               )}
