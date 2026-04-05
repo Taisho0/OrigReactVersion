@@ -83,7 +83,7 @@ const SignIn = () => {
         <div className="relative min-h-screen overflow-hidden bg-zinc-950 text-white">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(6,182,212,0.12),transparent_25%)]" />
             <div className="relative mx-auto flex min-h-screen max-w-6xl items-center justify-center px-6 py-12">
-                <div className="w-full overflow-hidden rounded-[32px] border border-white/10 bg-white/5 shadow-2xl shadow-black/40 backdrop-blur-2xl">
+                <div className="w-full overflow-hidden rounded-4xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40 backdrop-blur-2xl">
                     <div className="grid gap-8 md:grid-cols-[1.05fr_0.95fr]">
                         <div className="space-y-6 px-8 py-10 md:px-12 md:py-14">
                             <span className="inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-1 text-xs uppercase tracking-[0.35em] text-emerald-300">
@@ -104,8 +104,8 @@ const SignIn = () => {
                                 </p>
                             </div>
                         </div>
-                        <div className="relative overflow-hidden rounded-[32px] bg-zinc-950/90 px-8 py-10 md:px-12 md:py-14">
-                            <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-emerald-500/10 to-transparent" />
+                        <div className="relative overflow-hidden rounded-4xl bg-zinc-950/90 px-8 py-10 md:px-12 md:py-14">
+                            <div className="absolute inset-x-0 top-0 h-28 bg-linear-to-b from-emerald-500/10 to-transparent" />
                             <div className="relative">
                                 <button type="button" className="absolute right-4 top-4 text-zinc-400 transition hover:text-white" onClick={() => navigate("/") }>
                                     &times;
