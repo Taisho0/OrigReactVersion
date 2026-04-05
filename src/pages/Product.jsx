@@ -1,21 +1,25 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'motion/react';
-import { PRODUCTS } from '../data/products';
 import { useStore } from '../context/StoreContext';
 import { ArrowLeft, Check } from 'lucide-react';
 
 export const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const product = PRODUCTS.find((p) => p.id === id);
+  const { getProductById } = useStore();
+  const product = getProductById(id);
   const { addToCart } = useStore();
   const [added, setAdded] = useState(false);
 
   if (!product) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center">
-        <h2 className="text-2xl mb-4">Product not found.</h2>
+        <h2 className="text-2xl mb-4">Product unavailable.</h2>
+        <p className="text-zinc-500 mb-6 text-center max-w-md">
+          This item was removed from the shop by an administrator or is no longer available.
+        </p>
         <Link to="/shop" className="text-emerald-500 hover:underline">Return to Shop</Link>
       </div>
     );

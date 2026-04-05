@@ -1,10 +1,12 @@
 import { useRef } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion, useScroll, useTransform } from 'motion/react';
 import { Link } from 'react-router';
-import { PRODUCTS } from '../data/products';
 import { ArrowRight } from 'lucide-react';
+import { useStore } from '../context/StoreContext';
 
 export const Home = () => {
+  const { activeProducts } = useStore();
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -67,7 +69,7 @@ export const Home = () => {
           style={{ x: xTransform }}
           className="flex gap-8 px-6 md:px-12 w-max"
         >
-          {PRODUCTS.slice(0, 4).map((product, idx) => (
+          {activeProducts.slice(0, 4).map((product) => (
             <Link 
               key={product.id} 
               to={`/product/${product.id}`}

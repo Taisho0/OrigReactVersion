@@ -10,17 +10,31 @@ import { Cart } from "./pages/Cart";
 import { Checkout } from "./pages/Checkout";
 import { Tracking } from "./pages/Tracking";
 import PrivateRoute from "./pages/PrivateRoute";
+import AdminRoute from "./pages/AdminRoute";
+import Admin from "./pages/Admin";
+import AdminSignIn from "./pages/AdminSignIn";
+import AdminSignUp from "./pages/AdminSignUp";
 
 export const router = createBrowserRouter([
   { path: "/", element: <App /> },
   { path: "/signup", element: <SignUp /> },
   { path: "/signin", element: <SignIn /> },
+  { path: "/admin/signin", element: <AdminSignIn /> },
+  { path: "/admin/signup", element: <AdminSignUp /> },
+  {
+    path: "/admin",
+    element: (
+      <AdminRoute>
+        <Admin />
+      </AdminRoute>
+    ),
+  },
   {
     element: <Layout />,
     children: [
       { path: "/homepage", 
         element:(
-          <PrivateRoute>
+          <PrivateRoute requireNonAdmin>
             <Home />
           </PrivateRoute>
         ),

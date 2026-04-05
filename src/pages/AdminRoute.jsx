@@ -1,0 +1,23 @@
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { userAuth } from "../auth/AuthContext";
+
+const AdminRoute = ({ children }) => {
+  const { authReady, session, isAdmin, isConfiguredAdminEmail } = userAuth();
+
+  if (!authReady) {
+    return null;
+  }
+
+  if (!session) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (!isAdmin && !isConfiguredAdminEmail(session?.email || "")) {
+    return <Navigate to="/homepage" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+export default AdminRoute;

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { userAuth } from "../auth/AuthContext";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { app } from "../config/FirebaseConfig";
+import { useEffect } from "react";
 
 const SignUp = () => {
     const [email, setEmail] = useState("");
@@ -14,9 +15,15 @@ const SignUp = () => {
     const [successMessage, setSuccessMessage] = useState("");
     const [loading, setLoading] = useState(false); 
 
-    const {session, signUpNewUser} = userAuth();
+    const {session, userProfile, authReady, signUpNewUser} = userAuth();
     const db = getFirestore(app);
     const navigate =  useNavigate();
+
+    useEffect(() => {
+        if (authReady && session) {
+            navigate(userProfile?.role === "admin" ? "/admin" : "/homepage");
+        }
+    }, [authReady, navigate, session, userProfile]);
 
     const normalizePhone = (value) => {
         const digitsOnly = value.replace(/\D/g, "");
@@ -104,7 +111,7 @@ const SignUp = () => {
                 }
 
                 setSuccessMessage(result.message || "Account created successfully.");
-                navigate("/homepage");
+                navigate(result.profile?.role === "admin" ? "/admin" : "/homepage");
                 return;
             }
             setError(result.error || "Unable to sign up. Please try again.");

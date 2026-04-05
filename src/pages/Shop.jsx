@@ -1,9 +1,12 @@
 import React from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
-import { PRODUCTS } from '../data/products';
+import { useStore } from '../context/StoreContext';
 
 export const Shop = () => {
+  const { activeProducts } = useStore();
+
   return (
     <div className="px-6 md:px-12 py-12">
       <header className="mb-20">
@@ -19,8 +22,13 @@ export const Shop = () => {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-        {PRODUCTS.map((product, index) => (
+      {activeProducts.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/60 p-12 text-center text-zinc-400">
+          The catalog is empty right now. Add items from the admin dashboard to repopulate the shop.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+          {activeProducts.map((product, index) => (
           <motion.div
             key={product.id}
             initial={{ opacity: 0, y: 40 }}
@@ -46,8 +54,9 @@ export const Shop = () => {
               </div>
             </Link>
           </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

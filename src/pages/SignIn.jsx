@@ -11,10 +11,8 @@ const SignIn = () => {
     const [errorCode, setErrorCode] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const {session, signInUser, signUpNewUser, checkEmailVerification} = userAuth();
+    const {session, userProfile, authReady, signInUser, signUpNewUser, checkEmailVerification} = userAuth();
     const navigate =  useNavigate();
-    console.log(session);
-    console.log(email, password);
 
     const handleSignIn = async (e) => {
         e.preventDefault();
@@ -26,7 +24,7 @@ const SignIn = () => {
             const result =  await signInUser(email, password);
             if (result.success) {
                 console.log("User signed in successfully:", result.data);
-                navigate("/homepage");
+                navigate(result.profile?.role === "admin" ? "/admin" : "/homepage");
                 return;
             }
             setError(result.error || "Unable to sign in. Please try again.");
@@ -60,10 +58,10 @@ const SignIn = () => {
     };
 
     useEffect(() => {
-        if (session) {
-            navigate("/homepage");
+        if (authReady && session) {
+            navigate(userProfile?.role === "admin" ? "/admin" : "/homepage");
         }
-    }, [session, navigate]);
+    }, [authReady, session, userProfile, navigate]);
 
     useEffect(() => {
         if (errorCode !== "auth/email-not-verified") {
@@ -73,12 +71,12 @@ const SignIn = () => {
         const intervalId = setInterval(async () => {
             const result = await checkEmailVerification();
             if (result.success && result.verified) {
-                navigate("/homepage");
+                navigate(userProfile?.role === "admin" ? "/admin" : "/homepage");
             }
         }, 3000);
 
         return () => clearInterval(intervalId);
-    }, [errorCode, checkEmailVerification, navigate]);
+    }, [errorCode, checkEmailVerification, navigate, userProfile]);
 
 
     return (
