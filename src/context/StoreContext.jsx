@@ -25,7 +25,13 @@ const createInitialCatalog = () => {
     const parsedCatalog = JSON.parse(storedCatalog);
 
     if (!Array.isArray(parsedCatalog)) {
+      window.localStorage.removeItem(CATALOG_STORAGE_KEY);
       return PRODUCTS.map((product) => ({ ...product, isArchived: false }));
+    }
+
+    if (PRODUCTS.length === 0) {
+      window.localStorage.removeItem(CATALOG_STORAGE_KEY);
+      return [];
     }
 
     const storedById = new Map(parsedCatalog.filter((product) => product?.id).map((product) => [product.id, product]));
