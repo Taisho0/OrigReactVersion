@@ -6,6 +6,8 @@ import { useStore } from '../context/StoreContext';
 
 export const Home = () => {
   const { activeProducts } = useStore();
+  const featuredProducts = activeProducts.slice(0, 6);
+  const marqueeProducts = [...featuredProducts, ...featuredProducts];
 
   return (
     <div className="relative bg-zinc-950">
@@ -43,30 +45,34 @@ export const Home = () => {
           <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">Featured Objects</h2>
           <Link to="/shop" className="text-sm tracking-widest uppercase hover:text-emerald-400">View All</Link>
         </div>
-        
-        <motion.div className="flex gap-8 px-6 md:px-12 w-max">
-          {activeProducts.slice(0, 4).map((product) => (
-            <Link 
-              key={product.id} 
-              to={`/product/${product.id}`}
-              className="group block relative w-75 md:w-112.5 aspect-4/5 overflow-hidden rounded-sm bg-zinc-800 shrink-0"
-            >
-              <motion.img 
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                src={product.image} 
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-zinc-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="absolute bottom-0 left-0 p-6 md:p-8 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                <p className="text-xs tracking-widest text-emerald-400 mb-2 uppercase">{product.category}</p>
-                <h3 className="text-2xl font-bold">{product.name}</h3>
-                <p className="text-lg text-zinc-300 mt-2">${product.price}</p>
-              </div>
-            </Link>
-          ))}
-        </motion.div>
+
+        {featuredProducts.length > 0 && (
+          <div className="featured-marquee-mask">
+            <div className="featured-marquee-track">
+              {marqueeProducts.map((product, index) => (
+                <Link
+                  key={`${product.id}-${index}`}
+                  to={`/product/${product.id}`}
+                  className="group block relative w-75 md:w-112.5 aspect-4/5 overflow-hidden rounded-sm bg-zinc-800 shrink-0"
+                >
+                  <motion.img
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-linear-to-t from-zinc-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute bottom-0 left-0 p-6 md:p-8 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                    <p className="text-xs tracking-widest text-emerald-400 mb-2 uppercase">{product.category}</p>
+                    <h3 className="text-2xl font-bold">{product.name}</h3>
+                    <p className="text-lg text-zinc-300 mt-2">₱{product.price}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Philosophy Section */}

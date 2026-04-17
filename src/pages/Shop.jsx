@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
@@ -6,6 +6,19 @@ import { useStore } from '../context/StoreContext';
 
 export const Shop = () => {
   const { activeProducts } = useStore();
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  const categories = useMemo(() => {
+    const uniqueCategories = [...new Set(activeProducts.map((product) => product.category).filter(Boolean))];
+    return ['All', ...uniqueCategories.sort((a, b) => a.localeCompare(b))];
+  }, [activeProducts]);
+
+  const filteredProducts = useMemo(() => {
+    if (selectedCategory === 'All') {
+      return activeProducts;
+    }
+    return activeProducts.filter((product) => product.category === selectedCategory);
+  }, [activeProducts, selectedCategory]);
 
   return (
     <div className="px-6 md:px-12 py-12">
@@ -14,8 +27,17 @@ export const Shop = () => {
           The Collection
         </h1>
         <div className="flex gap-4 text-sm tracking-widest uppercase overflow-x-auto pb-4 hide-scrollbar">
-          {['All', 'Audio', 'Furniture', 'Lighting', 'Accessories', 'Art', 'Apparel'].map(cat => (
-            <button key={cat} className="px-4 py-2 rounded-full border border-zinc-800 hover:border-emerald-500 hover:text-emerald-400 transition-colors whitespace-nowrap">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-4 py-2 rounded-full border transition-colors whitespace-nowrap ${
+                selectedCategory === cat
+                  ? 'border-emerald-500 text-emerald-400'
+                  : 'border-zinc-800 hover:border-emerald-500 hover:text-emerald-400'
+              }`}
+            >
               {cat}
             </button>
           ))}
@@ -26,9 +48,13 @@ export const Shop = () => {
         <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/60 p-12 text-center text-zinc-400">
           The catalog is empty right now. Add items from the admin dashboard to repopulate the shop.
         </div>
+      ) : filteredProducts.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/60 p-12 text-center text-zinc-400">
+          No products found for {selectedCategory}.
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-          {activeProducts.map((product, index) => (
+          {filteredProducts.map((product, index) => (
           <motion.div
             key={product.id}
             initial={{ opacity: 0, y: 40 }}

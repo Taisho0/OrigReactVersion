@@ -52,13 +52,13 @@ export const Cart = () => {
                       <p className="text-xs text-emerald-500 font-bold uppercase tracking-widest mb-1">{item.product.category}</p>
                       <h3 className="text-xl md:text-2xl font-bold">{item.product.name}</h3>
                       <p className="mt-1 text-xs uppercase tracking-widest text-zinc-500">Size: {item.size || 'One size'}</p>
-                      {item.product.basePrice && item.product.sqMeter && (
+                      {item.product.basePrice && item.product.area && (
                         <p className="mt-2 text-xs text-zinc-400">
-                          ${item.product.basePrice}/m perimeter
+                          ₱{item.product.basePrice}/{item.product.pricingUnit || 'unit'} × {item.product.area} {item.product.pricingUnit || 'sq.m'}
                         </p>
                       )}
                     </div>
-                    <p className="text-xl font-light">${(item.product.price * item.quantity).toFixed(2)}</p>
+                    <p className="text-xl font-light">₱{(item.product.price * item.quantity).toFixed(2)}</p>
                   </div>
                   
                   <div className="flex justify-between items-center mt-6">

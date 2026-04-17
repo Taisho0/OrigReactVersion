@@ -7,6 +7,7 @@ const StoreContext = createContext(undefined);
 
 const CATALOG_STORAGE_KEY = 'theoriginals.catalog';
 const ORDERS_STORAGE_KEY = 'theoriginals.orders';
+const CART_STORAGE_KEY = 'theoriginals.cart';
 
 const getCartItemKey = (productId, size) => `${productId}::${size || 'default'}`;
 
@@ -36,17 +37,40 @@ const createInitialCatalog = () => {
         return { ...product, isArchived: false };
       }
 
+      const isAdminEdited = storedProduct.editedByAdmin === true;
+
       return {
         ...product,
-        ...storedProduct,
+        ...(isAdminEdited
+          ? {
+              name: storedProduct.name ?? product.name,
+              category: storedProduct.category ?? product.category,
+              image: storedProduct.image ?? product.image,
+              materials: storedProduct.materials ?? product.materials,
+              description: storedProduct.description ?? product.description,
+              requiresDimensions: storedProduct.requiresDimensions ?? product.requiresDimensions,
+            }
+          : {}),
         id: product.id,
+        // Seeded products always follow products.jsx pricing chart values.
+        price: product.price,
+        pricingUnit: product.pricingUnit,
+        dimensionUnit: product.dimensionUnit,
+        requiresDimensions: product.requiresDimensions,
         isArchived: Boolean(storedProduct.isArchived),
+        editedByAdmin: isAdminEdited,
       };
     });
 
-    const archivedExtras = parsedCatalog.filter((product) => product?.id && !PRODUCTS.some((baseProduct) => baseProduct.id === product.id));
+    // Keep only extras that were intentionally created from admin tools.
+    const adminCreatedExtras = parsedCatalog.filter(
+      (product) =>
+        product?.id &&
+        !PRODUCTS.some((baseProduct) => baseProduct.id === product.id) &&
+        product.createdByAdmin === true
+    );
 
-    return [...mergedCatalog, ...archivedExtras.map((product) => ({ ...product, isArchived: Boolean(product.isArchived) }))];
+    return [...mergedCatalog, ...adminCreatedExtras.map((product) => ({ ...product, isArchived: Boolean(product.isArchived) }))];
   } catch (error) {
     console.error('Unable to load catalog state:', error);
     return PRODUCTS.map((product) => ({ ...product, isArchived: false }));
@@ -68,11 +92,26 @@ const createInitialOrders = () => {
   }
 };
 
+const createInitialCart = () => {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  try {
+    const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
+    const parsedCart = storedCart ? JSON.parse(storedCart) : [];
+    return Array.isArray(parsedCart) ? parsedCart : [];
+  } catch (error) {
+    console.error('Unable to load cart state:', error);
+    return [];
+  }
+};
+
 export const StoreProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(createInitialCart);
   const [orders, setOrders] = useState(createInitialOrders);
   const [catalog, setCatalog] = useState(createInitialCatalog);
-  const { userProfile } = userAuth();
+  const { userProfile, session } = userAuth();
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -90,10 +129,22 @@ export const StoreProvider = ({ children }) => {
     window.localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
   }, [orders]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  }, [cart]);
+
   const activeProducts = catalog.filter((product) => !product.isArchived);
   const archivedProducts = catalog.filter((product) => product.isArchived);
 
   const addToCart = (product) => {
+    if (!session) {
+      return false;
+    }
+
     setCart((prev) => {
       const existing = prev.find((item) => getCartItemKey(item.product.id, item.size) === getCartItemKey(product.id, product.selectedSize));
       if (existing) {
@@ -155,6 +206,7 @@ export const StoreProvider = ({ children }) => {
                 : typeof updates.sizes === 'string'
                   ? updates.sizes.split(',').map((size) => size.trim()).filter(Boolean)
                   : product.sizes,
+              editedByAdmin: true,
             }
           : product
       )
@@ -167,6 +219,7 @@ export const StoreProvider = ({ children }) => {
       {
         ...product,
         id: product.id || `p-${Date.now()}`,
+        createdByAdmin: true,
         isArchived: Boolean(product.isArchived),
         sizes: Array.isArray(product.sizes) ? product.sizes : [],
       },

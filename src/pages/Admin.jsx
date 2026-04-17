@@ -131,11 +131,10 @@ export default function Admin() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setProductForm((current) => ({ ...current, image: String(reader.result || '') }));
-    };
-    reader.readAsDataURL(file);
+    const imagePath = `/productImage/${file.name}`;
+    setProductForm((current) => ({ ...current, image: imagePath }));
+    setProductMessage(`Image path set to ${imagePath}. Make sure the file exists in public/productImage.`);
+    window.setTimeout(() => setProductMessage(''), 4000);
   };
 
   const handleSaveProduct = (event) => {
@@ -365,7 +364,7 @@ export default function Admin() {
                     </label>
 
                     <label className="space-y-2 text-sm text-zinc-300">
-                      <span>Price per linear meter</span>
+                      <span>Price / rate</span>
                       <input
                         type="number"
                         min="0"

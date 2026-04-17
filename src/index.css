@@ -62,6 +62,46 @@ main {
   margin: 0;
 }
 
+.featured-marquee-mask {
+  overflow: hidden;
+  position: relative;
+}
+
+.featured-marquee-track {
+  display: flex;
+  gap: 2rem;
+  width: max-content;
+  padding: 0 1.5rem;
+  animation: featured-marquee-scroll 55s linear infinite;
+  will-change: transform;
+}
+
+@media (min-width: 768px) {
+  .featured-marquee-track {
+    padding: 0 3rem;
+  }
+}
+
+.featured-marquee-mask:hover .featured-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes featured-marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-marquee-track {
+    animation: none;
+    transform: none;
+  }
+}
+
 /* Header (ported from web component styles) */
 .landing-site-header {
   display: flex;
