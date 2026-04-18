@@ -26,7 +26,13 @@ const createInitialCatalog = () => {
     const parsedCatalog = JSON.parse(storedCatalog);
 
     if (!Array.isArray(parsedCatalog)) {
+      window.localStorage.removeItem(CATALOG_STORAGE_KEY);
       return PRODUCTS.map((product) => ({ ...product, isArchived: false }));
+    }
+
+    if (PRODUCTS.length === 0) {
+      window.localStorage.removeItem(CATALOG_STORAGE_KEY);
+      return [];
     }
 
     const storedById = new Map(parsedCatalog.filter((product) => product?.id).map((product) => [product.id, product]));
@@ -154,7 +160,7 @@ export const StoreProvider = ({ children }) => {
             : item
         );
       }
-      return [...prev, { product, quantity: 1, size: product.selectedSize || product.size || product.variantSize || '' }];
+      return [...prev, { product, quantity: 1, size: product.selectedSize || product.size || product.variantSize || '', itemPrice: product.itemPrice || product.price }];
     });
     return true;
   };
@@ -179,7 +185,17 @@ export const StoreProvider = ({ children }) => {
 
   const clearCart = () => setCart([]);
 
-  const cartTotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const updateCartItemLayout = (productId, size, layoutImage) => {
+    setCart((prev) =>
+      prev.map((item) =>
+        getCartItemKey(item.product.id, item.size) === getCartItemKey(productId, size)
+          ? { ...item, layoutImage }
+          : item
+      )
+    );
+  };
+
+  const cartTotal = cart.reduce((sum, item) => sum + (item.itemPrice || item.product.price) * item.quantity, 0);
   const catalogTotalValue = activeProducts.reduce((sum, product) => sum + product.price, 0);
 
   const getProductById = (productId) =>
@@ -272,6 +288,7 @@ export const StoreProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         updateQuantity,
+        updateCartItemLayout,
         clearCart,
         cartTotal,
         catalog,

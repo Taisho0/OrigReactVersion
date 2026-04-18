@@ -110,17 +110,30 @@ export const Checkout = () => {
         <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-500 mb-8">Order Summary</h2>
         <div className="space-y-6 mb-8 max-h-[40vh] overflow-y-auto hide-scrollbar">
           {cart.map(item => (
-            <div key={`${item.product.id}-${item.size || 'default'}`} className="flex gap-4">
-              <div className="w-16 h-20 bg-zinc-950 rounded-sm overflow-hidden shrink-0">
-                <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
-              </div>
-              <div className="grow flex flex-col justify-center">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-bold text-sm uppercase tracking-wider">{item.product.name}</h3>
-                  <p className="font-medium">${item.product.price}</p>
+            <div key={`${item.product.id}-${item.size || 'default'}`} className="border border-zinc-800 rounded p-3 bg-zinc-950/50">
+              <div className="flex gap-4 mb-3">
+                <div className="w-16 h-20 bg-zinc-950 rounded-sm overflow-hidden shrink-0">
+                  <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
                 </div>
-                <p className="text-zinc-500 text-xs mt-1">Qty: {item.quantity} • Size: {item.size || 'One size'}</p>
+                <div className="grow flex flex-col justify-center">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-bold text-sm uppercase tracking-wider">{item.product.name}</h3>
+                    <p className="font-medium">${(item.itemPrice || item.product.price) * item.quantity}</p>
+                  </div>
+                  <p className="text-zinc-500 text-xs mt-1">Qty: {item.quantity} • Size: {item.size || 'One size'}</p>
+                </div>
               </div>
+              {item.layoutImage && (
+                <div className="pt-3 border-t border-zinc-700">
+                  <p className="text-xs text-emerald-400 mb-2 font-semibold">✓ Layout Uploaded</p>
+                  <img src={item.layoutImage} alt="Layout" className="w-full h-auto max-h-24 object-contain rounded" />
+                </div>
+              )}
+              {!item.layoutImage && (
+                <div className="pt-3 border-t border-zinc-700">
+                  <p className="text-xs text-amber-500">⚠ No layout uploaded yet</p>
+                </div>
+              )}
             </div>
           ))}
         </div>

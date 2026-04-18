@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { useStore } from '../context/StoreContext';
 import { userAuth } from '../auth/AuthContext';
 import { ArrowLeft, Check } from 'lucide-react';
+import { UNIT_TYPES, calculateProductPrice } from '../utils/pricingUtils';
 
 export const ProductDetail = () => {
   const { id } = useParams();
@@ -27,6 +28,23 @@ export const ProductDetail = () => {
     setLength('');
     setSelectedVariant(Array.isArray(product.variants) && product.variants.length > 0 ? product.variants[0] : '');
   }, [product]);
+
+  // Recalculate price when dimensions change
+  useEffect(() => {
+    if (!product) return;
+
+    if (product.unitType && product.unitType !== UNIT_TYPES.FIXED && product.pricePerUnit) {
+      const result = calculateProductPrice(
+        product.unitType,
+        product.pricePerUnit,
+        dimensions,
+        1
+      );
+      setDisplayPrice(result.total);
+    } else {
+      setDisplayPrice(product?.price || 0);
+    }
+  }, [dimensions, product]);
 
   if (!product) {
     return (
@@ -223,6 +241,59 @@ export const ProductDetail = () => {
               </div>
             )}
           </div>
+
+          {/* Dynamic Pricing Section - Conditional Dimension Inputs */}
+          {product.unitType && product.unitType !== UNIT_TYPES.FIXED && (
+            <div className="mb-8">
+              <p className="text-sm font-semibold uppercase tracking-widest text-zinc-500 mb-4">Custom Dimensions</p>
+              {(product.unitType === UNIT_TYPES.SQ_FT || product.unitType === UNIT_TYPES.SQ_INCH) && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-zinc-400 mb-2">
+                      Width ({product.unitType === UNIT_TYPES.SQ_FT ? 'Feet' : 'Inches'})
+                    </label>
+                    <input
+                      type="number"
+                      value={dimensions.width}
+                      onChange={(e) => setDimensions({ ...dimensions, width: parseFloat(e.target.value) || '' })}
+                      placeholder="0"
+                      step="0.01"
+                      min="0"
+                      className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-50 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-zinc-400 mb-2">
+                      Height ({product.unitType === UNIT_TYPES.SQ_FT ? 'Feet' : 'Inches'})
+                    </label>
+                    <input
+                      type="number"
+                      value={dimensions.height}
+                      onChange={(e) => setDimensions({ ...dimensions, height: parseFloat(e.target.value) || '' })}
+                      placeholder="0"
+                      step="0.01"
+                      min="0"
+                      className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-50 text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+              {product.unitType === UNIT_TYPES.LINEAR_METER && (
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-2">Length (Meters)</label>
+                  <input
+                    type="number"
+                    value={dimensions.length}
+                    onChange={(e) => setDimensions({ ...dimensions, length: parseFloat(e.target.value) || '' })}
+                    placeholder="0"
+                    step="0.01"
+                    min="0"
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-50 text-sm"
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="space-y-6">
             <button 

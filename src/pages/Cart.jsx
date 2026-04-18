@@ -3,10 +3,10 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router';
 import { useStore } from '../context/StoreContext';
-import { Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowRight, Upload, X } from 'lucide-react';
 
 export const Cart = () => {
-  const { cart, removeFromCart, updateQuantity, cartTotal } = useStore();
+  const { cart, removeFromCart, updateQuantity, updateCartItemLayout, cartTotal } = useStore();
   const navigate = useNavigate();
 
   if (cart.length === 0) {
@@ -101,6 +101,49 @@ export const Cart = () => {
                     >
                       <Trash2 size={20} />
                     </button>
+                  </div>
+
+                  {/* Layout Upload Section */}
+                  <div className="mt-6 pt-6 border-t border-zinc-800">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">Upload Layout/Design</p>
+                    <div className="flex items-end gap-3">
+                      <label className="flex-1">
+                        <div className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-zinc-800 rounded hover:border-emerald-500 cursor-pointer transition-colors">
+                          <Upload size={16} className="text-zinc-500" />
+                          <span className="text-xs text-zinc-400">Choose file</span>
+                        </div>
+                        <input 
+                          type="file" 
+                          accept="image/*,application/pdf"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                updateCartItemLayout(item.product.id, item.size, String(reader.result || ''));
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                      {item.layoutImage && (
+                        <button 
+                          onClick={() => updateCartItemLayout(item.product.id, item.size, null)}
+                          className="p-2 text-zinc-500 hover:text-red-500 transition-colors"
+                          title="Remove layout"
+                        >
+                          <X size={18} />
+                        </button>
+                      )}
+                    </div>
+                    {item.layoutImage && (
+                      <div className="mt-3 p-2 bg-zinc-900 rounded">
+                        <p className="text-xs text-emerald-400 mb-2">✓ Layout uploaded</p>
+                        <img src={item.layoutImage} alt="Layout preview" className="w-full h-auto max-h-32 object-contain rounded" />
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>
