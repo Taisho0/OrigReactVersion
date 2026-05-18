@@ -93,18 +93,21 @@ export default function PricingForm({ product, onSave, isLoading = false }) {
         <label className="block text-sm font-medium text-zinc-300 mb-2">
           Pricing Unit Type
         </label>
-        <select
-          name="unitType"
-          value={formData.unitType}
-          onChange={handleInputChange}
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-zinc-50 text-sm"
-        >
-          {Object.entries(UNIT_TYPES).map(([key, value]) => (
-            <option key={value} value={value}>
-              {UNIT_LABELS[value]}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            name="unitType"
+            value={formData.unitType}
+            onChange={handleInputChange}
+            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 pr-10 text-zinc-50 text-sm appearance-none outline-none focus:border-emerald-400"
+          >
+            {Object.entries(UNIT_TYPES).map(([key, value]) => (
+              <option key={value} value={value} className="bg-slate-950 text-zinc-50">
+                {UNIT_LABELS[value]}
+              </option>
+            ))}
+          </select>
+          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-400">▾</span>
+        </div>
       </div>
 
       {/* Price Per Unit */}

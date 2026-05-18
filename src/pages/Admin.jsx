@@ -997,16 +997,19 @@ export default function Admin() {
 
                           <label className="space-y-2 text-sm text-zinc-300">
                             <span>Pricing Unit Type</span>
-                            <select
-                              value={newProductForm.unitType}
-                              onChange={(event) => setNewProductForm((current) => ({ ...current, unitType: event.target.value }))}
-                              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-50 outline-none focus:border-emerald-400"
-                            >
-                              <option value="fixed">Fixed Price</option>
-                              <option value="sq_ft">Square Feet</option>
-                              <option value="linear_meter">Linear Meters</option>
-                              <option value="sq_inch">Square Inches</option>
-                            </select>
+                            <div className="relative">
+                              <select
+                                value={newProductForm.unitType}
+                                onChange={(event) => setNewProductForm((current) => ({ ...current, unitType: event.target.value }))}
+                                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 pr-10 text-zinc-50 outline-none focus:border-emerald-400 appearance-none"
+                              >
+                                <option value="fixed" className="bg-slate-950 text-zinc-50">Fixed Price</option>
+                                <option value="sq_ft" className="bg-slate-950 text-zinc-50">Square Feet</option>
+                                <option value="linear_meter" className="bg-slate-950 text-zinc-50">Linear Meters</option>
+                                <option value="sq_inch" className="bg-slate-950 text-zinc-50">Square Inches</option>
+                              </select>
+                              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-400">▾</span>
+                            </div>
                           </label>
                         </div>
 
