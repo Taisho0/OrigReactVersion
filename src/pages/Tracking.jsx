@@ -461,9 +461,19 @@ export const Tracking = () => {
           ))) }
       </div>
 
+      <button
+        type="button"
+        onClick={() => setShowPrevious((value) => !value)}
+        className="fixed right-6 top-1/2 z-50 -translate-y-1/2 rounded-l-full border border-zinc-800 bg-zinc-950/95 px-3 py-4 text-[11px] font-bold uppercase tracking-[0.3em] text-zinc-100 shadow-2xl hover:border-emerald-400/40 hover:text-emerald-200"
+        aria-expanded={showPrevious}
+        aria-controls="previous-orders-panel"
+      >
+        {showPrevious ? 'Close' : 'Previous orders'}
+      </button>
+
       {/* Side drawer / panel for previous orders */}
       <div className={`fixed right-24 top-36 z-50 ml-6 transition-transform ${showPrevious ? 'translate-x-0' : 'translate-x-48'}`}>
-        <div className="w-80 bg-zinc-950/95 border border-zinc-900 rounded-3xl p-4 shadow-2xl">
+        <div id="previous-orders-panel" className="w-80 bg-zinc-950/95 border border-zinc-900 rounded-3xl p-4 shadow-2xl">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-bold uppercase text-zinc-100">Previous orders</h3>
             <button onClick={() => setShowPrevious(false)} className="text-xs text-zinc-400">Close</button>
