@@ -1,15 +1,18 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useId } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'motion/react';
 import { ArchiveRestore, BarChart3, ShieldCheck, ShoppingBag, Users, UserRoundCog, Upload, DollarSign, Plus, Download, CircleCheckBig, CircleX } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { addDoc, collection, getFirestore } from 'firebase/firestore';
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Label, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { ChartContainer } from '../components/ui/chart';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { app } from '../config/FirebaseConfig';
 import { useUserAuth } from '../auth/AuthContext';
 import { useStore } from '../context/StoreContext';
 import PricingForm from '../components/admin/PricingForm';
 import { SHOWCASE_CATEGORIES } from './Showcase';
+
 const API_ORIGIN = (import.meta.env.VITE_API_ORIGIN || '').replace(/\/$/, '');
 
 export default function Admin() {
@@ -56,6 +59,7 @@ export default function Admin() {
   const [salesMessage, setSalesMessage] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [selectedRange, setSelectedRange] = useState('7d');
   const [showcaseForm, setShowcaseForm] = useState({
     category: SHOWCASE_CATEGORIES[0],
     productId: '',
@@ -70,6 +74,8 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [paymentApprovalDrafts, setPaymentApprovalDrafts] = useState({});
   const [firebaseUsers, setFirebaseUsers] = useState([]);
+
+  const barGradId = useId();
 
   const db = getFirestore(app);
   const storage = getStorage(app);
@@ -244,6 +250,118 @@ export default function Admin() {
       approvedOrders,
     };
   }, [activeProducts, firebaseUsers, orders]);
+
+  const formatDate = (date) => date.toISOString().slice(0, 10);
+
+  const handleSelectRange = (range) => {
+    const now = new Date();
+    if (range === 'all') {
+      setSelectedRange('all');
+      setStartDate('');
+      setEndDate('');
+      return;
+    }
+
+    const days = range === '7d' ? 6 : 29;
+    const start = new Date(now);
+    start.setDate(now.getDate() - days);
+
+    setSelectedRange(range);
+    setStartDate(formatDate(start));
+    setEndDate(formatDate(now));
+  };
+
+  useEffect(() => {
+    if (!startDate && !endDate) {
+      const now = new Date();
+      const start = new Date(now);
+      start.setDate(now.getDate() - 6);
+      setStartDate(formatDate(start));
+      setEndDate(formatDate(now));
+      setSelectedRange('7d');
+    }
+  }, []);
+
+  const filteredSalesOrders = useMemo(() => {
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+    if (end) {
+      end.setHours(23, 59, 59, 999);
+    }
+
+    return metrics.approvedOrders.filter((order) => {
+      if (!order?.date) {
+        return true;
+      }
+      const orderDate = new Date(order.date);
+      if (start && orderDate < start) return false;
+      if (end && orderDate > end) return false;
+      return true;
+    });
+  }, [metrics.approvedOrders, startDate, endDate]);
+
+  const salesAnalytics = useMemo(() => {
+    const orders = filteredSalesOrders;
+    const totalRevenue = orders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+    const orderCount = orders.length;
+    const itemCount = orders.reduce(
+      (sum, order) => sum + order.items.reduce((itemSum, item) => itemSum + Number(item.quantity || 0), 0),
+      0
+    );
+    const averageTicket = orderCount ? totalRevenue / orderCount : 0;
+
+    const categoryTotals = orders.reduce((accumulator, order) => {
+      order.items.forEach((item) => {
+        const category = item.product?.category || item.category || 'Unknown';
+        accumulator[category] = (accumulator[category] || 0) + Number(item.quantity || 0);
+      });
+      return accumulator;
+    }, {});
+
+    const productTotals = orders.reduce((accumulator, order) => {
+      order.items.forEach((item) => {
+        const key = item.product?.id || item.productId || item.name || `${item.name}-${item.size || 'default'}`;
+        const name = item.product?.name || item.name || 'Unnamed product';
+        const quantity = Number(item.quantity || 0);
+        const revenue = Number(item.itemPrice || item.product?.price || 0) * quantity;
+
+        if (!accumulator[key]) {
+          accumulator[key] = { name, quantity: 0, revenue: 0 };
+        }
+
+        accumulator[key].quantity += quantity;
+        accumulator[key].revenue += revenue;
+      });
+      return accumulator;
+    }, {});
+
+    const topProducts = Object.values(productTotals)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
+    const rangeStart = startDate ? new Date(startDate) : new Date(Date.now() - 6 * 24 * 60 * 60 * 1000);
+    const rangeEnd = endDate ? new Date(endDate) : new Date();
+    rangeStart.setHours(0, 0, 0, 0);
+    rangeEnd.setHours(23, 59, 59, 999);
+
+    const dailySales = [];
+    const cursor = new Date(rangeStart);
+    while (cursor <= rangeEnd) {
+      const label = cursor.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      const dateKey = cursor.toISOString().slice(0, 10);
+      const total = orders.reduce((sum, order) => {
+        const orderDate = new Date(order.date);
+        return orderDate.toISOString().slice(0, 10) === dateKey ? sum + Number(order.total || 0) : sum;
+      }, 0);
+
+      dailySales.push({ label, total });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    const maxDaily = Math.max(...dailySales.map((entry) => entry.total), 1);
+
+    return { totalRevenue, orderCount, itemCount, averageTicket, categoryTotals, topProducts, dailySales, maxDaily };
+  }, [filteredSalesOrders, startDate, endDate]);
 
   const handleProductAction = async (productId, action) => {
     setBusyProductId(productId);
@@ -715,7 +833,7 @@ export default function Admin() {
       }}
     >
       <div className="border-b border-white/10 backdrop-blur-xl bg-slate-950/70 sticky top-0 z-20">
-        <div className="mx-auto max-w-7xl px-6 md:px-10 py-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="w-full max-w-none px-6 md:px-10 py-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Admin Control Center</p>
             <h1 className="text-3xl md:text-4xl font-black tracking-tight uppercase">Operations dashboard</h1>
@@ -732,7 +850,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-7xl px-6 md:px-10 py-10">
+      <main className="w-full max-w-none px-6 md:px-10 py-10">
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
           <aside className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
             <div className="space-y-4 mb-8">
@@ -778,14 +896,14 @@ export default function Admin() {
                     const Icon = item.icon;
 
                     return (
-                      <div key={item.label} className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/20">
-                        <div className="flex items-center justify-between">
+                      <div key={item.label} className="rounded-4xl border border-white/15 bg-slate-950/90 p-6 shadow-2xl shadow-black/30 backdrop-blur-md">
+                        <div className="flex items-start justify-between gap-4">
                           <div>
-                            <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">{item.label}</p>
-                            <p className="mt-3 text-3xl font-black tracking-tight">{item.value}</p>
+                            <p className="text-xs uppercase tracking-[0.35em] text-zinc-300">{item.label}</p>
+                            <p className="mt-4 text-4xl font-black tracking-tight text-white">{item.value}</p>
                           </div>
-                          <div className="rounded-2xl bg-emerald-400/10 p-3 text-emerald-300">
-                            <Icon size={22} />
+                          <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-emerald-400/15 text-emerald-300 ring-1 ring-emerald-400/20">
+                            <Icon size={24} />
                           </div>
                         </div>
                       </div>
@@ -1424,35 +1542,272 @@ export default function Admin() {
             )}
 
             {activeTab === 'sales' && (
-              <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
-                <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
+              <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-4 md:p-6">
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between mb-8">
                   <div className="flex items-center gap-3">
                     <BarChart3 size={20} className="text-emerald-300" />
-                    <h2 className="text-2xl font-black uppercase tracking-tight">Recent sales</h2>
+                    <div>
+                      <h2 className="text-3xl font-black uppercase tracking-tight">Sales analytics</h2>
+                      <p className="mt-1 text-sm text-zinc-400">Revenue, product and category performance for approved sales.</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {[
+                      { label: '7d', value: '7d' },
+                      { label: '30d', value: '30d' },
+                      { label: 'All', value: 'all' },
+                    ].map((range) => (
+                      <button
+                        key={range.value}
+                        type="button"
+                        onClick={() => handleSelectRange(range.value)}
+                        className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.28em] transition ${
+                          selectedRange === range.value
+                            ? 'border-emerald-400 bg-emerald-400/10 text-emerald-200'
+                            : 'border-white/10 bg-slate-950 text-zinc-300 hover:border-emerald-400 hover:text-emerald-200'
+                        }`}
+                      >
+                        {range.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between mb-6">
+                  <div className="flex flex-wrap items-center gap-3">
                     <label className="text-xs text-zinc-400">From</label>
                     <input
                       type="date"
                       value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedRange('custom');
+                        setStartDate(e.target.value);
+                      }}
                       className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-50 outline-none focus:border-emerald-400"
                     />
                     <label className="text-xs text-zinc-400">To</label>
                     <input
                       type="date"
                       value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedRange('custom');
+                        setEndDate(e.target.value);
+                      }}
                       className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-50 outline-none focus:border-emerald-400"
                     />
-                    <button
-                      type="button"
-                      onClick={handleDownloadSalesReport}
-                      className="rounded-2xl border border-emerald-400/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 flex items-center gap-2"
-                    >
-                      <Download size={14} />
-                      Download PDF
-                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleDownloadSalesReport}
+                    className="rounded-2xl border border-emerald-400/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 flex items-center gap-2"
+                  >
+                    <Download size={14} />
+                    Download PDF
+                  </button>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-6">
+                  {[{
+                    label: 'Revenue',
+                    value: `₱${salesAnalytics.totalRevenue.toFixed(2)}`,
+                    description: `${salesAnalytics.orderCount} approved orders`,
+                  }, {
+                    label: 'Orders',
+                    value: salesAnalytics.orderCount,
+                    description: `${salesAnalytics.itemCount} items sold`,
+                  }, {
+                    label: 'Average Ticket',
+                    value: `₱${salesAnalytics.averageTicket.toFixed(2)}`,
+                    description: 'Per approved order',
+                  }, {
+                    label: 'Products sold',
+                    value: salesAnalytics.itemCount,
+                    description: 'Total quantity',
+                  }].map((card) => (
+                    <div key={card.label} className="group rounded-[2rem] border border-white/10 bg-slate-950/80 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm transition duration-300 hover:border-emerald-400/30 hover:bg-slate-950/95 hover:-translate-y-0.5">
+                      <div className="h-1 w-14 rounded-full bg-gradient-to-r from-emerald-300 via-cyan-300 to-sky-500 shadow-[0_0_20px_rgba(52,211,153,0.18)]" />
+                      <div className="mt-4 flex items-center justify-between gap-4">
+                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">{card.label}</p>
+                        <span className="inline-flex rounded-full bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-emerald-300">Live</span>
+                      </div>
+                      <p className="mt-5 text-4xl font-black tracking-tight text-white">{card.value}</p>
+                      <p className="mt-3 text-sm text-zinc-400">{card.description}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-4 mb-6">
+                  <div className="rounded-[2rem] border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-5 gap-4">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Daily revenue</p>
+                        <p className="text-sm text-zinc-400">Revenue movement across the selected range.</p>
+                      </div>
+                      <span className="inline-flex rounded-full bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300">{salesAnalytics.dailySales.length} days</span>
+                    </div>
+                    <ChartContainer className="h-72 rounded-[1.75rem] bg-slate-950/70 p-3" config={{ revenue: { color: '#34d399' } }}>
+                      <AreaChart data={salesAnalytics.dailySales} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
+                        <CartesianGrid stroke="rgba(148,163,184,0.12)" strokeDasharray="4 4" vertical={false} />
+                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 13 }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 13 }} tickFormatter={(value) => `₱${value}`} />
+                        <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: 10 }} formatter={(value) => `₱${value.toFixed(2)}`} />
+                        <Area type="monotone" dataKey="total" stroke="#34d399" fill="rgba(52,211,153,0.18)" strokeWidth={3} />
+                      </AreaChart>
+                    </ChartContainer>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="rounded-[2rem] border border-white/10 bg-slate-950/85 p-4 shadow-2xl shadow-black/20 backdrop-blur-sm flex flex-col min-h-0">
+                      <div className="flex items-center justify-between mb-3 gap-4 px-4 pt-4">
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Top products</p>
+                          <p className="text-sm text-zinc-400">Revenue share for your best sellers.</p>
+                        </div>
+                        <span className="text-xs uppercase tracking-[0.35em] text-zinc-500">By revenue</span>
+                      </div>
+                      {salesAnalytics.topProducts.length === 0 ? (
+                        <div className="grid h-80 place-items-center rounded-2xl border border-dashed border-white/10 text-sm text-zinc-500">No product revenue yet.</div>
+                      ) : (
+                        <ChartContainer className="h-80 rounded-[1.5rem] bg-slate-950/80 p-4" config={{ revenue: { color: '#f59e0b' } }}>
+                          <PieChart>
+                            <Pie
+                              data={salesAnalytics.topProducts}
+                              dataKey="revenue"
+                              nameKey="name"
+                              cx="50%"
+                              cy="45%"
+                              startAngle={90}
+                              endAngle={-270}
+                              innerRadius={48}
+                              outerRadius={78}
+                              paddingAngle={6}
+                              stroke="#0f172a"
+                              strokeWidth={4}
+                              labelLine={false}
+                            >
+                              {salesAnalytics.topProducts.map((entry, index) => (
+                                <Cell
+                                  key={entry.name}
+                                  fill={['#34d399', '#60a5fa', '#f59e0b', '#a855f7', '#f97316'][index % 5]}
+                                />
+                              ))}
+                              <Label
+                                value={`₱${salesAnalytics.topProducts.reduce((sum, item) => sum + item.revenue, 0).toFixed(0)}`}
+                                position="center"
+                                fill="#f8fafc"
+                                style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.1 }}
+                              />
+                            </Pie>
+                            <Tooltip
+                              contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: 14, padding: 14 }}
+                              formatter={(value) => `₱${value.toFixed(2)}`}
+                              labelStyle={{ color: '#e2e8f0', fontSize: 13 }}
+                              itemStyle={{ color: '#e2e8f0', fontSize: 13 }}
+                            />
+                            <Legend
+                              verticalAlign="bottom"
+                              height={44}
+                              iconType="circle"
+                              wrapperStyle={{ paddingTop: 8 }}
+                              formatter={(value) => <span style={{ color: '#cbd5e1', fontSize: 12 }}>{value}</span>}
+                              iconSize={10}
+                            />
+                          </PieChart>
+                        </ChartContainer>
+                      )}
+                    </div>
+
+                    <div className="rounded-[2rem] border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                      <div className="flex items-center justify-between mb-5 gap-4">
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Category sales</p>
+                          <p className="text-sm text-zinc-400">Quantity breakdown by category.</p>
+                        </div>
+                        <span className="text-xs uppercase tracking-[0.35em] text-zinc-500">Quantity sold</span>
+                      </div>
+                      {(() => {
+                        const categoryData = Object.entries(salesAnalytics.categoryTotals).map(([category, count]) => ({ category, count }));
+                        const categoryCount = categoryData.length;
+                        let autoBarSize = 52;
+                        if (categoryCount <= 3) autoBarSize = 100;
+                        else if (categoryCount <= 5) autoBarSize = 72;
+                        else if (categoryCount <= 8) autoBarSize = 56;
+                        else if (categoryCount <= 12) autoBarSize = 40;
+                        else autoBarSize = 30;
+
+                        return (
+                          <ChartContainer className="flex-1 w-full rounded-[1.5rem] bg-slate-950/80 p-3 min-h-0" config={{ count: { color: '#60a5fa' } }}>
+                            <BarChart data={categoryData} margin={{ top: 14, right: 6, left: 6, bottom: 34 }} barSize={autoBarSize} barCategoryGap="10%" barGap={12}>
+                                <defs>
+                                  <linearGradient id={`barGrad-${barGradId}`} x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#dbeafe" stopOpacity="1" />
+                                    <stop offset="45%" stopColor="#93c5fd" stopOpacity="0.95" />
+                                    <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.9" />
+                                  </linearGradient>
+                                </defs>
+                                <CartesianGrid stroke="rgba(148,163,184,0.08)" strokeDasharray="3 3" vertical={false} />
+                                <XAxis dataKey="category" axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 12, fontWeight: 600, dy: 16 }} interval={0} angle={0} height={50} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 12, dx: -10 }} width={32} />
+                                <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: 14, padding: 14 }} formatter={(value) => value} labelStyle={{ color: '#e2e8f0', fontSize: 13 }} itemStyle={{ color: '#e2e8f0', fontSize: 13 }} />
+                                <Bar dataKey="count" fill={`url(#barGrad-${barGradId})`} radius={[20, 20, 0, 0]} isAnimationActive animationDuration={900} animationEasing="ease-out" />
+                              </BarChart>
+                          </ChartContainer>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr] mb-6">
+                  <div className="rounded-[2rem] border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-5 gap-4">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Sales details</p>
+                        <p className="text-sm text-zinc-400">Snapshot of top-selling products in the selected period.</p>
+                      </div>
+                      <span className="inline-flex rounded-full bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300">Top performers</span>
+                    </div>
+                    {salesAnalytics.topProducts.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-white/10 p-5 text-sm text-zinc-500">
+                        No product sales in the selected range.
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {salesAnalytics.topProducts.map((product) => (
+                          <div key={product.name} className="rounded-3xl border border-white/10 bg-slate-950/80 p-4 shadow-sm shadow-black/10">
+                            <div className="flex items-center justify-between gap-3 text-sm">
+                              <div>
+                                <p className="font-semibold text-white">{product.name}</p>
+                                <p className="text-xs text-zinc-500">{product.quantity} sold</p>
+                              </div>
+                              <p className="text-sm font-semibold text-emerald-300">₱{product.revenue.toFixed(2)}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="rounded-[2rem] border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-5 gap-4">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Sales activity</p>
+                        <p className="text-sm text-zinc-400">Live metrics to keep your operations moving.</p>
+                      </div>
+                      <span className="inline-flex rounded-full bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300">Live</span>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-3xl border border-white/10 bg-slate-950/70 p-4 text-sm text-zinc-200 shadow-sm shadow-black/10">
+                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Approved orders</p>
+                        <p className="mt-3 text-3xl font-bold tracking-tight text-emerald-300">{salesAnalytics.orderCount}</p>
+                      </div>
+                      <div className="rounded-3xl border border-white/10 bg-slate-950/70 p-4 text-sm text-zinc-200 shadow-sm shadow-black/10">
+                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Total items sold</p>
+                        <p className="mt-3 text-3xl font-bold tracking-tight text-emerald-300">{salesAnalytics.itemCount}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1484,75 +1839,84 @@ export default function Admin() {
                               </div>
                             </div>
 
-                            {receiptProofImage && (
-                              <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-3 space-y-3">
-                                <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Payment receipt proof</p>
-                                <a
-                                  href={receiptProofImage}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-xs text-emerald-300 hover:text-emerald-200 underline"
-                                >
-                                  View full receipt image
-                                </a>
-                                <img
-                                  src={receiptProofImage}
-                                  alt={`Receipt proof for order ${order.id}`}
-                                  className="max-h-60 w-auto rounded border border-white/10"
-                                />
-                              </div>
-                            )}
+                            <div className="space-y-4">
+                              <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-3 space-y-4">
+                                <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Customer and order details</p>
 
-                            <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-3 space-y-4">
-                              <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Customer and order details</p>
-
-                              <div className="grid gap-3 md:grid-cols-2">
-                                <div className="space-y-1 text-xs text-zinc-300">
-                                  <p><span className="text-zinc-500">Name:</span> {`${order.shipping?.firstName || ''} ${order.shipping?.lastName || ''}`.trim() || 'N/A'}</p>
-                                  <p><span className="text-zinc-500">Email:</span> {order.shipping?.email || order.purchaserEmail || 'N/A'}</p>
-                                  <p><span className="text-zinc-500">Phone:</span> {order.shipping?.phone || 'N/A'}</p>
+                                <div className="grid gap-3 md:grid-cols-2">
+                                  <div className="space-y-1 text-xs text-zinc-300">
+                                    <p><span className="text-zinc-500">Name:</span> {`${order.shipping?.firstName || ''} ${order.shipping?.lastName || ''}`.trim() || 'N/A'}</p>
+                                    <p><span className="text-zinc-500">Email:</span> {order.shipping?.email || order.purchaserEmail || 'N/A'}</p>
+                                    <p><span className="text-zinc-500">Phone:</span> {order.shipping?.phone || 'N/A'}</p>
+                                  </div>
+                                  <div className="space-y-1 text-xs text-zinc-300">
+                                    <p><span className="text-zinc-500">Address:</span> {order.shipping?.addressLine || 'N/A'}</p>
+                                    <p><span className="text-zinc-500">City:</span> {order.shipping?.city || 'N/A'}</p>
+                                    <p><span className="text-zinc-500">Province:</span> {order.shipping?.stateProvince || 'N/A'}</p>
+                                    <p><span className="text-zinc-500">Postal Code:</span> {order.shipping?.postalCode || 'N/A'}</p>
+                                  </div>
                                 </div>
-                                <div className="space-y-1 text-xs text-zinc-300">
-                                  <p><span className="text-zinc-500">Address:</span> {order.shipping?.addressLine || 'N/A'}</p>
-                                  <p><span className="text-zinc-500">City:</span> {order.shipping?.city || 'N/A'}</p>
-                                  <p><span className="text-zinc-500">Province:</span> {order.shipping?.stateProvince || 'N/A'}</p>
-                                  <p><span className="text-zinc-500">Postal Code:</span> {order.shipping?.postalCode || 'N/A'}</p>
+
+                                <div className="overflow-x-auto rounded-xl border border-white/10">
+                                  <table className="w-full min-w-160 text-left text-xs">
+                                    <thead className="bg-white/5 text-zinc-400 uppercase tracking-[0.2em]">
+                                      <tr>
+                                        <th className="px-3 py-2 font-semibold">Item</th>
+                                        <th className="px-3 py-2 font-semibold">Category</th>
+                                        <th className="px-3 py-2 font-semibold">Size</th>
+                                        <th className="px-3 py-2 font-semibold">Quantity</th>
+                                        <th className="px-3 py-2 font-semibold">Unit Price</th>
+                                        <th className="px-3 py-2 font-semibold">Subtotal</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {order.items.map((item, index) => {
+                                        const unitPrice = Number(item.itemPrice ?? item.product?.price ?? 0);
+                                        const quantity = Number(item.quantity ?? 0);
+                                        const subtotal = unitPrice * quantity;
+
+                                        return (
+                                          <tr key={`${order.id}-${item.product?.id || item.productId || index}-${item.size || 'default'}`} className="border-t border-white/10 text-zinc-200">
+                                            <td className="px-3 py-2">{item.product?.name || item.name || 'Unnamed item'}</td>
+                                            <td className="px-3 py-2">{item.product?.category || 'N/A'}</td>
+                                            <td className="px-3 py-2">{item.size || 'N/A'}</td>
+                                            <td className="px-3 py-2">{quantity}</td>
+                                            <td className="px-3 py-2">₱{unitPrice.toFixed(2)}</td>
+                                            <td className="px-3 py-2">₱{subtotal.toFixed(2)}</td>
+                                          </tr>
+                                        );
+                                      })}
+                                    </tbody>
+                                  </table>
                                 </div>
                               </div>
 
-                              <div className="overflow-x-auto rounded-xl border border-white/10">
-                                <table className="w-full min-w-160 text-left text-xs">
-                                  <thead className="bg-white/5 text-zinc-400 uppercase tracking-[0.2em]">
-                                    <tr>
-                                      <th className="px-3 py-2 font-semibold">Item</th>
-                                      <th className="px-3 py-2 font-semibold">Category</th>
-                                      <th className="px-3 py-2 font-semibold">Size</th>
-                                      <th className="px-3 py-2 font-semibold">Quantity</th>
-                                      <th className="px-3 py-2 font-semibold">Unit Price</th>
-                                      <th className="px-3 py-2 font-semibold">Subtotal</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {order.items.map((item, index) => {
-                                      const unitPrice = Number(item.itemPrice ?? item.product?.price ?? 0);
-                                      const quantity = Number(item.quantity ?? 0);
-                                      const subtotal = unitPrice * quantity;
-
-                                      return (
-                                        <tr key={`${order.id}-${item.product?.id || item.productId || index}-${item.size || 'default'}`} className="border-t border-white/10 text-zinc-200">
-                                          <td className="px-3 py-2">{item.product?.name || item.name || 'Unnamed item'}</td>
-                                          <td className="px-3 py-2">{item.product?.category || 'N/A'}</td>
-                                          <td className="px-3 py-2">{item.size || 'N/A'}</td>
-                                          <td className="px-3 py-2">{quantity}</td>
-                                          <td className="px-3 py-2">₱{unitPrice.toFixed(2)}</td>
-                                          <td className="px-3 py-2">₱{subtotal.toFixed(2)}</td>
-                                        </tr>
-                                      );
-                                    })}
-                                  </tbody>
-                                </table>
+                              {receiptProofImage && (
+                                <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4 shadow-lg shadow-black/20">
+                                  <div className="space-y-3">
+                                    <div>
+                                      <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Proof of payment</p>
+                                      <p className="text-xs text-zinc-500">Receipt image uploaded for review</p>
+                                    </div>
+                                    <a
+                                      href={receiptProofImage}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-xs text-emerald-300 hover:text-emerald-200 underline"
+                                    >
+                                      View full receipt image
+                                    </a>
+                                    <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950">
+                                      <img
+                                        src={receiptProofImage}
+                                        alt={`Receipt proof for order ${order.id}`}
+                                        className="h-72 w-full object-cover"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                               </div>
-                            </div>
 
                             {isPendingPayment && (
                               <div className="grid gap-2 sm:grid-cols-2">
