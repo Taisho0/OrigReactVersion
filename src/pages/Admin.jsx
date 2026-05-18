@@ -1496,6 +1496,57 @@ export default function Admin() {
                               </div>
                             )}
 
+                            <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-3 space-y-4">
+                              <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Customer and order details</p>
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1 text-xs text-zinc-300">
+                                  <p><span className="text-zinc-500">Name:</span> {`${order.shipping?.firstName || ''} ${order.shipping?.lastName || ''}`.trim() || 'N/A'}</p>
+                                  <p><span className="text-zinc-500">Email:</span> {order.shipping?.email || order.purchaserEmail || 'N/A'}</p>
+                                  <p><span className="text-zinc-500">Phone:</span> {order.shipping?.phone || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1 text-xs text-zinc-300">
+                                  <p><span className="text-zinc-500">Address:</span> {order.shipping?.addressLine || 'N/A'}</p>
+                                  <p><span className="text-zinc-500">City:</span> {order.shipping?.city || 'N/A'}</p>
+                                  <p><span className="text-zinc-500">Province:</span> {order.shipping?.stateProvince || 'N/A'}</p>
+                                  <p><span className="text-zinc-500">Postal Code:</span> {order.shipping?.postalCode || 'N/A'}</p>
+                                </div>
+                              </div>
+
+                              <div className="overflow-x-auto rounded-xl border border-white/10">
+                                <table className="w-full min-w-160 text-left text-xs">
+                                  <thead className="bg-white/5 text-zinc-400 uppercase tracking-[0.2em]">
+                                    <tr>
+                                      <th className="px-3 py-2 font-semibold">Item</th>
+                                      <th className="px-3 py-2 font-semibold">Category</th>
+                                      <th className="px-3 py-2 font-semibold">Size</th>
+                                      <th className="px-3 py-2 font-semibold">Quantity</th>
+                                      <th className="px-3 py-2 font-semibold">Unit Price</th>
+                                      <th className="px-3 py-2 font-semibold">Subtotal</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {order.items.map((item, index) => {
+                                      const unitPrice = Number(item.itemPrice ?? item.product?.price ?? 0);
+                                      const quantity = Number(item.quantity ?? 0);
+                                      const subtotal = unitPrice * quantity;
+
+                                      return (
+                                        <tr key={`${order.id}-${item.product?.id || item.productId || index}-${item.size || 'default'}`} className="border-t border-white/10 text-zinc-200">
+                                          <td className="px-3 py-2">{item.product?.name || item.name || 'Unnamed item'}</td>
+                                          <td className="px-3 py-2">{item.product?.category || 'N/A'}</td>
+                                          <td className="px-3 py-2">{item.size || 'N/A'}</td>
+                                          <td className="px-3 py-2">{quantity}</td>
+                                          <td className="px-3 py-2">₱{unitPrice.toFixed(2)}</td>
+                                          <td className="px-3 py-2">₱{subtotal.toFixed(2)}</td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+
                             {isPendingPayment && (
                               <div className="grid gap-2 sm:grid-cols-2">
                                 <button
