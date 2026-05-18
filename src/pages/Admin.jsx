@@ -5,7 +5,7 @@ import { ArchiveRestore, BarChart3, ShieldCheck, ShoppingBag, Users, UserRoundCo
 import { Link } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { addDoc, collection, deleteDoc, doc, getFirestore } from 'firebase/firestore';
+import { addDoc, collection, getFirestore } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { app } from '../config/FirebaseConfig';
 import { useUserAuth } from '../auth/AuthContext';
@@ -415,8 +415,24 @@ export default function Admin() {
 
   const handleDeleteShowcaseItem = async (itemId) => {
     try {
-      await deleteDoc(doc(db, 'showcase', itemId));
+      const actorToken = await session?.getIdToken?.(true);
+      const response = await fetch(`${API_ORIGIN || ''}/api/showcase/delete`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          actorToken,
+          itemId,
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body?.message || `Server delete failed with status ${response.status}`);
+      }
+
       setShowcaseMessage('Showcase item removed.');
+
+      setShowcaseItems((current) => current.filter((item) => item.id !== itemId));
     } catch (error) {
       console.error('Unable to remove showcase item:', error);
       setShowcaseMessage(error?.message || 'Unable to remove showcase item.');

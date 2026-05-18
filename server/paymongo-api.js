@@ -891,6 +891,39 @@ app.post('/api/showcase/upload', async (req, res) => {
   }
 });
 
+app.post('/api/showcase/delete', async (req, res) => {
+  try {
+    const actorToken = String(req.body?.actorToken || '').trim();
+    const itemId = String(req.body?.itemId || '').trim();
+
+    if (!actorToken) return res.status(401).json({ message: 'actorToken is required.' });
+    if (!itemId) return res.status(400).json({ message: 'itemId is required.' });
+
+    const { auth: adminAuth, db: adminDb } = getFirebaseAdmin();
+    const decoded = await adminAuth.verifyIdToken(actorToken);
+    const actorProfileSnapshot = await adminDb.collection('users').doc(decoded.uid).get();
+    const actorProfile = actorProfileSnapshot.exists ? actorProfileSnapshot.data() : null;
+    const actorEmail = normalizeEmail(decoded.email || '');
+    const canDelete = isActiveAdmin(actorProfile) || allowedAdminEmails.includes(actorEmail);
+
+    if (!canDelete) return res.status(403).json({ message: 'Only admin users may remove showcase items.' });
+
+    const docRef = adminDb.collection('showcase').doc(itemId);
+    const snapshot = await docRef.get();
+
+    if (!snapshot.exists) {
+      return res.status(404).json({ message: 'Showcase item not found.' });
+    }
+
+    await docRef.delete();
+    return res.json({ ok: true, itemId });
+  } catch (error) {
+    console.error('/api/showcase/delete error:', error);
+    const status = error?.code === 'auth/id-token-expired' || error?.code === 'auth/argument-error' ? 401 : 500;
+    return res.status(status).json({ ok: false, message: error?.message || 'Unable to remove showcase item.' });
+  }
+});
+
 // Allow customers to cancel their own orders while in cancellable statuses.
 app.post('/api/orders/cancel', async (req, res) => {
   try {
