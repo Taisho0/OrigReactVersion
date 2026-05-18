@@ -11,6 +11,7 @@ export const Tracking = () => {
   const { orders, cancelOrder } = useStore();
   const [busyOrderId, setBusyOrderId] = useState('');
   const [orderMessage, setOrderMessage] = useState('');
+  const [showPrevious, setShowPrevious] = useState(false);
 
   const canCancel = (order) => CANCELLABLE_STATUSES.includes(order.status);
 
@@ -54,8 +55,11 @@ export const Tracking = () => {
     );
   }
 
+  const previousOrders = orders.filter((o) => ['Cancelled', 'Complete'].includes(o.status));
+  const currentOrders = orders.filter((o) => !['Cancelled', 'Complete'].includes(o.status));
+
   return (
-    <div className="px-6 md:px-12 py-12 max-w-5xl mx-auto">
+    <div className="px-6 md:px-12 py-12 max-w-5xl mx-auto relative">
       <h1 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase mb-16">
         Tracking
       </h1>
@@ -67,7 +71,13 @@ export const Tracking = () => {
       )}
 
       <div className="space-y-12">
-        {orders.map((order, idx) => (
+        {currentOrders.length === 0 ? (
+          <div className="min-h-[40vh] flex flex-col items-center justify-center text-center p-8 rounded-2xl border border-zinc-900 bg-zinc-950/50">
+            <p className="text-lg text-zinc-400 mb-4">You have no active orders right now.</p>
+            <button onClick={() => setShowPrevious(true)} className="rounded-2xl border border-emerald-400/40 px-4 py-2 text-sm font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300">View previous orders</button>
+          </div>
+        ) : (
+          currentOrders.map((order, idx) => (
           <motion.div 
             key={order.id}
             initial={{ opacity: 0, y: 20 }}
@@ -238,7 +248,27 @@ export const Tracking = () => {
               </div>
             </div>
           </motion.div>
-        ))}
+          ))}
+      </div>
+
+      {/* Side drawer / panel for previous orders */}
+      <div className={`fixed right-6 top-36 z-50 transition-transform ${showPrevious ? 'translate-x-0' : 'translate-x-48'}`}>
+        <div className="w-80 bg-zinc-950/95 border border-zinc-900 rounded-3xl p-4 shadow-2xl">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold uppercase text-zinc-100">Previous orders</h3>
+            <button onClick={() => setShowPrevious(false)} className="text-xs text-zinc-400">Close</button>
+          </div>
+          <div className="space-y-2 max-h-96 overflow-auto">
+            {previousOrders.length === 0 && <p className="text-xs text-zinc-500">No previous orders yet.</p>}
+            {previousOrders.map((o) => (
+              <div key={o.id} className="rounded-md border border-zinc-900 p-3 bg-zinc-900">
+                <p className="text-xs text-zinc-400">{o.id}</p>
+                <p className="text-sm font-semibold text-zinc-100">{o.purchaserEmail || 'Unknown'}</p>
+                <p className="text-xs text-zinc-500">{o.status}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
