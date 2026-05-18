@@ -12,7 +12,6 @@ export const Tracking = () => {
   const [busyOrderId, setBusyOrderId] = useState('');
   const [orderMessage, setOrderMessage] = useState('');
   const [showPrevious, setShowPrevious] = useState(false);
-  const [selectedOrderId, setSelectedOrderId] = useState('');
 
   const canCancel = (order) => CANCELLABLE_STATUSES.includes(order.status);
 
@@ -255,7 +254,6 @@ export const Tracking = () => {
 
   const previousOrders = orders.filter((o) => ['Cancelled', 'Complete'].includes(o.status));
   const currentOrders = orders.filter((o) => !['Cancelled', 'Complete'].includes(o.status));
-  const selectedOrder = orders.find((order) => order.id === selectedOrderId) || currentOrders[0] || previousOrders[0];
 
   return (
     <div className="px-6 md:px-12 py-12 max-w-5xl mx-auto relative">
@@ -270,13 +268,13 @@ export const Tracking = () => {
       )}
 
       <div className="space-y-12">
-        {!selectedOrder ? (
+        {currentOrders.length === 0 ? (
           <div className="min-h-[40vh] flex flex-col items-center justify-center text-center p-8 rounded-2xl border border-zinc-900 bg-zinc-950/50">
-            <p className="text-lg text-zinc-400 mb-4">You have no orders to display right now.</p>
+            <p className="text-lg text-zinc-400 mb-4">You have no active orders right now.</p>
             <button onClick={() => setShowPrevious(true)} className="rounded-2xl border border-emerald-400/40 px-4 py-2 text-sm font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300">View previous orders</button>
           </div>
         ) : (
-          [selectedOrder].map((order, idx) => (
+          currentOrders.map((order, idx) => (
           <motion.div 
             key={order.id}
             initial={{ opacity: 0, y: 20 }}
@@ -303,19 +301,6 @@ export const Tracking = () => {
                 <p className="text-xl font-light">{new Date(order.estimatedDelivery).toLocaleDateString()}</p>
               </div>
             </div>
-
-            {selectedOrderId && previousOrders.some((previousOrder) => previousOrder.id === order.id) && (
-              <div className="relative z-10 mb-6 flex items-center justify-between gap-4 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
-                <p>Viewing previous order {order.id}</p>
-                <button
-                  type="button"
-                  onClick={() => setSelectedOrderId('')}
-                  className="rounded-full border border-emerald-400/30 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300"
-                >
-                  Back to current
-                </button>
-              </div>
-            )}
 
             <div className="relative z-10 grid gap-6 xl:grid-cols-[1.35fr_0.85fr] mb-10">
               <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-6">
@@ -496,20 +481,11 @@ export const Tracking = () => {
           <div className="space-y-2 max-h-96 overflow-auto">
             {previousOrders.length === 0 && <p className="text-xs text-zinc-500">No previous orders yet.</p>}
             {previousOrders.map((o) => (
-              <button
-                key={o.id}
-                type="button"
-                onClick={() => {
-                  setSelectedOrderId(o.id);
-                  setShowPrevious(false);
-                }}
-                className={`w-full rounded-md border p-3 text-left transition-colors ${selectedOrderId === o.id ? 'border-emerald-400/50 bg-emerald-400/10' : 'border-zinc-900 bg-zinc-900 hover:border-zinc-700'}`}
-              >
+              <div key={o.id} className="rounded-md border border-zinc-900 p-3 bg-zinc-900">
                 <p className="text-xs text-zinc-400">{o.id}</p>
                 <p className="text-sm font-semibold text-zinc-100">{o.purchaserEmail || 'Unknown'}</p>
                 <p className="text-xs text-zinc-500">{o.status}</p>
-                <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.25em] text-emerald-200">Open order</p>
-              </button>
+              </div>
             ))}
           </div>
         </div>
