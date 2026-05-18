@@ -3,8 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { ArchiveRestore, BarChart3, ShieldCheck, ShoppingBag, Users, UserRoundCog, Upload, DollarSign, Plus, Download, CircleCheckBig, CircleX } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { addDoc, collection, getFirestore } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { app } from '../config/FirebaseConfig';
@@ -523,7 +521,7 @@ export default function Admin() {
     }
   };
 
-  const handleDownloadSalesReport = () => {
+  const handleDownloadSalesReport = async () => {
     const reportOrders = orders.filter((order) => {
       const paymentStatus = order.payment?.status;
       if (paymentStatus && paymentStatus !== 'approved') return false;
@@ -548,6 +546,12 @@ export default function Admin() {
       setSalesMessage('No approved sales yet. Approve receipt proofs first before exporting PDF.');
       return;
     }
+
+    const [{ default: jsPDF }, autoTableModule] = await Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable'),
+    ]);
+    const autoTable = autoTableModule.default;
 
     const doc = new jsPDF();
     const now = new Date();
