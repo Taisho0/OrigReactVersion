@@ -15,6 +15,203 @@ export const Tracking = () => {
 
   const canCancel = (order) => CANCELLABLE_STATUSES.includes(order.status);
 
+  const handlePrintReceipt = (order) => {
+    if (order.status !== 'Complete') {
+      return;
+    }
+
+    const receiptWindow = window.open('', '_blank', 'width=900,height=1200');
+    if (!receiptWindow) {
+      setOrderMessage('Unable to open the receipt print window. Please allow pop-ups and try again.');
+      return;
+    }
+
+    const totalItems = order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+    const lineItems = order.items
+      .map((item) => {
+        const amount = (item.itemPrice || item.product.price) * item.quantity;
+        return `
+          <tr>
+            <td>${item.product.name}</td>
+            <td>${item.size || 'One size'}</td>
+            <td>${item.quantity}</td>
+            <td>₱${amount.toFixed(2)}</td>
+          </tr>
+        `;
+      })
+      .join('');
+
+    const receiptHtml = `
+      <!doctype html>
+      <html>
+        <head>
+          <title>Order Receipt ${order.id}</title>
+          <style>
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              padding: 32px;
+              font-family: Arial, sans-serif;
+              color: #111827;
+              background: #ffffff;
+            }
+            .receipt {
+              max-width: 760px;
+              margin: 0 auto;
+              border: 1px solid #e5e7eb;
+              border-radius: 20px;
+              padding: 28px;
+            }
+            .header {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              gap: 16px;
+              padding-bottom: 20px;
+              border-bottom: 1px solid #e5e7eb;
+              margin-bottom: 20px;
+            }
+            h1 {
+              margin: 0 0 8px;
+              font-size: 28px;
+            }
+            p {
+              margin: 4px 0;
+              line-height: 1.5;
+            }
+            .muted { color: #6b7280; }
+            .status {
+              display: inline-block;
+              padding: 8px 12px;
+              border-radius: 999px;
+              background: #d1fae5;
+              color: #065f46;
+              font-weight: 700;
+              font-size: 12px;
+              text-transform: uppercase;
+              letter-spacing: 0.12em;
+            }
+            .grid {
+              display: grid;
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: 16px;
+              margin-bottom: 22px;
+            }
+            .card {
+              border: 1px solid #e5e7eb;
+              border-radius: 16px;
+              padding: 16px;
+            }
+            .label {
+              font-size: 11px;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.2em;
+              color: #6b7280;
+              margin-bottom: 10px;
+            }
+            .value {
+              font-size: 14px;
+              color: #111827;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+            th, td {
+              text-align: left;
+              padding: 12px 10px;
+              border-bottom: 1px solid #e5e7eb;
+              font-size: 14px;
+            }
+            th {
+              text-transform: uppercase;
+              letter-spacing: 0.14em;
+              font-size: 11px;
+              color: #6b7280;
+            }
+            .summary {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 20px;
+              padding-top: 16px;
+              border-top: 1px solid #e5e7eb;
+              font-size: 16px;
+              font-weight: 700;
+            }
+            @media print {
+              body { padding: 0; }
+              .receipt { border: none; border-radius: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="receipt">
+            <div class="header">
+              <div>
+                <h1>Order Receipt</h1>
+                <p class="muted">Order ${order.id}</p>
+                <p class="muted">${new Date(order.date).toLocaleDateString()}</p>
+              </div>
+              <div class="status">Complete</div>
+            </div>
+
+            <div class="grid">
+              <div class="card">
+                <div class="label">Customer</div>
+                <div class="value">${order.shipping?.firstName || ''} ${order.shipping?.lastName || ''}</div>
+                <p class="muted">${order.shipping?.email || order.purchaserEmail || 'No email available'}</p>
+              </div>
+              <div class="card">
+                <div class="label">Shipping Address</div>
+                <div class="value">${order.shipping?.addressLine || 'No address available'}</div>
+                <p class="muted">${order.shipping?.city || ''}, ${order.shipping?.stateProvince || ''} ${order.shipping?.postalCode || ''}</p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="label">Payment Details</div>
+              <p><strong>Method:</strong> ${order.payment?.method || 'N/A'}</p>
+              <p><strong>Status:</strong> ${order.payment?.status || 'N/A'}</p>
+              ${order.payment?.reference ? `<p><strong>Reference:</strong> ${order.payment.reference}</p>` : ''}
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Size</th>
+                  <th>Qty</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${lineItems}
+              </tbody>
+            </table>
+
+            <div class="summary">
+              <span>Total items: ${totalItems}</span>
+              <span>₱${Number(order.total || 0).toFixed(2)}</span>
+            </div>
+          </div>
+          <script>
+            window.onload = () => {
+              window.focus();
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    receiptWindow.document.open();
+    receiptWindow.document.write(receiptHtml);
+    receiptWindow.document.close();
+  };
+
   const handleCancelOrder = async (order) => {
     if (!canCancel(order)) {
       return;
@@ -151,6 +348,19 @@ export const Tracking = () => {
                     <span className="inline-flex items-center justify-center gap-2">
                       <XCircle size={16} />
                       {busyOrderId === order.id ? 'Cancelling...' : 'Cancel Order'}
+                    </span>
+                  </button>
+                )}
+
+                {order.status === 'Complete' && (
+                  <button
+                    type="button"
+                    onClick={() => handlePrintReceipt(order)}
+                    className="w-full rounded-2xl border border-emerald-400/40 bg-emerald-500/10 px-4 py-3 text-sm font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-white"
+                  >
+                    <span className="inline-flex items-center justify-center gap-2">
+                      <CheckCircle size={16} />
+                      Print Receipt
                     </span>
                   </button>
                 )}
