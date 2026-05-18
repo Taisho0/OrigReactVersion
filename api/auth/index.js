@@ -262,6 +262,11 @@ export default async function handler(req, res) {
     }
   }
 
+  // Treat 'signup' as 'send-otp' for backward compatibility
+  if (action === "signup") {
+    action = "send-otp";
+  }
+
   switch (action) {
     case "send-otp":
       return handleSendOtp(req, res);

@@ -468,6 +468,11 @@ app.post('/api/auth', async (req, res) => {
     }
   }
 
+  // Treat 'signup' as 'send-otp' for backward compatibility
+  if (action === 'signup') {
+    action = 'send-otp';
+  }
+
   if (action === 'send-otp') {
     const email = normalizeEmail(req.body?.email);
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
