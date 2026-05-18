@@ -8,6 +8,11 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  // Increase the chunk size warning limit to reduce noisy warnings during deploy.
+  // Default is 500 (KB). Set to 2000 KB (2 MB) here — adjust as needed.
+  build: {
+    chunkSizeWarningLimit: 2000,
+  },
   server: {
     proxy: {
       '/api': {
