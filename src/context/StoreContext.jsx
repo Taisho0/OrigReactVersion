@@ -7,7 +7,10 @@ import { addDoc, collection, doc, getFirestore, onSnapshot, query, updateDoc, wh
 import { getAuth } from 'firebase/auth';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 
-const API_ORIGIN = (import.meta.env.VITE_API_ORIGIN || '').replace(/\/$/, '');
+const API_ORIGIN = (
+  import.meta.env.VITE_API_ORIGIN ||
+  (import.meta.env.DEV ? 'http://localhost:8787' : '')
+).replace(/\/$/, '');
 
 const StoreContext = createContext(undefined);
 
@@ -503,20 +506,40 @@ export const StoreProvider = ({ children }) => {
     }
 
     try {
-      const actorToken = await auth.currentUser?.getIdToken();
+      // Ensure we use a fresh ID token (force refresh) to avoid expired-token errors
+      const actorToken = (typeof session?.getIdToken === 'function'
+        ? await session.getIdToken(true)
+        : await auth.currentUser?.getIdToken(true));
 
       if (!actorToken) {
         return false;
       }
 
-      const response = await fetch(`${API_ORIGIN}/api/orders/cancel`, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          authorization: `Bearer ${actorToken}`,
-        },
-        body: JSON.stringify({ orderId: order.firestoreId }),
-      });
+      const doCancelRequest = async (token) => {
+        const resp = await fetch(`${API_ORIGIN}/api/orders/cancel`, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ orderId: order.firestoreId }),
+        });
+        return resp;
+      };
+
+      let response = await doCancelRequest(actorToken);
+
+      // If token expired (401), try to refresh token once and retry.
+      if (response.status === 401) {
+        try {
+          const fresh = await (typeof session?.getIdToken === 'function' ? session.getIdToken(true) : auth.currentUser?.getIdToken(true));
+          if (fresh) {
+            response = await doCancelRequest(fresh);
+          }
+        } catch (refreshErr) {
+          console.warn('Token refresh during cancel retry failed:', refreshErr);
+        }
+      }
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));

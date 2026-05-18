@@ -890,3 +890,46 @@ app.post('/api/showcase/upload', async (req, res) => {
     return res.status(500).json({ ok: false, message: error?.message || 'Unable to upload showcase file.' });
   }
 });
+
+// Allow customers to cancel their own orders while in cancellable statuses.
+app.post('/api/orders/cancel', async (req, res) => {
+  try {
+    const authHeader = String(req.headers?.authorization || '').trim();
+    if (!authHeader.toLowerCase().startsWith('bearer ')) {
+      return res.status(401).json({ message: 'Missing bearer token.' });
+    }
+
+    const actorToken = authHeader.slice(7).trim();
+    const orderId = String(req.body?.orderId || '').trim();
+
+    if (!orderId) {
+      return res.status(400).json({ message: 'orderId is required.' });
+    }
+
+    const { auth: adminAuth, db: adminDb } = getFirebaseAdmin();
+    const decoded = await adminAuth.verifyIdToken(actorToken);
+    const orderSnapshot = await adminDb.collection('orders').doc(orderId).get();
+
+    if (!orderSnapshot.exists) {
+      return res.status(404).json({ message: 'Order not found.' });
+    }
+
+    const order = orderSnapshot.data() || {};
+    const cancellableStatuses = ['Pending Payment Approval', 'Processing'];
+
+    if (order.purchaserUid !== decoded.uid) {
+      return res.status(403).json({ message: 'You can only cancel your own order.' });
+    }
+
+    if (!cancellableStatuses.includes(order.status)) {
+      return res.status(400).json({ message: 'This order can no longer be cancelled.' });
+    }
+
+    await adminDb.collection('orders').doc(orderId).update({ status: 'Cancelled' });
+
+    return res.status(200).json({ ok: true, orderId, status: 'Cancelled' });
+  } catch (error) {
+    const status = error?.code === 'auth/id-token-expired' || error?.code === 'auth/argument-error' ? 401 : 500;
+    return res.status(status).json({ message: error?.message || 'Unable to cancel order.' });
+  }
+});

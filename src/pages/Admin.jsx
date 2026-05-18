@@ -56,6 +56,8 @@ export default function Admin() {
   const [newProductMessage, setNewProductMessage] = useState('');
   const [userMessage, setUserMessage] = useState('');
   const [salesMessage, setSalesMessage] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [showcaseForm, setShowcaseForm] = useState({
     category: SHOWCASE_CATEGORIES[0],
     productId: '',
@@ -508,7 +510,22 @@ export default function Admin() {
   const handleDownloadSalesReport = () => {
     const reportOrders = orders.filter((order) => {
       const paymentStatus = order.payment?.status;
-      return !paymentStatus || paymentStatus === 'approved';
+      if (paymentStatus && paymentStatus !== 'approved') return false;
+
+      if (startDate) {
+        const start = new Date(startDate);
+        const orderDate = new Date(order.date);
+        if (orderDate < start) return false;
+      }
+
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        const orderDate = new Date(order.date);
+        if (orderDate > end) return false;
+      }
+
+      return true;
     });
 
     if (reportOrders.length === 0) {
@@ -1390,14 +1407,30 @@ export default function Admin() {
                     <BarChart3 size={20} className="text-emerald-300" />
                     <h2 className="text-2xl font-black uppercase tracking-tight">Recent sales</h2>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleDownloadSalesReport}
-                    className="rounded-2xl border border-emerald-400/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 flex items-center gap-2"
-                  >
-                    <Download size={14} />
-                    Download PDF
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <label className="text-xs text-zinc-400">From</label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-50 outline-none focus:border-emerald-400"
+                    />
+                    <label className="text-xs text-zinc-400">To</label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-50 outline-none focus:border-emerald-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleDownloadSalesReport}
+                      className="rounded-2xl border border-emerald-400/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 flex items-center gap-2"
+                    >
+                      <Download size={14} />
+                      Download PDF
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-3 max-h-96 overflow-auto pr-1">
