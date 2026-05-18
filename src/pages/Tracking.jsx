@@ -177,7 +177,7 @@ export const Tracking = () => {
                 transition={{ duration: 1, ease: 'easeOut' }}
               />
 
-              <div className="relative flex justify-between">
+              <div className="relative flex justify-between items-center">
                 {STATUS_STEPS.map((step, index) => {
                   const statusIndex = STATUS_STEPS.indexOf(order.status);
                   const isActive = statusIndex >= index;
@@ -252,7 +252,7 @@ export const Tracking = () => {
       </div>
 
       {/* Side drawer / panel for previous orders */}
-      <div className={`absolute left-full top-36 z-50 ml-6 transition-transform ${showPrevious ? 'translate-x-0' : 'translate-x-48'}`}>
+      <div className={`fixed right-24 top-36 z-50 ml-6 transition-transform ${showPrevious ? 'translate-x-0' : 'translate-x-48'}`}>
         <div className="w-80 bg-zinc-950/95 border border-zinc-900 rounded-3xl p-4 shadow-2xl">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-bold uppercase text-zinc-100">Previous orders</h3>
