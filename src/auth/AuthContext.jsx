@@ -493,7 +493,7 @@ export const AuthContextProvider = ({ children }) => {
       throw new Error("No authenticated admin session available.");
     }
 
-    const response = await fetch("/api/auth/delete-user", {
+    const response = await fetch("/api/auth", {
       method: "POST",
       headers: {
         "content-type": "application/json",

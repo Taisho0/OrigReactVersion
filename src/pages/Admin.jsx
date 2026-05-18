@@ -355,7 +355,7 @@ export default function Admin() {
           reader.readAsDataURL(showcaseForm.imageFile);
         });
 
-        const resp = await fetch(`${API_ORIGIN}/api/showcase/upload`, {
+        const resp = await fetch(`${API_ORIGIN}/api/showcase`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
@@ -414,10 +414,11 @@ export default function Admin() {
   const handleDeleteShowcaseItem = async (itemId) => {
     try {
       const actorToken = await session?.getIdToken?.(true);
-      const response = await fetch(`${API_ORIGIN || ''}/api/showcase/delete`, {
+      const response = await fetch(`${API_ORIGIN || ''}/api/showcase`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
+          action: 'delete',
           actorToken,
           itemId,
         }),
