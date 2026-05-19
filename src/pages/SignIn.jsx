@@ -135,7 +135,7 @@ const SignIn = () => {
         }
 
         try {
-            const response = await fetch("/api/auth/send-otp", {
+            const response = await fetch("/api/auth", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
@@ -175,7 +175,7 @@ const SignIn = () => {
         }
 
         try {
-            const verifyResponse = await fetch("/api/auth/verify-otp", {
+            const verifyResponse = await fetch("/api/auth", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, code: resetOtpCode }),
@@ -233,7 +233,7 @@ const SignIn = () => {
         }
 
         try {
-            const response = await fetch("/api/auth/reset-password", {
+            const response = await fetch("/api/auth", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

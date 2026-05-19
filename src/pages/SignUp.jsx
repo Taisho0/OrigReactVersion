@@ -116,7 +116,7 @@ const SignUp = () => {
 
         setOtpSending(true);
         try {
-            const response = await fetch("/api/auth/send-otp", {
+            const response = await fetch("/api/auth", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: email.trim().toLowerCase(), action: 'signup' }),
@@ -151,7 +151,7 @@ const SignUp = () => {
 
         setOtpVerifying(true);
         try {
-            const response = await fetch("/api/auth/verify-otp", {
+            const response = await fetch("/api/auth", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: email.trim().toLowerCase(), code: otpCode.trim(), action: 'signup' }),
@@ -196,7 +196,7 @@ const SignUp = () => {
         setOtpSending(true);
 
         try {
-            const response = await fetch("/api/auth/send-otp", {
+            const response = await fetch("/api/auth", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: email.trim().toLowerCase(), action: 'signup' }),

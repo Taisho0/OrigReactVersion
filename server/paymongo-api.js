@@ -312,13 +312,12 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-// Public endpoint to return showcase items using Firebase Admin SDK.
-// Supports optional filtering by category via the `category` query param.
+// GET: List showcase items
 app.get('/api/showcase', async (req, res) => {
   try {
     const { db } = getFirebaseAdmin();
     const category = typeof req.query?.category === 'string' && req.query.category.trim() ? req.query.category.trim() : '';
-    console.log('/api/showcase request, category=', category || '<all>');
+    console.log('/api/showcase GET request, category=', category || '<all>');
 
     let queryRef = db.collection('showcase').orderBy('createdAt', 'desc');
     if (category) {
@@ -333,183 +332,294 @@ app.get('/api/showcase', async (req, res) => {
       return res.json({ ok: true, items });
     } catch (queryError) {
       console.warn('/api/showcase query failed, falling back to client-side filter. Error:', queryError?.message || queryError);
-      // If the composite index is missing, fall back to fetching all documents and filtering/sorting in code.
       try {
         const allSnapshot = await db.collection('showcase').get();
         items = allSnapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() || {}) }));
         if (category) {
           items = items.filter((it) => String(it.category || '') === String(category));
+          }
+          items.sort((a, b) => {
+            const ta = a.createdAt ? Date.parse(a.createdAt) : 0;
+            const tb = b.createdAt ? Date.parse(b.createdAt) : 0;
+            return tb - ta;
+          });
+          console.log('/api/showcase returning', items.length, 'items (fallback)');
+          return res.json({ ok: true, items });
+        } catch (fallbackError) {
+          console.error('Fallback /api/showcase error:', fallbackError);
+          return res.status(500).json({ ok: false, message: fallbackError?.message || 'Unable to load showcase items.' });
         }
-        // sort by createdAt desc if present
-        items.sort((a, b) => {
-          const ta = a.createdAt ? Date.parse(a.createdAt) : 0;
-          const tb = b.createdAt ? Date.parse(b.createdAt) : 0;
-          return tb - ta;
-        });
-        console.log('/api/showcase returning', items.length, 'items (fallback)');
-        return res.json({ ok: true, items });
-      } catch (fallbackError) {
-        console.error('Fallback /api/showcase error:', fallbackError);
-        return res.status(500).json({ ok: false, message: fallbackError?.message || 'Unable to load showcase items.' });
       }
+    } catch (error) {
+      console.error('Server /api/showcase error:', error);
+      return res.status(500).json({ ok: false, message: error?.message || 'Unable to load showcase items.' });
     }
-  } catch (error) {
-    console.error('Server /api/showcase error:', error);
-    return res.status(500).json({ ok: false, message: error?.message || 'Unable to load showcase items.' });
-  }
-});
-
-app.post('/api/auth/send-otp', async (req, res) => {
-  const email = normalizeEmail(req.body?.email);
-
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ message: 'Please provide a valid email address.' });
-  }
-
-  const code = generateOtpCode();
-  const expiresAt = Date.now() + OTP_TTL_MS;
-  otpStore.set(email, { code, expiresAt, attemptsLeft: MAX_OTP_ATTEMPTS });
-
-  if (!BREVO_API_KEY) {
-    otpStore.delete(email);
-    return res.status(500).json({ message: 'BREVO_API_KEY is not configured on the server.' });
-  }
-
-  try {
-    await sendBrevoOtpEmail(email, code);
-    return res.json({ ok: true, message: `Verification code sent to ${maskEmail(email)}.` });
-  } catch (error) {
-    console.error('Brevo OTP send error:', error);
-    otpStore.delete(email);
-
-    if (error?.status === 401) {
-      return res.status(503).json({
-        message:
-          'Brevo rejected the API key with 401 Unauthorized. Check the BREVO_API_KEY and make sure your Brevo API key is enabled for API usage.',
-        details: error?.details || error?.message || null,
-      });
-    }
-
-    if (error?.status === 400) {
-      return res.status(502).json({
-        message:
-          'Brevo rejected the request. Verify that BREVO_SENDER_EMAIL is a valid Brevo sender and that your account can send from that address.',
-        details: error?.details || error?.message || null,
-      });
-    }
-
-    return res.status(500).json({ message: error?.message || 'Failed to send verification code.' });
-  }
-});
-
-app.post('/api/auth/verify-otp', (req, res) => {
-  const email = normalizeEmail(req.body?.email);
-  const code = String(req.body?.code || '').trim();
-
-  if (!email || !code) {
-    return res.status(400).json({ message: 'Email and verification code are required.' });
-  }
-
-  const record = otpStore.get(email);
-  if (!record) {
-    return res.status(400).json({ message: 'No active verification request found. Please request a new code.' });
-  }
-
-  if (record.expiresAt < Date.now()) {
-    otpStore.delete(email);
-    return res.status(400).json({ message: 'The verification code has expired. Please request a new one.' });
-  }
-
-  if (record.attemptsLeft <= 0) {
-    otpStore.delete(email);
-    return res.status(400).json({ message: 'Too many incorrect attempts. Please request a new verification code.' });
-  }
-
-  if (record.code !== code) {
-    record.attemptsLeft -= 1;
-    otpStore.set(email, record);
-    return res.status(400).json({ message: `Invalid verification code. ${record.attemptsLeft} attempt(s) remaining.` });
-  }
-
-  otpStore.delete(email);
-  const resetToken = generateResetToken();
-  passwordResetTokens.set(resetToken, {
-    email,
-    expiresAt: Date.now() + PASSWORD_RESET_TOKEN_TTL_MS,
   });
 
-  return res.json({ ok: true, message: 'Verification succeeded.', resetToken });
-});
+// POST: Upload or delete showcase items
+app.post('/api/showcase', async (req, res) => {
+    const action = String(req.body?.action || req.query?.action || '').toLowerCase();
 
-app.post('/api/auth/reset-password', async (req, res) => {
-  try {
-    const email = normalizeEmail(req.body?.email);
-    const resetToken = String(req.body?.resetToken || '').trim();
-    const newPassword = String(req.body?.password || '').trim();
+    if (action === 'delete') {
+      // DELETE showcase item
+      try {
+        const actorToken = String(req.body?.actorToken || '').trim();
+        const itemId = String(req.body?.itemId || '').trim();
 
-    if (!email || !resetToken || !newPassword) {
-      return res.status(400).json({ message: 'Email, reset token, and new password are required.' });
+        if (!actorToken) return res.status(401).json({ message: 'actorToken is required.' });
+        if (!itemId) return res.status(400).json({ message: 'itemId is required.' });
+
+        const { auth: adminAuth, db: adminDb } = getFirebaseAdmin();
+        const decoded = await adminAuth.verifyIdToken(actorToken);
+        const actorProfileSnapshot = await adminDb.collection('users').doc(decoded.uid).get();
+        const actorProfile = actorProfileSnapshot.exists ? actorProfileSnapshot.data() : null;
+        const actorEmail = normalizeEmail(decoded.email || '');
+        const canDelete = isActiveAdmin(actorProfile) || allowedAdminEmails.includes(actorEmail);
+
+        if (!canDelete) return res.status(403).json({ message: 'Only admin users may remove showcase items.' });
+
+        const docRef = adminDb.collection('showcase').doc(itemId);
+        const snapshot = await docRef.get();
+
+        if (!snapshot.exists) {
+          return res.status(404).json({ message: 'Showcase item not found.' });
+        }
+
+        await docRef.delete();
+        return res.json({ ok: true, itemId });
+      } catch (error) {
+        console.error('/api/showcase delete error:', error);
+        const status = error?.code === 'auth/id-token-expired' || error?.code === 'auth/argument-error' ? 401 : 500;
+        return res.status(status).json({ ok: false, message: error?.message || 'Unable to remove showcase item.' });
+      }
+    } else {
+      // UPLOAD showcase item (default)
+      try {
+        const actorToken = String(req.body?.actorToken || '').trim();
+        if (!actorToken) return res.status(401).json({ message: 'actorToken is required.' });
+
+        const { auth: adminAuth, db: adminDb, storage } = getFirebaseAdmin();
+        const decoded = await adminAuth.verifyIdToken(actorToken);
+        const actorProfileSnapshot = await adminDb.collection('users').doc(decoded.uid).get();
+        const actorProfile = actorProfileSnapshot.exists ? actorProfileSnapshot.data() : null;
+        const actorEmail = normalizeEmail(decoded.email || '');
+        const canCreate = isActiveAdmin(actorProfile) || allowedAdminEmails.includes(actorEmail);
+
+        if (!canCreate) return res.status(403).json({ message: 'Only admin users may upload showcase items.' });
+
+        const fileName = String(req.body?.fileName || 'showcase-image').replace(/[^a-zA-Z0-9._-]/g, '_');
+        const dataUrl = String(req.body?.dataUrl || '').trim();
+        if (!dataUrl) return res.status(400).json({ message: 'dataUrl is required.' });
+
+        const safeFileName = `${Date.now()}-${fileName}`;
+        const storagePath = `showcase/${safeFileName}`;
+
+        const { buffer, contentType } = parseDataUrl(dataUrl);
+        const file = storage.bucket().file(storagePath);
+        const downloadToken = crypto.randomUUID();
+
+        await file.save(buffer, {
+          resumable: false,
+          metadata: {
+            contentType,
+            metadata: {
+              firebaseStorageDownloadTokens: downloadToken,
+            },
+          },
+        });
+
+        const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${storage.bucket().name}/o/${encodeURIComponent(storagePath)}?alt=media&token=${downloadToken}`;
+
+        const item = {
+          category: String(req.body?.category || ''),
+          productId: String(req.body?.productId || ''),
+          productName: String(req.body?.productName || ''),
+          title: String(req.body?.title || '').trim(),
+          description: String(req.body?.description || '').trim(),
+          imageUrl: publicUrl,
+          createdAt: new Date().toISOString(),
+        };
+
+        const docRef = adminDb.collection('showcase').doc();
+        await docRef.set(item);
+
+        return res.json({ ok: true, id: docRef.id, item: { id: docRef.id, ...item } });
+      } catch (error) {
+        console.error('/api/showcase upload error:', error);
+        return res.status(500).json({ ok: false, message: error?.message || 'Unable to upload showcase file.' });
+      }
     }
+  });
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({ message: 'Password is too weak. Use at least 6 characters.' });
+// Consolidated auth endpoint: handles send-otp, verify-otp, reset-password, delete-user
+app.post('/api/auth', async (req, res) => {
+  let action = String(req.body?.action || req.query?.action || '').toLowerCase();
+
+  // Infer action from request parameters if not explicitly provided
+  if (!action) {
+    if (req.body?.resetToken && req.body?.password) {
+      action = 'reset-password';
+    } else if (req.body?.targetUid && req.body?.actorToken) {
+      action = 'delete-user';
+    } else if (req.body?.code) {
+      action = 'verify-otp';
+    } else if (req.body?.email) {
+      action = 'send-otp';
     }
-
-    const tokenRecord = passwordResetTokens.get(resetToken);
-    if (!tokenRecord || tokenRecord.email !== email) {
-      return res.status(400).json({ message: 'Invalid or expired password reset token. Please verify the OTP again.' });
-    }
-
-    if (tokenRecord.expiresAt < Date.now()) {
-      passwordResetTokens.delete(resetToken);
-      return res.status(400).json({ message: 'Password reset session expired. Please verify the OTP again.' });
-    }
-
-    const { auth } = getFirebaseAdmin();
-    const userRecord = await auth.getUserByEmail(email);
-    await auth.updateUser(userRecord.uid, { password: newPassword });
-    await auth.revokeRefreshTokens(userRecord.uid);
-
-    passwordResetTokens.delete(resetToken);
-
-    return res.json({ ok: true, message: 'Password updated successfully.' });
-  } catch (error) {
-    return res.status(500).json({ message: error?.message || 'Failed to reset password.' });
   }
-});
 
-app.post('/api/auth/delete-user', async (req, res) => {
-  try {
-    const targetUid = String(req.body?.targetUid || '').trim();
-    const actorToken = String(req.body?.actorToken || '').trim();
+  // Treat 'signup' as 'send-otp' for backward compatibility
+  if (action === 'signup') {
+    action = 'send-otp';
+  }
 
-    if (!targetUid || !actorToken) {
-      return res.status(400).json({ message: 'targetUid and actorToken are required.' });
+  if (action === 'send-otp') {
+    const email = normalizeEmail(req.body?.email);
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: 'Please provide a valid email address.' });
     }
 
-    const { auth: adminAuth, db: adminDb } = getFirebaseAdmin();
-    const decoded = await adminAuth.verifyIdToken(actorToken);
-    const actorProfileSnapshot = await adminDb.collection('users').doc(decoded.uid).get();
-    const actorProfile = actorProfileSnapshot.exists ? actorProfileSnapshot.data() : null;
-    const actorEmail = normalizeEmail(decoded.email || '');
-    const canDeleteUser = isActiveAdmin(actorProfile) || allowedAdminEmails.includes(actorEmail);
+    const code = generateOtpCode();
+    const expiresAt = Date.now() + OTP_TTL_MS;
+    otpStore.set(email, { code, expiresAt, attemptsLeft: MAX_OTP_ATTEMPTS });
 
-    if (!canDeleteUser) {
-      return res.status(403).json({ message: 'Only active admins can delete user accounts.' });
+    if (!BREVO_API_KEY) {
+      otpStore.delete(email);
+      return res.status(500).json({ message: 'BREVO_API_KEY is not configured on the server.' });
     }
 
-    if (decoded.uid === targetUid) {
-      return res.status(400).json({ message: 'Admins cannot delete their own account from this endpoint.' });
+    try {
+      await sendBrevoOtpEmail(email, code);
+      return res.json({ ok: true, message: `Verification code sent to ${maskEmail(email)}.`, email });
+    } catch (error) {
+      console.error('Brevo OTP send error:', error);
+      otpStore.delete(email);
+
+      if (error?.status === 401) {
+        return res.status(503).json({
+          message: 'Brevo rejected the API key with 401 Unauthorized. Check the BREVO_API_KEY and make sure your Brevo API key is enabled for API usage.',
+          details: error?.details || error?.message || null,
+        });
+      }
+
+      if (error?.status === 400) {
+        return res.status(502).json({
+          message: 'Brevo rejected the request. Verify that BREVO_SENDER_EMAIL is a valid Brevo sender and that your account can send from that address.',
+          details: error?.details || error?.message || null,
+        });
+      }
+
+      return res.status(500).json({ message: error?.message || 'Failed to send verification code.' });
+    }
+  } else if (action === 'verify-otp') {
+    const email = normalizeEmail(req.body?.email);
+    const code = String(req.body?.code || '').trim();
+
+    if (!email || !code) {
+      return res.status(400).json({ message: 'Email and verification code are required.' });
     }
 
-    await adminAuth.deleteUser(targetUid);
-    return res.status(200).json({ ok: true, deletedUid: targetUid });
-  } catch (error) {
-    if (error?.code === 'auth/user-not-found') {
-      return res.status(200).json({ ok: true, alreadyDeleted: true });
+    const record = otpStore.get(email);
+    if (!record) {
+      return res.status(400).json({ message: 'No active verification request found. Please request a new code.' });
     }
 
-    return res.status(500).json({ message: error?.message || 'Failed to delete Firebase Authentication user.' });
+    if (record.expiresAt < Date.now()) {
+      otpStore.delete(email);
+      return res.status(400).json({ message: 'The verification code has expired. Please request a new one.' });
+    }
+
+    if (record.attemptsLeft <= 0) {
+      otpStore.delete(email);
+      return res.status(400).json({ message: 'Too many incorrect attempts. Please request a new verification code.' });
+    }
+
+    if (record.code !== code) {
+      record.attemptsLeft -= 1;
+      otpStore.set(email, record);
+      return res.status(400).json({ message: `Invalid verification code. ${record.attemptsLeft} attempt(s) remaining.` });
+    }
+
+    otpStore.delete(email);
+    const resetToken = generateResetToken();
+    passwordResetTokens.set(resetToken, {
+      email,
+      expiresAt: Date.now() + PASSWORD_RESET_TOKEN_TTL_MS,
+    });
+
+    return res.json({ ok: true, message: 'Verification succeeded.', resetToken, email });
+  } else if (action === 'reset-password') {
+    try {
+      const email = normalizeEmail(req.body?.email);
+      const resetToken = String(req.body?.resetToken || '').trim();
+      const newPassword = String(req.body?.password || '').trim();
+
+      if (!email || !resetToken || !newPassword) {
+        return res.status(400).json({ message: 'Email, reset token, and new password are required.' });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: 'Password is too weak. Use at least 6 characters.' });
+      }
+
+      const tokenRecord = passwordResetTokens.get(resetToken);
+      if (!tokenRecord || tokenRecord.email !== email) {
+        return res.status(400).json({ message: 'Invalid or expired password reset token. Please verify the OTP again.' });
+      }
+
+      if (tokenRecord.expiresAt < Date.now()) {
+        passwordResetTokens.delete(resetToken);
+        return res.status(400).json({ message: 'Password reset session expired. Please verify the OTP again.' });
+      }
+
+      const { auth } = getFirebaseAdmin();
+      const userRecord = await auth.getUserByEmail(email);
+      await auth.updateUser(userRecord.uid, { password: newPassword });
+      await auth.revokeRefreshTokens(userRecord.uid);
+
+      passwordResetTokens.delete(resetToken);
+
+      return res.json({ ok: true, message: 'Password updated successfully.' });
+    } catch (error) {
+      return res.status(500).json({ message: error?.message || 'Failed to reset password.' });
+    }
+  } else if (action === 'delete-user') {
+    try {
+      const targetUid = String(req.body?.targetUid || '').trim();
+      const actorToken = String(req.body?.actorToken || '').trim();
+
+      if (!targetUid || !actorToken) {
+        return res.status(400).json({ message: 'targetUid and actorToken are required.' });
+      }
+
+      const { auth: adminAuth, db: adminDb } = getFirebaseAdmin();
+      const decoded = await adminAuth.verifyIdToken(actorToken);
+      const actorProfileSnapshot = await adminDb.collection('users').doc(decoded.uid).get();
+      const actorProfile = actorProfileSnapshot.exists ? actorProfileSnapshot.data() : null;
+      const actorEmail = normalizeEmail(decoded.email || '');
+      const canDeleteUser = isActiveAdmin(actorProfile) || allowedAdminEmails.includes(actorEmail);
+
+      if (!canDeleteUser) {
+        return res.status(403).json({ message: 'Only active admins can delete user accounts.' });
+      }
+
+      if (decoded.uid === targetUid) {
+        return res.status(400).json({ message: 'Admins cannot delete their own account from this endpoint.' });
+      }
+
+      await adminAuth.deleteUser(targetUid);
+      return res.status(200).json({ ok: true, deletedUid: targetUid });
+    } catch (error) {
+      if (error?.code === 'auth/user-not-found') {
+        return res.status(200).json({ ok: true, alreadyDeleted: true });
+      }
+
+      return res.status(500).json({ message: error?.message || 'Failed to delete Firebase Authentication user.' });
+    }
+  } else {
+    return res.status(400).json({
+      message: 'Invalid action. Use: send-otp, verify-otp, reset-password, or delete-user.',
+    });
   }
 });
 
@@ -829,107 +939,12 @@ app.get('/api/payments/status/:reference', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`PayMongo API listening on http://localhost:${port}`);
-});
-
-// Admin-only endpoint: upload a showcase image via Firebase Admin SDK and create showcase doc.
-app.post('/api/showcase/upload', async (req, res) => {
-  try {
-    const actorToken = String(req.body?.actorToken || '').trim();
-    if (!actorToken) return res.status(401).json({ message: 'actorToken is required.' });
-
-    const { auth: adminAuth, db: adminDb, storage } = getFirebaseAdmin();
-    const decoded = await adminAuth.verifyIdToken(actorToken);
-    const actorProfileSnapshot = await adminDb.collection('users').doc(decoded.uid).get();
-    const actorProfile = actorProfileSnapshot.exists ? actorProfileSnapshot.data() : null;
-    const actorEmail = normalizeEmail(decoded.email || '');
-    const canCreate = isActiveAdmin(actorProfile) || allowedAdminEmails.includes(actorEmail);
-
-    if (!canCreate) return res.status(403).json({ message: 'Only admin users may upload showcase items.' });
-
-    const fileName = String(req.body?.fileName || 'showcase-image').replace(/[^a-zA-Z0-9._-]/g, '_');
-    const dataUrl = String(req.body?.dataUrl || '').trim();
-    if (!dataUrl) return res.status(400).json({ message: 'dataUrl is required.' });
-
-    const safeFileName = `${Date.now()}-${fileName}`;
-    const storagePath = `showcase/${safeFileName}`;
-
-    const { buffer, contentType } = parseDataUrl(dataUrl);
-    const file = storage.bucket().file(storagePath);
-    const downloadToken = crypto.randomUUID();
-
-    await file.save(buffer, {
-      resumable: false,
-      metadata: {
-        contentType,
-        metadata: {
-          firebaseStorageDownloadTokens: downloadToken,
-        },
-      },
-    });
-
-    const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${storage.bucket().name}/o/${encodeURIComponent(storagePath)}?alt=media&token=${downloadToken}`;
-
-    const item = {
-      category: String(req.body?.category || ''),
-      productId: String(req.body?.productId || ''),
-      productName: String(req.body?.productName || ''),
-      title: String(req.body?.title || '').trim(),
-      description: String(req.body?.description || '').trim(),
-      imageUrl: publicUrl,
-      createdAt: new Date().toISOString(),
-    };
-
-    const docRef = adminDb.collection('showcase').doc();
-    await docRef.set(item);
-
-    return res.json({ ok: true, item: { id: docRef.id, ...item } });
-  } catch (error) {
-    console.error('/api/showcase/upload error:', error);
-    return res.status(500).json({ ok: false, message: error?.message || 'Unable to upload showcase file.' });
-  }
-});
-
-app.post('/api/showcase/delete', async (req, res) => {
-  try {
-    const actorToken = String(req.body?.actorToken || '').trim();
-    const itemId = String(req.body?.itemId || '').trim();
-
-    if (!actorToken) return res.status(401).json({ message: 'actorToken is required.' });
-    if (!itemId) return res.status(400).json({ message: 'itemId is required.' });
-
-    const { auth: adminAuth, db: adminDb } = getFirebaseAdmin();
-    const decoded = await adminAuth.verifyIdToken(actorToken);
-    const actorProfileSnapshot = await adminDb.collection('users').doc(decoded.uid).get();
-    const actorProfile = actorProfileSnapshot.exists ? actorProfileSnapshot.data() : null;
-    const actorEmail = normalizeEmail(decoded.email || '');
-    const canDelete = isActiveAdmin(actorProfile) || allowedAdminEmails.includes(actorEmail);
-
-    if (!canDelete) return res.status(403).json({ message: 'Only admin users may remove showcase items.' });
-
-    const docRef = adminDb.collection('showcase').doc(itemId);
-    const snapshot = await docRef.get();
-
-    if (!snapshot.exists) {
-      return res.status(404).json({ message: 'Showcase item not found.' });
-    }
-
-    await docRef.delete();
-    return res.json({ ok: true, itemId });
-  } catch (error) {
-    console.error('/api/showcase/delete error:', error);
-    const status = error?.code === 'auth/id-token-expired' || error?.code === 'auth/argument-error' ? 401 : 500;
-    return res.status(status).json({ ok: false, message: error?.message || 'Unable to remove showcase item.' });
-  }
-});
-
 // Allow customers to cancel their own orders while in cancellable statuses.
 app.post('/api/orders/cancel', async (req, res) => {
   try {
     const authHeader = String(req.headers?.authorization || '').trim();
     if (!authHeader.toLowerCase().startsWith('bearer ')) {
-      return res.status(401).json({ message: 'Missing bearer token.' });
+      return res.status(401).json({ message: 'Authentication required.' });
     }
 
     const actorToken = authHeader.slice(7).trim();
@@ -965,4 +980,8 @@ app.post('/api/orders/cancel', async (req, res) => {
     const status = error?.code === 'auth/id-token-expired' || error?.code === 'auth/argument-error' ? 401 : 500;
     return res.status(status).json({ message: error?.message || 'Unable to cancel order.' });
   }
+});
+
+app.listen(port, () => {
+  console.log(`PayMongo API listening on http://localhost:${port}`);
 });
