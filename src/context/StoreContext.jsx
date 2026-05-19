@@ -7,10 +7,7 @@ import { addDoc, collection, doc, getFirestore, onSnapshot, query, updateDoc, wh
 import { getAuth } from 'firebase/auth';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 
-const API_ORIGIN = (
-  import.meta.env.VITE_API_ORIGIN ||
-  (import.meta.env.DEV ? 'http://localhost:8787' : '')
-).replace(/\/$/, '');
+const API_ORIGIN = '';
 
 const StoreContext = createContext(undefined);
 
