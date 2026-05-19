@@ -1840,7 +1840,7 @@ export default function Admin() {
                               </div>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className="grid gap-4 xl:grid-cols-[1.3fr_0.9fr]">
                               <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-3 space-y-4">
                                 <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Customer and order details</p>
 
@@ -1917,7 +1917,7 @@ export default function Admin() {
                                   </div>
                                 </div>
                               )}
-                              </div>
+                            </div>
 
                             {isPendingPayment && (
                               <div className="grid gap-2 sm:grid-cols-2">
