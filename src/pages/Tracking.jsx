@@ -540,28 +540,48 @@ export const Tracking = () => {
     <div className="px-6 md:px-12 py-12 relative">
       {mainContent}
 
-      {/* Side drawer / panel for previous orders - always floating */}
-      <div className="fixed right-0 top-36 z-40">
-        <div id="previous-orders-panel" className="w-96 bg-zinc-950/95 border border-zinc-900 rounded-l-3xl p-4 shadow-2xl max-h-[80vh] overflow-auto">
-          <h3 className="text-sm font-bold uppercase text-zinc-100 mb-3">Previous orders</h3>
-          
-          <div className="space-y-2">
-            {previousOrders.length === 0 && <p className="text-xs text-zinc-500">No previous orders yet.</p>}
-            {previousOrders.map((o) => (
-              <button
-                key={o.id}
-                onClick={() => setSelectedPreviousOrder(o)}
-                className="w-full text-left rounded-md border border-zinc-900 p-3 bg-zinc-900 hover:border-emerald-400/40 hover:bg-zinc-800 transition-colors"
-              >
-                <p className="text-xs text-zinc-400">{o.id}</p>
-                <p className="text-sm font-semibold text-zinc-100">{o.purchaserEmail || 'Unknown'}</p>
-                <p className="text-xs text-zinc-500">{o.status}</p>
-                <p className="text-xs text-emerald-400 mt-1">₱{Number(o.total || 0).toFixed(2)}</p>
-              </button>
-            ))}
-          </div>
+      {previousOrders.length > 0 && (
+        <div className="fixed right-8 top-36 z-40 flex flex-col items-end gap-3">
+          {!showPrevious ? (
+            <button
+              type="button"
+              onClick={() => setShowPrevious(true)}
+              className="rounded-full border border-emerald-400/40 bg-zinc-950/95 px-5 py-3 text-sm font-bold uppercase tracking-[0.25em] text-emerald-200 shadow-2xl hover:border-emerald-300 transition-colors"
+            >
+              Show Previous Orders
+            </button>
+          ) : (
+            <div id="previous-orders-panel" className="w-96 bg-zinc-950/95 border border-zinc-900 rounded-l-3xl p-4 shadow-2xl max-h-[80vh] overflow-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold uppercase text-zinc-100">Previous orders</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowPrevious(false)}
+                  className="rounded-full border border-zinc-800 bg-zinc-900/90 px-3 py-2 text-xs uppercase tracking-[0.25em] text-zinc-300 hover:border-emerald-400/40 hover:text-emerald-200 transition-colors"
+                >
+                  Hide
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {previousOrders.length === 0 && <p className="text-xs text-zinc-500">No previous orders yet.</p>}
+                {previousOrders.map((o) => (
+                  <button
+                    key={o.id}
+                    onClick={() => setSelectedPreviousOrder(o)}
+                    className="w-full text-left rounded-md border border-zinc-900 p-3 bg-zinc-900 hover:border-emerald-400/40 hover:bg-zinc-800 transition-colors"
+                  >
+                    <p className="text-xs text-zinc-400">{o.id}</p>
+                    <p className="text-sm font-semibold text-zinc-100">{o.purchaserEmail || 'Unknown'}</p>
+                    <p className="text-xs text-zinc-500">{o.status}</p>
+                    <p className="text-xs text-emerald-400 mt-1">₱{Number(o.total || 0).toFixed(2)}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 };
