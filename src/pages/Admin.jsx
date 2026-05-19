@@ -640,26 +640,42 @@ export default function Admin() {
     }
   };
 
+  const getFilteredSalesReportOrders = () => orders.filter((order) => {
+    const paymentStatus = order.payment?.status;
+    if (paymentStatus && paymentStatus !== 'approved') return false;
+
+    if (startDate) {
+      const start = new Date(startDate);
+      const orderDate = new Date(order.date);
+      if (orderDate < start) return false;
+    }
+
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      const orderDate = new Date(order.date);
+      if (orderDate > end) return false;
+    }
+
+    return true;
+  });
+
+  const getSalesReportRows = (reportOrders) => reportOrders.map((order) => {
+    const quantity = order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+    const paymentRef = order.payment?.reference || '-';
+    return [
+      order.id,
+      order.purchaserEmail || 'Unknown buyer',
+      String(quantity),
+      `PHP ${Number(order.total || 0).toFixed(2)}`,
+      order.status,
+      paymentRef,
+      new Date(order.date).toLocaleDateString(),
+    ];
+  });
+
   const handleDownloadSalesReport = async () => {
-    const reportOrders = orders.filter((order) => {
-      const paymentStatus = order.payment?.status;
-      if (paymentStatus && paymentStatus !== 'approved') return false;
-
-      if (startDate) {
-        const start = new Date(startDate);
-        const orderDate = new Date(order.date);
-        if (orderDate < start) return false;
-      }
-
-      if (endDate) {
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        const orderDate = new Date(order.date);
-        if (orderDate > end) return false;
-      }
-
-      return true;
-    });
+    const reportOrders = getFilteredSalesReportOrders();
 
     if (reportOrders.length === 0) {
       setSalesMessage('No approved sales yet. Approve receipt proofs first before exporting PDF.');
@@ -683,24 +699,10 @@ export default function Admin() {
     doc.text(`Approved Orders: ${reportOrders.length}`, 14, 30);
     doc.text(`Total Revenue: PHP ${totalRevenue.toFixed(2)}`, 14, 36);
 
-    const rows = reportOrders.map((order) => {
-      const quantity = order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-      const paymentRef = order.payment?.reference || '-';
-      return [
-        order.id,
-        order.purchaserEmail || 'Unknown buyer',
-        String(quantity),
-        `PHP ${Number(order.total || 0).toFixed(2)}`,
-        order.status,
-        paymentRef,
-        new Date(order.date).toLocaleDateString(),
-      ];
-    });
-
     autoTable(doc, {
       startY: 42,
       head: [['Order ID', 'Customer', 'Items', 'Total', 'Status', 'Payment Ref', 'Date']],
-      body: rows,
+      body: getSalesReportRows(reportOrders),
       styles: {
         fontSize: 8,
         cellPadding: 2,
@@ -713,6 +715,41 @@ export default function Admin() {
 
     doc.save(`sales-report-${now.toISOString().slice(0, 10)}.pdf`);
     setSalesMessage('Sales report PDF downloaded successfully.');
+  };
+
+  const handleDownloadSalesReportExcel = () => {
+    const reportOrders = getFilteredSalesReportOrders();
+
+    if (reportOrders.length === 0) {
+      setSalesMessage('No approved sales yet. Approve receipt proofs first before exporting Excel.');
+      return;
+    }
+
+    const rows = [
+      ['Order ID', 'Customer', 'Items', 'Total', 'Status', 'Payment Ref', 'Date'],
+      ...getSalesReportRows(reportOrders),
+    ];
+
+    const csvContent = rows
+      .map((row) => row
+        .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+        .join(','))
+      .join('\r\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const now = new Date();
+    const fileName = `sales-report-${now.toISOString().slice(0, 10)}.csv`;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    setSalesMessage('Sales report Excel file downloaded successfully.');
   };
 
   const handleProductUpload = (event) => {
@@ -1599,14 +1636,24 @@ export default function Admin() {
                     />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleDownloadSalesReport}
-                    className="rounded-2xl border border-emerald-400/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 flex items-center gap-2"
-                  >
-                    <Download size={14} />
-                    Download PDF
-                  </button>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleDownloadSalesReport}
+                      className="rounded-2xl border border-emerald-400/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 flex items-center gap-2"
+                    >
+                      <Download size={14} />
+                      Download PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadSalesReportExcel}
+                      className="rounded-2xl border border-cyan-400/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-cyan-200 hover:border-cyan-300 hover:text-cyan-100 flex items-center gap-2"
+                    >
+                      <Download size={14} />
+                      Download Excel
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-6">
