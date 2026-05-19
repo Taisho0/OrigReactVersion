@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 
-const API_ORIGIN = (import.meta.env.VITE_API_ORIGIN || '').replace(/\/$/, '');
+const API_ORIGIN = (
+  import.meta.env.VITE_API_ORIGIN ||
+  (import.meta.env.DEV ? 'http://localhost:8787' : '')
+).replace(/\/$/, '');
 
 export const SHOWCASE_CATEGORIES = [
   'Tarpaulin',
