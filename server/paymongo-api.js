@@ -1076,6 +1076,81 @@ app.post('/api/admin/create-user', async (req, res) => {
   }
 });
 
+// Get all users (admin only)
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    const readBearerToken = (request) => {
+      const authHeader = String(request.headers?.authorization || "").trim();
+      if (!authHeader.toLowerCase().startsWith("bearer ")) {
+        return "";
+      }
+      return authHeader.slice(7).trim();
+    };
+
+    const actorToken = readBearerToken(req);
+    if (!actorToken) {
+      return res.status(401).json({ message: "Missing bearer token." });
+    }
+
+    const { auth: adminAuth, db: adminDb } = getFirebaseAdmin();
+    const decoded = await adminAuth.verifyIdToken(actorToken);
+
+    const actorProfileSnapshot = await adminDb.collection("users").doc(decoded.uid).get();
+    const actorProfile = actorProfileSnapshot.exists ? actorProfileSnapshot.data() : null;
+    const actorEmail = normalizeEmail(decoded.email || "");
+    const canReadUsers = isActiveAdmin(actorProfile) || allowedAdminEmails.includes(actorEmail);
+
+    if (!canReadUsers) {
+      return res.status(403).json({ message: "Only active admins can view users." });
+    }
+
+    const profileSnapshot = await adminDb.collection("users").get();
+    const profileByUid = new Map();
+    profileSnapshot.forEach((doc) => {
+      profileByUid.set(doc.id, doc.data() || {});
+    });
+
+    // Pull from Firebase Authentication so counts are sourced from Firebase, not local state.
+    const authUsersPage = await adminAuth.listUsers(1000);
+    const users = authUsersPage.users.map((authUser) => {
+      const profile = profileByUid.get(authUser.uid) || {};
+      profileByUid.delete(authUser.uid);
+      return {
+        uid: authUser.uid,
+        email: profile.email || authUser.email || "",
+        phone: profile.phone || authUser.phoneNumber || "",
+        role: profile.role || "customer",
+        status: profile.status || "active",
+        createdAt: profile.createdAt || new Date().toISOString(),
+        updatedAt: profile.updatedAt || new Date().toISOString(),
+      };
+    });
+
+    // Include any profile docs that do not yet have a matching auth record in this page.
+    profileByUid.forEach((profile, uid) => {
+      users.push({
+        uid,
+        email: profile.email || "",
+        phone: profile.phone || "",
+        role: profile.role || "customer",
+        status: profile.status || "active",
+        createdAt: profile.createdAt || new Date().toISOString(),
+        updatedAt: profile.updatedAt || new Date().toISOString(),
+      });
+    });
+
+    users.sort((a, b) => {
+      const ta = Date.parse(a.createdAt || "") || 0;
+      const tb = Date.parse(b.createdAt || "") || 0;
+      return tb - ta;
+    });
+
+    return res.status(200).json({ ok: true, users });
+  } catch (error) {
+    return res.status(500).json({ message: error?.message || "Unable to load users." });
+  }
+});
+
 app.listen(port, () => {
   console.log(`PayMongo API listening on http://localhost:${port}`);
 });

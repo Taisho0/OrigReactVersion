@@ -114,6 +114,7 @@ export default function Admin() {
       } catch (error) {
         if (!mounted) return;
         console.error('Unable to sync users from Firebase:', error);
+        console.error('Error details:', error?.message, error?.code, error?.status);
         setFirebaseUsers([]);
       }
     };
@@ -1674,8 +1675,8 @@ export default function Admin() {
                     value: salesAnalytics.itemCount,
                     description: 'Total quantity',
                   }].map((card) => (
-                    <div key={card.label} className="group rounded-[2rem] border border-white/10 bg-slate-950/80 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm transition duration-300 hover:border-emerald-400/30 hover:bg-slate-950/95 hover:-translate-y-0.5">
-                      <div className="h-1 w-14 rounded-full bg-gradient-to-r from-emerald-300 via-cyan-300 to-sky-500 shadow-[0_0_20px_rgba(52,211,153,0.18)]" />
+                    <div key={card.label} className="group rounded-4xl border border-white/10 bg-slate-950/80 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm transition duration-300 hover:border-emerald-400/30 hover:bg-slate-950/95 hover:-translate-y-0.5">
+                      <div className="h-1 w-14 rounded-full bg-linear-to-r from-emerald-300 via-cyan-300 to-sky-500 shadow-[0_0_20px_rgba(52,211,153,0.18)]" />
                       <div className="mt-4 flex items-center justify-between gap-4">
                         <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">{card.label}</p>
                         <span className="inline-flex rounded-full bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-emerald-300">Live</span>
@@ -1687,7 +1688,7 @@ export default function Admin() {
                 </div>
 
                 <div className="space-y-4 mb-6">
-                  <div className="rounded-[2rem] border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                  <div className="rounded-4xl border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-5 gap-4">
                       <div>
                         <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Daily revenue</p>
@@ -1707,7 +1708,7 @@ export default function Admin() {
                   </div>
 
                   <div className="grid gap-3 md:grid-cols-2">
-                    <div className="rounded-[2rem] border border-white/10 bg-slate-950/85 p-4 shadow-2xl shadow-black/20 backdrop-blur-sm flex flex-col min-h-0">
+                    <div className="rounded-4xl border border-white/10 bg-slate-950/85 p-4 shadow-2xl shadow-black/20 backdrop-blur-sm flex flex-col min-h-0">
                       <div className="flex items-center justify-between mb-3 gap-4 px-4 pt-4">
                         <div>
                           <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Top products</p>
@@ -1718,7 +1719,7 @@ export default function Admin() {
                       {salesAnalytics.topProducts.length === 0 ? (
                         <div className="grid h-80 place-items-center rounded-2xl border border-dashed border-white/10 text-sm text-zinc-500">No product revenue yet.</div>
                       ) : (
-                        <ChartContainer className="h-80 rounded-[1.5rem] bg-slate-950/80 p-4" config={{ revenue: { color: '#f59e0b' } }}>
+                        <ChartContainer className="h-80 rounded-3xl bg-slate-950/80 p-4" config={{ revenue: { color: '#f59e0b' } }}>
                           <PieChart>
                             <Pie
                               data={salesAnalytics.topProducts}
@@ -1767,7 +1768,7 @@ export default function Admin() {
                       )}
                     </div>
 
-                    <div className="rounded-[2rem] border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                    <div className="rounded-4xl border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
                       <div className="flex items-center justify-between mb-5 gap-4">
                         <div>
                           <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Category sales</p>
@@ -1786,7 +1787,7 @@ export default function Admin() {
                         else autoBarSize = 30;
 
                         return (
-                          <ChartContainer className="flex-1 w-full rounded-[1.5rem] bg-slate-950/80 p-3 min-h-0" config={{ count: { color: '#60a5fa' } }}>
+                          <ChartContainer className="flex-1 w-full rounded-3xl bg-slate-950/80 p-3 min-h-0" config={{ count: { color: '#60a5fa' } }}>
                             <BarChart data={categoryData} margin={{ top: 14, right: 6, left: 6, bottom: 34 }} barSize={autoBarSize} barCategoryGap="10%" barGap={12}>
                                 <defs>
                                   <linearGradient id={`barGrad-${barGradId}`} x1="0" y1="0" x2="0" y2="1">
@@ -1809,7 +1810,7 @@ export default function Admin() {
                 </div>
 
                 <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr] mb-6">
-                  <div className="rounded-[2rem] border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                  <div className="rounded-4xl border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-5 gap-4">
                       <div>
                         <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Sales details</p>
@@ -1838,7 +1839,7 @@ export default function Admin() {
                     )}
                   </div>
 
-                  <div className="rounded-[2rem] border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                  <div className="rounded-4xl border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-5 gap-4">
                       <div>
                         <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Sales activity</p>

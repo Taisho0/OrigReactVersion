@@ -17,7 +17,9 @@ service cloud.firestore {
       return signedIn()
         && (
           request.auth.token.email == 'kylebriantonido123@gmail.com'
+          || request.auth.token.email == 'sampleadmin@gmail.com'
           || request.auth.token.firebase.identities['email'][0] == 'kylebriantonido123@gmail.com'
+          || request.auth.token.firebase.identities['email'][0] == 'sampleadmin@gmail.com'
         );
     }
 

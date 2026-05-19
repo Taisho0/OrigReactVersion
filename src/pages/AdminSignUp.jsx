@@ -72,9 +72,12 @@ const AdminSignUp = () => {
         throw new Error(payload?.message || "Unable to create admin account.");
       }
 
+      console.log("Admin account created:", payload);
+
       // Sign in with the newly created credentials
       // The useEffect above will automatically navigate to /admin once the profile loads
       await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
+      console.log("Signed in successfully");
     } catch (signupError) {
       setError(signupError?.message || "Unable to create admin account.");
     } finally {

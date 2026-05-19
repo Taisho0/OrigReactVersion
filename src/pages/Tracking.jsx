@@ -12,6 +12,7 @@ export const Tracking = () => {
   const [busyOrderId, setBusyOrderId] = useState('');
   const [orderMessage, setOrderMessage] = useState('');
   const [showPrevious, setShowPrevious] = useState(false);
+  const [selectedPreviousOrder, setSelectedPreviousOrder] = useState(null);
 
   const canCancel = (order) => CANCELLABLE_STATUSES.includes(order.status);
 
@@ -202,6 +203,9 @@ export const Tracking = () => {
               window.focus();
               window.print();
             };
+            window.onafterprint = () => {
+              window.close();
+            };
           </script>
         </body>
       </html>
@@ -255,8 +259,76 @@ export const Tracking = () => {
   const previousOrders = orders.filter((o) => ['Cancelled', 'Complete'].includes(o.status));
   const currentOrders = orders.filter((o) => !['Cancelled', 'Complete'].includes(o.status));
 
-  return (
-    <div className="px-6 md:px-12 py-12 max-w-5xl mx-auto relative">
+  // Main content - either showing active orders or a selected previous order
+  const mainContent = selectedPreviousOrder ? (
+    <div className="px-6 md:px-12 py-12">
+      <h1 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase mb-12">Order {selectedPreviousOrder.id}</h1>
+
+        <div className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr] mb-10">
+          <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-6">
+            <div className="flex items-center justify-between gap-4 mb-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Order details</p>
+                <p className="text-lg font-semibold text-zinc-50 mt-3">{selectedPreviousOrder.purchaserEmail || 'No contact email'}</p>
+              </div>
+              <span className="rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.35em] bg-emerald-400/20 text-emerald-200">
+                {selectedPreviousOrder.status}
+              </span>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-3">
+                <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Payment</p>
+                <p className="text-sm text-zinc-100">{selectedPreviousOrder.payment?.status || 'N/A'}</p>
+                <p className="text-xs text-zinc-500">Method: {selectedPreviousOrder.payment?.method || 'N/A'}</p>
+              </div>
+              <div className="space-y-3">
+                <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Total</p>
+                <p className="text-2xl font-semibold text-emerald-300">₱{Number(selectedPreviousOrder.total || 0).toFixed(2)}</p>
+                <p className="text-xs text-zinc-500">Items: {selectedPreviousOrder.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-6">
+            <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-4">Shipping</p>
+            <div className="space-y-2 text-sm text-zinc-100 mb-6">
+              <p className="font-semibold">{selectedPreviousOrder.shipping?.firstName} {selectedPreviousOrder.shipping?.lastName}</p>
+              <p>{selectedPreviousOrder.shipping?.email || selectedPreviousOrder.purchaserEmail}</p>
+              <p>{selectedPreviousOrder.shipping?.addressLine}</p>
+              <p>{selectedPreviousOrder.shipping?.city}, {selectedPreviousOrder.shipping?.stateProvince} {selectedPreviousOrder.shipping?.postalCode}</p>
+            </div>
+
+            {selectedPreviousOrder.status === 'Complete' && (
+              <button
+                type="button"
+                onClick={() => handlePrintReceipt(selectedPreviousOrder)}
+                className="w-full rounded-2xl border border-emerald-400/40 bg-emerald-500/10 px-4 py-3 text-sm font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300"
+              >
+                Print Receipt
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-6">
+          <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-4">Order items</p>
+          <div className="space-y-4">
+            {selectedPreviousOrder.items.map((item) => (
+              <div key={`${item.product.id}-${item.size || 'default'}`} className="grid gap-3 md:grid-cols-[1fr_auto] items-center rounded-3xl border border-zinc-900 bg-zinc-900/80 p-4">
+                <div>
+                  <p className="font-semibold text-zinc-100">{item.product.name}</p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 mt-1">Size: {item.size || 'One size'}</p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">Qty: {item.quantity}</p>
+                </div>
+                <p className="text-right text-sm font-semibold text-emerald-300">₱{((item.itemPrice || item.product.price) * item.quantity).toFixed(2)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+    </div>
+  ) : (
+    <div className="px-6 md:px-12 py-12">
       <h1 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase mb-16">
         Tracking
       </h1>
@@ -458,34 +530,34 @@ export const Tracking = () => {
               </div>
             </div>
           </motion.div>
-          ))) }
+          ))
+        )}
       </div>
+    </div>
+  );
 
-      <button
-        type="button"
-        onClick={() => setShowPrevious((value) => !value)}
-        className="fixed right-6 top-1/2 z-50 -translate-y-1/2 rounded-l-full border border-zinc-800 bg-zinc-950/95 px-3 py-4 text-[11px] font-bold uppercase tracking-[0.3em] text-zinc-100 shadow-2xl hover:border-emerald-400/40 hover:text-emerald-200"
-        aria-expanded={showPrevious}
-        aria-controls="previous-orders-panel"
-      >
-        {showPrevious ? 'Close' : 'Previous orders'}
-      </button>
+  return (
+    <div className="px-6 md:px-12 py-12 relative">
+      {mainContent}
 
-      {/* Side drawer / panel for previous orders */}
-      <div className={`fixed right-24 top-36 z-50 ml-6 transition-transform ${showPrevious ? 'translate-x-0' : 'translate-x-48'}`}>
-        <div id="previous-orders-panel" className="w-80 bg-zinc-950/95 border border-zinc-900 rounded-3xl p-4 shadow-2xl">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold uppercase text-zinc-100">Previous orders</h3>
-            <button onClick={() => setShowPrevious(false)} className="text-xs text-zinc-400">Close</button>
-          </div>
-          <div className="space-y-2 max-h-96 overflow-auto">
+      {/* Side drawer / panel for previous orders - always floating */}
+      <div className="fixed right-0 top-36 z-40">
+        <div id="previous-orders-panel" className="w-96 bg-zinc-950/95 border border-zinc-900 rounded-l-3xl p-4 shadow-2xl max-h-[80vh] overflow-auto">
+          <h3 className="text-sm font-bold uppercase text-zinc-100 mb-3">Previous orders</h3>
+          
+          <div className="space-y-2">
             {previousOrders.length === 0 && <p className="text-xs text-zinc-500">No previous orders yet.</p>}
             {previousOrders.map((o) => (
-              <div key={o.id} className="rounded-md border border-zinc-900 p-3 bg-zinc-900">
+              <button
+                key={o.id}
+                onClick={() => setSelectedPreviousOrder(o)}
+                className="w-full text-left rounded-md border border-zinc-900 p-3 bg-zinc-900 hover:border-emerald-400/40 hover:bg-zinc-800 transition-colors"
+              >
                 <p className="text-xs text-zinc-400">{o.id}</p>
                 <p className="text-sm font-semibold text-zinc-100">{o.purchaserEmail || 'Unknown'}</p>
                 <p className="text-xs text-zinc-500">{o.status}</p>
-              </div>
+                <p className="text-xs text-emerald-400 mt-1">₱{Number(o.total || 0).toFixed(2)}</p>
+              </button>
             ))}
           </div>
         </div>
