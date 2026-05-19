@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserAuth } from "../auth/AuthContext";
+import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
+import { app } from "../config/FirebaseConfig";
 
 const passwordChecks = (password) => ({
   minLength: password.length >= 8,
@@ -10,8 +12,7 @@ const passwordChecks = (password) => ({
   symbol: /[^A-Za-z0-9]/.test(password),
 });
 
-const API_ORIGIN = (import.meta.env.VITE_API_ORIGIN || "").replace(/\/$/, "");
-const ADMIN_CREATE_ENDPOINT = `${API_ORIGIN}/api/admin/create-user`;
+const ADMIN_CREATE_ENDPOINT = "/api/admin/create-user";
 
 const AdminSignUp = () => {
   const [email, setEmail] = useState("");
@@ -21,6 +22,7 @@ const AdminSignUp = () => {
   const [loading, setLoading] = useState(false);
 
   const { authReady, session, userProfile } = useUserAuth();
+  const auth = getAuth(app);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,7 +56,7 @@ const AdminSignUp = () => {
         headers.Authorization = `Bearer ${actorToken}`;
       }
 
-      const response = await fetch(ADMIN_CREATE_ENDPOINT || "/api/admin/create-user", {
+      const response = await fetch(ADMIN_CREATE_ENDPOINT, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -70,7 +72,9 @@ const AdminSignUp = () => {
         throw new Error(payload?.message || "Unable to create admin account.");
       }
 
-      navigate("/admin", { replace: true });
+      // Sign in with the newly created credentials
+      // The useEffect above will automatically navigate to /admin once the profile loads
+      await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
     } catch (signupError) {
       setError(signupError?.message || "Unable to create admin account.");
     } finally {
