@@ -16,7 +16,7 @@ export const ProductDetail = () => {
   const [added, setAdded] = useState(false);
   const [width, setWidth] = useState('');
   const [length, setLength] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState('');
   const [selectedVariant, setSelectedVariant] = useState('');
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export const ProductDetail = () => {
 
     setWidth('');
     setLength('');
-    setQuantity(1);
+    setQuantity('');
     setSelectedVariant(Array.isArray(product.variants) && product.variants.length > 0 ? product.variants[0] : '');
   }, [product]);
 
@@ -79,6 +79,8 @@ export const ProductDetail = () => {
   const productVariants = Array.isArray(product.variants) && product.variants.length > 0
     ? product.variants
     : [];
+  const parsedQuantity = Number.parseInt(quantity, 10);
+  const isValidQuantity = Number.isFinite(parsedQuantity) && parsedQuantity > 0;
 
   const handleAdd = () => {
     if (!session) {
@@ -92,7 +94,7 @@ export const ProductDetail = () => {
       return;
     }
 
-    if (!Number.isFinite(quantity) || quantity <= 0) {
+    if (!isValidQuantity) {
       alert('Please enter a valid quantity.');
       return;
     }
@@ -107,7 +109,7 @@ export const ProductDetail = () => {
     const success = addToCart({ 
       ...product, 
       price: calculatedPrice,
-      orderQuantity: quantity,
+      orderQuantity: parsedQuantity,
       selectedSize,
       basePrice: product.price,
       area: product.requiresDimensions ? parseFloat(sqMeter) : 1,
@@ -163,7 +165,7 @@ export const ProductDetail = () => {
             <p className="text-3xl font-light">₱{product.price}</p>
             {(product.requiresDimensions ? width && length : true) && (
               <p className="text-lg text-emerald-400 mt-3">
-                Total: ₱{(parseFloat(calculatePrice()) * quantity).toFixed(2)}
+                Total: ₱{(parseFloat(calculatePrice()) * (isValidQuantity ? parsedQuantity : 0)).toFixed(2)}
               </p>
             )}
           </div>
@@ -252,12 +254,10 @@ export const ProductDetail = () => {
               inputMode="numeric"
               value={quantity}
               onChange={(e) => {
-                const parsed = Number.parseInt(e.target.value, 10);
-                if (Number.isNaN(parsed)) {
-                  setQuantity(1);
-                  return;
+                const nextValue = e.target.value;
+                if (nextValue === '' || /^[0-9]+$/.test(nextValue)) {
+                  setQuantity(nextValue);
                 }
-                setQuantity(Math.max(1, parsed));
               }}
               className="quantity-input-no-spinner w-full rounded-2xl border border-zinc-800 bg-white/5 px-4 py-3 text-zinc-50 placeholder:text-zinc-600 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
             />
@@ -266,11 +266,13 @@ export const ProductDetail = () => {
           <div className="space-y-6">
             <button 
               onClick={handleAdd}
-              disabled={added}
+              disabled={added || !isValidQuantity}
               className={`w-full py-5 px-8 flex items-center justify-center gap-3 text-lg font-bold tracking-widest uppercase transition-all duration-300 ${
                 added 
                   ? 'bg-zinc-800 text-emerald-400 cursor-default' 
-                  : 'bg-zinc-50 text-zinc-950 hover:bg-emerald-400 hover:text-zinc-950'
+                  : !isValidQuantity
+                    ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed'
+                    : 'bg-zinc-50 text-zinc-950 hover:bg-emerald-400 hover:text-zinc-950'
               }`}
             >
               {added ? (
