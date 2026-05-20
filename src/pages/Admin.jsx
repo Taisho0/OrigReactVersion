@@ -1936,7 +1936,7 @@ export default function Admin() {
                                             <td className="px-2 sm:px-3 py-1 sm:py-2 text-right">₱{subtotal.toFixed(2)}</td>
                                           </tr>
                                         );
-                                      })}}
+                                      })}
                                     </tbody>
                                   </table>
                                 </div>
