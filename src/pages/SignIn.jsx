@@ -299,8 +299,8 @@ const SignIn = () => {
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(6,182,212,0.12),transparent_25%)]" />
             <div className="relative mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-4 sm:px-6 md:py-12">
                 <div className="w-full overflow-hidden rounded-3xl sm:rounded-4xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40 backdrop-blur-2xl">
-                    <div className="grid gap-6 md:gap-8 md:grid-cols-[1.05fr_0.95fr]">
-                        <div className="hidden md:flex space-y-4 px-4 py-8 sm:px-8 sm:py-10 md:px-12 md:py-14">
+                    <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-[1.05fr_0.95fr]">
+                        <div className="hidden md:flex flex-col space-y-4 px-4 py-8 sm:px-8 sm:py-10 md:px-12 md:py-14">
                             <span className="inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-1 text-xs uppercase tracking-[0.35em] text-emerald-300">
                                 Originals Printing Co.
                             </span>
