@@ -243,8 +243,8 @@ export const Tracking = () => {
 
   if (orders.length === 0) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase mb-6 text-zinc-800">No Orders Yet</h1>
+      <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 sm:px-6 text-center">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter uppercase mb-6 text-zinc-800">No Orders Yet</h1>
         <p className="text-zinc-500 mb-12">You haven't placed any orders with us.</p>
         <Link 
           to="/shop" 
@@ -261,15 +261,15 @@ export const Tracking = () => {
 
   // Main content - either showing active orders or a selected previous order
   const mainContent = selectedPreviousOrder ? (
-    <div className="px-6 md:px-12 py-12">
-      <h1 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase mb-12">Order {selectedPreviousOrder.id}</h1>
+    <div className="px-4 sm:px-6 md:px-12 py-8 sm:py-12">
+      <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tighter uppercase mb-8 sm:mb-12">Order {selectedPreviousOrder.id}</h1>
 
-        <div className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr] mb-10">
-          <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-6">
+        <div className="grid gap-4 sm:gap-6 xl:grid-cols-[1.35fr_0.85fr] mb-8 sm:mb-10">
+          <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-4 sm:p-6">
             <div className="flex items-center justify-between gap-4 mb-6">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Order details</p>
-                <p className="text-lg font-semibold text-zinc-50 mt-3">{selectedPreviousOrder.purchaserEmail || 'No contact email'}</p>
+                <p className="text-sm sm:text-base md:text-lg font-semibold text-zinc-50 mt-3">{selectedPreviousOrder.purchaserEmail || 'No contact email'}</p>
               </div>
               <span className="rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.35em] bg-emerald-400/20 text-emerald-200">
                 {selectedPreviousOrder.status}
@@ -284,13 +284,13 @@ export const Tracking = () => {
               </div>
               <div className="space-y-3">
                 <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Total</p>
-                <p className="text-2xl font-semibold text-emerald-300">₱{Number(selectedPreviousOrder.total || 0).toFixed(2)}</p>
+                <p className="text-xl sm:text-2xl font-semibold text-emerald-300">₱{Number(selectedPreviousOrder.total || 0).toFixed(2)}</p>
                 <p className="text-xs text-zinc-500">Items: {selectedPreviousOrder.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-6">
+          <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-4 sm:p-6">
             <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-4">Shipping</p>
             <div className="space-y-2 text-sm text-zinc-100 mb-6">
               <p className="font-semibold">{selectedPreviousOrder.shipping?.firstName} {selectedPreviousOrder.shipping?.lastName}</p>
@@ -311,7 +311,7 @@ export const Tracking = () => {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-6">
+        <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-4 sm:p-6">
           <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-4">Order items</p>
           <div className="space-y-4">
             {selectedPreviousOrder.items.map((item) => (
@@ -328,8 +328,8 @@ export const Tracking = () => {
         </div>
     </div>
   ) : (
-    <div className="px-6 md:px-12 py-12">
-      <h1 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase mb-16">
+    <div className="px-4 sm:px-6 md:px-12 py-8 sm:py-12">
+      <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tighter uppercase mb-8 sm:mb-16">
         Tracking
       </h1>
 
@@ -352,7 +352,7 @@ export const Tracking = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="border border-zinc-900 bg-zinc-950/50 p-8 rounded-sm relative overflow-hidden"
+            className="border border-zinc-900 bg-zinc-950/50 p-4 sm:p-6 md:p-8 rounded-sm relative overflow-hidden"
           >
             {/* Animated background glow for active order */}
             {order.status !== 'Delivered' && order.status !== 'Complete' && (
@@ -395,13 +395,13 @@ export const Tracking = () => {
                   </div>
                   <div className="space-y-3">
                     <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Total</p>
-                    <p className="text-2xl font-semibold text-emerald-300">₱{Number(order.total || 0).toFixed(2)}</p>
+                    <p className="text-xl sm:text-2xl font-semibold text-emerald-300">₱{Number(order.total || 0).toFixed(2)}</p>
                     <p className="text-xs text-zinc-500">Items: {order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-6">
+              <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-4 sm:p-6">
                 <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-4">Shipping</p>
                 <div className="space-y-2 text-sm text-zinc-100 mb-4">
                   <p>{order.shipping?.firstName} {order.shipping?.lastName}</p>
