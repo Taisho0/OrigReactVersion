@@ -271,7 +271,7 @@ export const Tracking = () => {
                 <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-emerald-400">Order details</p>
                 <p className="text-xs sm:text-sm md:text-base font-semibold text-zinc-50 mt-1 sm:mt-3 truncate">{selectedPreviousOrder.purchaserEmail || 'No contact email'}</p>
               </div>
-              <span className="rounded-full px-1.5 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.35em] bg-emerald-400/20 text-emerald-200 whitespace-nowrap flex-shrink-0 leading-none">
+              <span className="rounded-full px-1.5 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.35em] bg-emerald-400/20 text-emerald-200 whitespace-nowrap shrink-0 leading-none">
                 {selectedPreviousOrder.status}
               </span>
             </div>
@@ -381,7 +381,7 @@ export const Tracking = () => {
                     <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-emerald-400">Order details</p>
                     <p className="text-xs sm:text-sm md:text-base font-semibold text-zinc-50 mt-1 sm:mt-3 truncate">{order.purchaserEmail || 'No contact email'}</p>
                   </div>
-                  <span className={`rounded-full px-1.5 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.35em] whitespace-nowrap flex-shrink-0 leading-none ${order.status === 'Cancelled' ? 'bg-rose-400/20 text-rose-200' : order.status === 'Payment Rejected' ? 'bg-amber-400/20 text-amber-200' : order.status === 'Complete' || order.status === 'Delivered' ? 'bg-emerald-400/20 text-emerald-200' : 'bg-emerald-500/10 text-emerald-300'}`}>
+                  <span className={`rounded-full px-1.5 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.35em] whitespace-nowrap shrink-0 leading-none ${order.status === 'Cancelled' ? 'bg-rose-400/20 text-rose-200' : order.status === 'Payment Rejected' ? 'bg-amber-400/20 text-amber-200' : order.status === 'Complete' || order.status === 'Delivered' ? 'bg-emerald-400/20 text-emerald-200' : 'bg-emerald-500/10 text-emerald-300'}`}>
                     {order.status === 'Cancelled' ? 'Order cancelled' : order.status}
                   </span>
                 </div>
@@ -541,40 +541,40 @@ export const Tracking = () => {
       {mainContent}
 
       {previousOrders.length > 0 && (
-        <div className="fixed right-8 top-36 z-40 flex flex-col items-end gap-3">
+        <div className="fixed right-2 sm:right-8 top-36 z-40 flex flex-col items-end gap-3">
           {!showPrevious ? (
             <button
               type="button"
               onClick={() => setShowPrevious(true)}
-              className="rounded-full border border-emerald-400/40 bg-zinc-950/95 px-5 py-3 text-sm font-bold uppercase tracking-[0.25em] text-emerald-200 shadow-2xl hover:border-emerald-300 transition-colors"
+              className="rounded-full border border-emerald-400/40 bg-zinc-950/95 px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] sm:tracking-[0.25em] text-emerald-200 shadow-2xl hover:border-emerald-300 transition-colors"
             >
               Show Previous Orders
             </button>
           ) : (
-            <div id="previous-orders-panel" className="w-96 bg-zinc-950/95 border border-zinc-900 rounded-l-3xl p-4 shadow-2xl max-h-[80vh] overflow-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold uppercase text-zinc-100">Previous orders</h3>
+            <div id="previous-orders-panel" className="w-72 sm:w-96 bg-zinc-950/95 border border-zinc-900 rounded-l-2xl sm:rounded-l-3xl p-2 sm:p-4 shadow-2xl max-h-[80vh] overflow-auto">
+              <div className="flex items-center justify-between mb-2 sm:mb-4">
+                <h3 className="text-xs sm:text-sm font-bold uppercase text-zinc-100 truncate">Previous orders</h3>
                 <button
                   type="button"
                   onClick={() => setShowPrevious(false)}
-                  className="rounded-full border border-zinc-800 bg-zinc-900/90 px-3 py-2 text-xs uppercase tracking-[0.25em] text-zinc-300 hover:border-emerald-400/40 hover:text-emerald-200 transition-colors"
+                  className="rounded-full border border-zinc-800 bg-zinc-900/90 px-2 sm:px-3 py-1 sm:py-2 text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.25em] text-zinc-300 hover:border-emerald-400/40 hover:text-emerald-200 transition-colors flex-shrink-0"
                 >
                   Hide
                 </button>
               </div>
 
-              <div className="space-y-2">
-                {previousOrders.length === 0 && <p className="text-xs text-zinc-500">No previous orders yet.</p>}
+              <div className="space-y-1 sm:space-y-2">
+                {previousOrders.length === 0 && <p className="text-[10px] sm:text-xs text-zinc-500">No previous orders yet.</p>}
                 {previousOrders.map((o) => (
                   <button
                     key={o.id}
                     onClick={() => setSelectedPreviousOrder(o)}
-                    className="w-full text-left rounded-md border border-zinc-900 p-3 bg-zinc-900 hover:border-emerald-400/40 hover:bg-zinc-800 transition-colors"
+                    className="w-full text-left rounded-md border border-zinc-900 p-2 sm:p-3 bg-zinc-900 hover:border-emerald-400/40 hover:bg-zinc-800 transition-colors"
                   >
-                    <p className="text-xs text-zinc-400">{o.id}</p>
-                    <p className="text-sm font-semibold text-zinc-100">{o.purchaserEmail || 'Unknown'}</p>
-                    <p className="text-xs text-zinc-500">{o.status}</p>
-                    <p className="text-xs text-emerald-400 mt-1">₱{Number(o.total || 0).toFixed(2)}</p>
+                    <p className="text-[9px] sm:text-xs text-zinc-400 truncate">{o.id}</p>
+                    <p className="text-xs sm:text-sm font-semibold text-zinc-100 truncate">{o.purchaserEmail || 'Unknown'}</p>
+                    <p className="text-[9px] sm:text-xs text-zinc-500 truncate">{o.status}</p>
+                    <p className="text-[9px] sm:text-xs text-emerald-400 mt-0.5 sm:mt-1">₱{Number(o.total || 0).toFixed(2)}</p>
                   </button>
                 ))}
               </div>
