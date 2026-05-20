@@ -1,5 +1,11 @@
+#root {
+  min-height: 100vh;
+  background: transparent;
+}
+
 .app-container {
   min-height: 100vh;
+  background: transparent;
 }
 
 /* fixed header height compensation */

@@ -20,7 +20,7 @@ export const Layout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans selection:bg-emerald-500/30">
+    <div className="min-h-screen text-zinc-50 font-sans selection:bg-emerald-500/30">
       <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-between px-6 py-6 md:px-12 pointer-events-none">
         <Link to="/" className="text-xl font-bold tracking-tighter uppercase pointer-events-auto">
           Originals Printing Co.
