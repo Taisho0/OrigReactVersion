@@ -266,12 +266,12 @@ export const Tracking = () => {
 
         <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-[1.35fr_0.85fr] mb-8 sm:mb-10">
           <div className="rounded-3xl border border-zinc-900 bg-zinc-950/95 p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-4 mb-6">
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Order details</p>
-                <p className="text-sm sm:text-base md:text-lg font-semibold text-zinc-50 mt-3">{selectedPreviousOrder.purchaserEmail || 'No contact email'}</p>
+            <div className="flex items-start sm:items-center justify-between gap-2 sm:gap-4 mb-3 sm:mb-6">
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-emerald-400">Order details</p>
+                <p className="text-xs sm:text-sm md:text-base font-semibold text-zinc-50 mt-1 sm:mt-3 truncate">{selectedPreviousOrder.purchaserEmail || 'No contact email'}</p>
               </div>
-              <span className="rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.35em] bg-emerald-400/20 text-emerald-200">
+              <span className="rounded-full px-1.5 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.35em] bg-emerald-400/20 text-emerald-200 whitespace-nowrap flex-shrink-0 leading-none">
                 {selectedPreviousOrder.status}
               </span>
             </div>
@@ -381,7 +381,7 @@ export const Tracking = () => {
                     <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-emerald-400">Order details</p>
                     <p className="text-xs sm:text-sm md:text-base font-semibold text-zinc-50 mt-1 sm:mt-3 truncate">{order.purchaserEmail || 'No contact email'}</p>
                   </div>
-                  <span className={`rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.2em] sm:tracking-[0.35em] whitespace-nowrap ${order.status === 'Cancelled' ? 'bg-rose-400/20 text-rose-200' : order.status === 'Payment Rejected' ? 'bg-amber-400/20 text-amber-200' : order.status === 'Complete' || order.status === 'Delivered' ? 'bg-emerald-400/20 text-emerald-200' : 'bg-emerald-500/10 text-emerald-300'}`}>
+                  <span className={`rounded-full px-1.5 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.35em] whitespace-nowrap flex-shrink-0 leading-none ${order.status === 'Cancelled' ? 'bg-rose-400/20 text-rose-200' : order.status === 'Payment Rejected' ? 'bg-amber-400/20 text-amber-200' : order.status === 'Complete' || order.status === 'Delivered' ? 'bg-emerald-400/20 text-emerald-200' : 'bg-emerald-500/10 text-emerald-300'}`}>
                     {order.status === 'Cancelled' ? 'Order cancelled' : order.status}
                   </span>
                 </div>
