@@ -557,7 +557,7 @@ export const Tracking = () => {
                 <button
                   type="button"
                   onClick={() => setShowPrevious(false)}
-                  className="rounded-full border border-zinc-800 bg-zinc-900/90 px-2 sm:px-3 py-1 sm:py-2 text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.25em] text-zinc-300 hover:border-emerald-400/40 hover:text-emerald-200 transition-colors flex-shrink-0"
+                  className="rounded-full border border-zinc-800 bg-zinc-900/90 px-2 sm:px-3 py-1 sm:py-2 text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.25em] text-zinc-300 hover:border-emerald-400/40 hover:text-emerald-200 transition-colors shrink-0"
                 >
                   Hide
                 </button>
@@ -585,3 +585,6 @@ export const Tracking = () => {
     </div>
   );
 };
+
+
+//perfect
