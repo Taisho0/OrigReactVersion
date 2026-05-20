@@ -58,23 +58,23 @@ export const Showcase = () => {
   }, [selectedCategory]);
 
   return (
-    <div className="px-6 md:px-12 py-12 max-w-7xl mx-auto">
-      <div className="mb-16">
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase mb-4">
+    <div className="px-3 sm:px-6 md:px-12 py-6 sm:py-12 max-w-7xl mx-auto">
+      <div className="mb-8 sm:mb-16">
+        <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tighter uppercase mb-2 sm:mb-4">
           Showcase
         </h1>
-        <p className="text-zinc-400 text-lg">Explore our previous works and projects across various product categories.</p>
+        <p className="text-zinc-400 text-xs sm:text-lg">Explore our previous works and projects across various product categories.</p>
       </div>
 
       {/* Category Filter */}
-      <div className="mb-12">
-        <p className="text-xs uppercase tracking-[0.35em] text-emerald-500 mb-4">Filter by category</p>
-        <div className="flex flex-wrap gap-3">
+      <div className="mb-8 sm:mb-12">
+        <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-emerald-500 mb-2 sm:mb-4">Filter by category</p>
+        <div className="flex flex-wrap gap-1.5 sm:gap-3">
           {SHOWCASE_CATEGORIES.map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-widest transition-colors ${
+              className={`rounded-full px-2 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold uppercase tracking-widest transition-colors whitespace-nowrap ${
                 selectedCategory === category
                   ? 'bg-emerald-400 text-slate-950'
                   : 'border border-white/10 text-zinc-300 hover:border-emerald-400 hover:text-emerald-300'
@@ -95,14 +95,14 @@ export const Showcase = () => {
             <p>No showcase items available for {selectedCategory} yet.</p>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-2 sm:gap-4 lg:gap-6 grid-cols-3 sm:grid-cols-4 lg:grid-cols-5">
             {showcaseItems.map((item, idx) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 hover:border-emerald-400 transition-all"
+                className="group overflow-hidden rounded-lg sm:rounded-2xl border border-white/10 bg-white/5 hover:border-emerald-400 transition-all"
               >
                 <div className="aspect-square overflow-hidden bg-zinc-900 relative">
                   <img
@@ -111,16 +111,13 @@ export const Showcase = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
-                <div className="p-5 space-y-3">
+                <div className="p-2 sm:p-4 lg:p-5 space-y-1 sm:space-y-2 lg:space-y-3">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-1">{item.category}</p>
-                    {item.title && <h3 className="text-lg font-semibold text-zinc-50">{item.title}</h3>}
+                    <p className="text-[8px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-emerald-400 mb-0.5 sm:mb-1">{item.category}</p>
+                    {item.title && <h3 className="text-xs sm:text-base lg:text-lg font-semibold text-zinc-50 line-clamp-1">{item.title}</h3>}
                   </div>
                   {item.description && (
-                    <p className="text-sm text-zinc-400 line-clamp-2">{item.description}</p>
-                  )}
-                  {item.productName && (
-                    <p className="text-xs text-zinc-500">Product: {item.productName}</p>
+                    <p className="text-[8px] sm:text-xs lg:text-sm text-zinc-400 line-clamp-2 hidden sm:block">{item.description}</p>
                   )}
                 </div>
               </motion.div>
@@ -130,10 +127,10 @@ export const Showcase = () => {
       </div>
 
       {/* Back to shop */}
-      <div className="mt-16 text-center">
+      <div className="mt-8 sm:mt-16 text-center">
         <Link
           to="/shop"
-          className="inline-block py-4 px-8 border border-zinc-800 text-zinc-50 font-bold tracking-widest uppercase hover:border-emerald-500 hover:text-emerald-400 transition-colors"
+          className="inline-block py-3 sm:py-4 px-6 sm:px-8 border border-zinc-800 text-zinc-50 font-bold tracking-widest uppercase text-xs sm:text-base hover:border-emerald-500 hover:text-emerald-400 transition-colors"
         >
           Back to Shop
         </Link>
