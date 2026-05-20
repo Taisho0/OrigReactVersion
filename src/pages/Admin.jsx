@@ -13,7 +13,7 @@ import { useStore } from '../context/StoreContext';
 import PricingForm from '../components/admin/PricingForm';
 import { SHOWCASE_CATEGORIES } from './Showcase';
 
-const API_ORIGIN = (import.meta.env.VITE_API_ORIGIN || '').replace(/\/$/, '');
+const API_ORIGIN = '';
 
 export default function Admin() {
   const { session, userProfile, signOut, suspendUser, deleteUser, restoreUser, setUserRole } = useUserAuth();
