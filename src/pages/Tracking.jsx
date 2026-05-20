@@ -363,51 +363,51 @@ export const Tracking = () => {
               />
             )}
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-6 border-b border-zinc-900 pb-8 relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-2 sm:gap-6 mb-3 sm:mb-6 border-b border-zinc-900 pb-3 sm:pb-8 relative z-10">
               <div>
-                <p className="text-sm font-bold uppercase tracking-widest text-emerald-500 mb-2">Order {order.id}</p>
-                <p className="text-zinc-500 text-sm">{new Date(order.date).toLocaleDateString()} • {order.items.length} items</p>
+                <p className="text-xs sm:text-sm font-bold uppercase tracking-widest text-emerald-500 mb-1 sm:mb-2">Order {order.id}</p>
+                <p className="text-zinc-500 text-xs sm:text-sm">{new Date(order.date).toLocaleDateString()} • {order.items.length} items</p>
               </div>
               <div className="text-left md:text-right">
-                <p className="text-sm font-bold uppercase tracking-widest text-zinc-50 mb-2">Estimated Delivery</p>
-                <p className="text-xl font-light">{new Date(order.estimatedDelivery).toLocaleDateString()}</p>
+                <p className="text-xs sm:text-sm font-bold uppercase tracking-widest text-zinc-50 mb-1 sm:mb-2">Estimated Delivery</p>
+                <p className="text-sm sm:text-xl font-light">{new Date(order.estimatedDelivery).toLocaleDateString()}</p>
               </div>
             </div>
 
-            <div className="relative z-10 grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-[1.35fr_0.85fr] mb-8 sm:mb-10">
-              <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-6">
-                <div className="flex items-center justify-between gap-4 mb-6">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Order details</p>
-                    <p className="text-lg font-semibold text-zinc-50 mt-3">{order.purchaserEmail || 'No contact email'}</p>
+            <div className="relative z-10 grid gap-3 sm:gap-6 grid-cols-1 lg:grid-cols-[1.35fr_0.85fr] mb-6 sm:mb-10">
+              <div className="rounded-2xl sm:rounded-3xl border border-zinc-900 bg-zinc-950/70 p-3 sm:p-6">
+                <div className="flex items-start sm:items-center justify-between gap-2 sm:gap-4 mb-3 sm:mb-6">
+                  <div className="min-w-0">
+                    <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-emerald-400">Order details</p>
+                    <p className="text-xs sm:text-sm md:text-base font-semibold text-zinc-50 mt-1 sm:mt-3 truncate">{order.purchaserEmail || 'No contact email'}</p>
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.35em] ${order.status === 'Cancelled' ? 'bg-rose-400/20 text-rose-200' : order.status === 'Payment Rejected' ? 'bg-amber-400/20 text-amber-200' : order.status === 'Complete' || order.status === 'Delivered' ? 'bg-emerald-400/20 text-emerald-200' : 'bg-emerald-500/10 text-emerald-300'}`}>
+                  <span className={`rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.2em] sm:tracking-[0.35em] whitespace-nowrap ${order.status === 'Cancelled' ? 'bg-rose-400/20 text-rose-200' : order.status === 'Payment Rejected' ? 'bg-amber-400/20 text-amber-200' : order.status === 'Complete' || order.status === 'Delivered' ? 'bg-emerald-400/20 text-emerald-200' : 'bg-emerald-500/10 text-emerald-300'}`}>
                     {order.status === 'Cancelled' ? 'Order cancelled' : order.status}
                   </span>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-3">
-                    <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Payment</p>
-                    <p className="text-sm text-zinc-100">{order.payment?.status || 'N/A'}</p>
-                    <p className="text-xs text-zinc-500">Method: {order.payment?.method || 'N/A'}</p>
-                    {order.payment?.reference && <p className="text-xs text-zinc-500">Ref: {order.payment.reference}</p>}
+                <div className="grid gap-2 sm:gap-3 grid-cols-2">
+                  <div className="space-y-1 sm:space-y-3">
+                    <p className="text-[9px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.35em] text-zinc-500">Payment</p>
+                    <p className="text-xs sm:text-sm text-zinc-100">{order.payment?.status || 'N/A'}</p>
+                    <p className="text-[9px] sm:text-xs text-zinc-500">Method: {order.payment?.method || 'N/A'}</p>
+                    {order.payment?.reference && <p className="text-[9px] sm:text-xs text-zinc-500">Ref: {order.payment.reference}</p>}
                   </div>
-                  <div className="space-y-3">
-                    <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Total</p>
-                    <p className="text-xl sm:text-2xl font-semibold text-emerald-300">₱{Number(order.total || 0).toFixed(2)}</p>
-                    <p className="text-xs text-zinc-500">Items: {order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</p>
+                  <div className="space-y-1 sm:space-y-3">
+                    <p className="text-[9px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.35em] text-zinc-500">Total</p>
+                    <p className="text-base sm:text-lg md:text-2xl font-semibold text-emerald-300">₱{Number(order.total || 0).toFixed(2)}</p>
+                    <p className="text-[9px] sm:text-xs text-zinc-500">Items: {order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-4 sm:p-6">
-                <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-4">Shipping</p>
-                <div className="space-y-2 text-sm text-zinc-100 mb-4">
-                  <p>{order.shipping?.firstName} {order.shipping?.lastName}</p>
-                  <p>{order.shipping?.email || order.purchaserEmail}</p>
-                  <p>{order.shipping?.addressLine}</p>
-                  <p>{order.shipping?.city}, {order.shipping?.stateProvince} {order.shipping?.postalCode}</p>
+              <div className="rounded-2xl sm:rounded-3xl border border-zinc-900 bg-zinc-950/70 p-3 sm:p-6">
+                <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-emerald-400 mb-2 sm:mb-4">Shipping</p>
+                <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-zinc-100 mb-3 sm:mb-4">
+                  <p className="truncate font-semibold">{order.shipping?.firstName} {order.shipping?.lastName}</p>
+                  <p className="truncate">{order.shipping?.email || order.purchaserEmail}</p>
+                  <p className="truncate">{order.shipping?.addressLine}</p>
+                  <p className="truncate">{order.shipping?.city}, {order.shipping?.stateProvince} {order.shipping?.postalCode}</p>
                 </div>
 
                 {canCancel(order) && (
