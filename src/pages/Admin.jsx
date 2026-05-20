@@ -1641,7 +1641,7 @@ export default function Admin() {
                     <button
                       type="button"
                       onClick={handleDownloadSalesReport}
-                      className="rounded-lg sm:rounded-2xl border border-emerald-400/40 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 flex items-center gap-1 sm:gap-2 flex-shrink-0"
+                      className="rounded-lg sm:rounded-2xl border border-emerald-400/40 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 flex items-center gap-1 sm:gap-2 shrink-0"
                     >
                       <Download size={12} className="sm:w-3.5 sm:h-3.5" />
                       <span className="hidden sm:inline">Download PDF</span>
@@ -1650,7 +1650,7 @@ export default function Admin() {
                     <button
                       type="button"
                       onClick={handleDownloadSalesReportExcel}
-                      className="rounded-lg sm:rounded-2xl border border-cyan-400/40 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-cyan-200 hover:border-cyan-300 hover:text-cyan-100 flex items-center gap-1 sm:gap-2 flex-shrink-0"
+                      className="rounded-lg sm:rounded-2xl border border-cyan-400/40 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-cyan-200 hover:border-cyan-300 hover:text-cyan-100 flex items-center gap-1 sm:gap-2 shrink-0"
                     >
                       <Download size={12} className="sm:w-3.5 sm:h-3.5" />
                       <span className="hidden sm:inline">Download Excel</span>
@@ -1696,7 +1696,7 @@ export default function Admin() {
                         <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-400">Daily revenue</p>
                         <p className="text-[10px] sm:text-sm text-zinc-400">Revenue movement across the selected range.</p>
                       </div>
-                      <span className="inline-flex rounded-full bg-white/5 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300 flex-shrink-0">{salesAnalytics.dailySales.length} days</span>
+                      <span className="inline-flex rounded-full bg-white/5 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300 shrink-0">{salesAnalytics.dailySales.length} days</span>
                     </div>
                     <ChartContainer className="h-48 sm:h-64 lg:h-72 rounded-xl sm:rounded-[1.75rem] bg-slate-950/70 p-2 sm:p-3" config={{ revenue: { color: '#34d399' } }}>
                       <AreaChart data={salesAnalytics.dailySales} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
@@ -1716,7 +1716,7 @@ export default function Admin() {
                           <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-400">Top products</p>
                           <p className="text-[10px] sm:text-sm text-zinc-400">Revenue share for your best sellers.</p>
                         </div>
-                        <span className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500 flex-shrink-0">By revenue</span>
+                        <span className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500 shrink-0">By revenue</span>
                       </div>
                       {salesAnalytics.topProducts.length === 0 ? (
                         <div className="grid h-48 sm:h-64 lg:h-80 place-items-center rounded-xl sm:rounded-2xl border border-dashed border-white/10 text-xs sm:text-sm text-zinc-500">No product revenue yet.</div>
@@ -1776,7 +1776,7 @@ export default function Admin() {
                           <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-400">Category sales</p>
                           <p className="text-[10px] sm:text-sm text-zinc-400">Quantity breakdown by category.</p>
                         </div>
-                        <span className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500 flex-shrink-0">Quantity sold</span>
+                        <span className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500 shrink-0">Quantity sold</span>
                       </div>
                       {(() => {
                         const categoryData = Object.entries(salesAnalytics.categoryTotals).map(([category, count]) => ({ category, count }));
@@ -1818,7 +1818,7 @@ export default function Admin() {
                         <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-400">Sales details</p>
                         <p className="text-[10px] sm:text-sm text-zinc-400">Snapshot of top-selling products in the selected period.</p>
                       </div>
-                      <span className="inline-flex rounded-full bg-white/5 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300 flex-shrink-0">Top performers</span>
+                      <span className="inline-flex rounded-full bg-white/5 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300 shrink-0">Top performers</span>
                     </div>
                     {salesAnalytics.topProducts.length === 0 ? (
                       <div className="rounded-xl sm:rounded-2xl border border-dashed border-white/10 p-3 sm:p-5 text-xs sm:text-sm text-zinc-500">
@@ -1833,7 +1833,7 @@ export default function Admin() {
                                 <p className="font-semibold text-white text-[10px] sm:text-sm">{product.name}</p>
                                 <p className="text-[8px] sm:text-xs text-zinc-500">{product.quantity} sold</p>
                               </div>
-                              <p className="text-[10px] sm:text-sm font-semibold text-emerald-300 flex-shrink-0">₱{product.revenue.toFixed(2)}</p>
+                              <p className="text-[10px] sm:text-sm font-semibold text-emerald-300 shrink-0">₱{product.revenue.toFixed(2)}</p>
                             </div>
                           </div>
                         ))}
@@ -1847,7 +1847,7 @@ export default function Admin() {
                         <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-400">Sales activity</p>
                         <p className="text-[10px] sm:text-sm text-zinc-400">Live metrics to keep your operations moving.</p>
                       </div>
-                      <span className="inline-flex rounded-full bg-white/5 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300 flex-shrink-0">Live</span>
+                      <span className="inline-flex rounded-full bg-white/5 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300 shrink-0">Live</span>
                     </div>
                     <div className="grid gap-2 sm:gap-3 sm:grid-cols-2">
                       <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-3 sm:p-4 text-xs sm:text-sm text-zinc-200 shadow-sm shadow-black/10">
