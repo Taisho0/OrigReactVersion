@@ -297,10 +297,10 @@ const SignIn = () => {
     return (
         <div className="relative min-h-screen overflow-hidden bg-zinc-950 text-white">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(6,182,212,0.12),transparent_25%)]" />
-            <div className="relative mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-8 sm:px-6 md:py-12">
-                <div className="w-full overflow-hidden rounded-4xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40 backdrop-blur-2xl">
+            <div className="relative mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-4 sm:px-6 md:py-12">
+                <div className="w-full overflow-hidden rounded-3xl sm:rounded-4xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40 backdrop-blur-2xl">
                     <div className="grid gap-6 md:gap-8 md:grid-cols-[1.05fr_0.95fr]">
-                        <div className="space-y-4 px-4 py-8 sm:px-8 sm:py-10 md:px-12 md:py-14">
+                        <div className="hidden md:flex space-y-4 px-4 py-8 sm:px-8 sm:py-10 md:px-12 md:py-14">
                             <span className="inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-1 text-xs uppercase tracking-[0.35em] text-emerald-300">
                                 Originals Printing Co.
                             </span>
@@ -319,20 +319,20 @@ const SignIn = () => {
                                 </p>
                             </div>
                         </div>
-                        <div className="relative overflow-hidden rounded-4xl bg-zinc-950/90 px-4 py-8 sm:px-8 sm:py-10 md:px-12 md:py-14">
+                        <div className="relative overflow-hidden rounded-3xl sm:rounded-4xl bg-zinc-950/90 px-3 sm:px-8 py-6 sm:py-10 md:px-12 md:py-14">
                             <div className="absolute inset-x-0 top-0 h-28 bg-linear-to-b from-emerald-500/10 to-transparent" />
                             <div className="relative">
-                                <button type="button" className="absolute right-4 top-4 text-zinc-400 transition hover:text-white" onClick={() => navigate("/") }>
+                                <button type="button" className="absolute right-2 sm:right-4 top-2 sm:top-4 text-zinc-400 transition hover:text-white text-lg sm:text-xl" onClick={() => navigate("/") }>
                                     &times;
                                 </button>
-                                <div className="mb-8">
-                                    <p className="text-sm uppercase tracking-[0.35em] text-emerald-300">{forgotMode ? "Forgot Password" : "Sign in"}</p>
-                                    <h2 className="mt-4 text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white">Continue to Originals</h2>
+                                <div className="mb-4 sm:mb-8">
+                                    <p className="text-xs sm:text-sm uppercase tracking-[0.35em] text-emerald-300">{forgotMode ? "Forgot Password" : "Sign in"}</p>
+                                    <h2 className="mt-2 sm:mt-4 text-lg sm:text-2xl md:text-3xl font-bold tracking-tight text-white">Continue to Originals</h2>
                                 </div>
                                 {forgotMode ? (
-                                    <form onSubmit={resetPasswordStage ? handleSubmitNewPassword : handleVerifyOtpAndSendReset} className="space-y-6">
-                                        <div className="space-y-3">
-                                            <label htmlFor="email" className="block text-sm font-medium text-zinc-300">Email address</label>
+                                    <form onSubmit={resetPasswordStage ? handleSubmitNewPassword : handleVerifyOtpAndSendReset} className="space-y-3 sm:space-y-6">
+                                        <div className="space-y-1.5 sm:space-y-3">
+                                            <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-zinc-300">Email address</label>
                                             <input
                                                 id="email"
                                                 value={email}
@@ -341,7 +341,7 @@ const SignIn = () => {
                                                 required
                                                 autoComplete="email"
                                                 placeholder="sample@gmail.com"
-                                                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-zinc-500 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
+                                                className="w-full rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 px-3 sm:px-4 py-2 sm:py-3 text-sm text-white placeholder:text-zinc-500 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
                                             />
                                         </div>
                                         {resetPasswordStage ? (
@@ -462,9 +462,9 @@ const SignIn = () => {
                                         {forgotError && <p className="text-sm text-red-400">{forgotError}</p>}
                                     </form>
                                 ) : (
-                                    <form onSubmit={handleSignIn} className="space-y-6">
-                                        <div className="space-y-3">
-                                            <label htmlFor="email" className="block text-sm font-medium text-zinc-300">Email address</label>
+                                    <form onSubmit={handleSignIn} className="space-y-3 sm:space-y-6">
+                                        <div className="space-y-1.5 sm:space-y-3">
+                                            <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-zinc-300">Email address</label>
                                             <input
                                                 id="email"
                                                 value={email}
@@ -473,15 +473,15 @@ const SignIn = () => {
                                                 required
                                                 autoComplete="email"
                                                 placeholder="sample@gmail.com"
-                                                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-zinc-500 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
+                                                className="w-full rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 px-3 sm:px-4 py-2 sm:py-3 text-sm text-white placeholder:text-zinc-500 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
                                             />
                                         </div>
-                                        <div className="space-y-3">
+                                        <div className="space-y-1.5 sm:space-y-3">
                                             <div className="flex items-center justify-between">
-                                                <label htmlFor="password" className="text-sm font-medium text-zinc-300">Password</label>
+                                                <label htmlFor="password" className="text-xs sm:text-sm font-medium text-zinc-300">Password</label>
                                                 <button
                                                     type="button"
-                                                    className="text-sm font-semibold text-amber-400 hover:text-amber-300"
+                                                    className="text-xs sm:text-sm font-semibold text-amber-400 hover:text-amber-300"
                                                     onClick={handleForgotPassword}
                                                 >
                                                     Forgot password?
@@ -496,34 +496,34 @@ const SignIn = () => {
                                                     required
                                                     autoComplete="current-password"
                                                     placeholder="Sample@123"
-                                                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 pr-12 text-white placeholder:text-zinc-500 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
+                                                    className="w-full rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 px-3 sm:px-4 py-2 sm:py-3 pr-10 sm:pr-12 text-sm text-white placeholder:text-zinc-500 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowPassword((prev) => !prev)}
-                                                    className="absolute inset-y-0 right-0 flex items-center px-3 text-zinc-400 hover:text-white"
+                                                    className="absolute inset-y-0 right-0 flex items-center px-2 sm:px-3 text-xs sm:text-sm text-zinc-400 hover:text-white"
                                                     aria-label={showPassword ? "Hide password" : "Show password"}
                                                 >
                                                     {showPassword ? "Hide" : "Show"}
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
+                                        <div className="flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-zinc-300">
                                             <input
                                                 id="remember-me"
                                                 type="checkbox"
                                                 checked={rememberMe}
                                                 onChange={(e) => setRememberMe(e.target.checked)}
-                                                className="h-4 w-4 rounded border-zinc-600 bg-zinc-900 text-emerald-500 focus:ring-emerald-500"
+                                                className="h-3 w-3 sm:h-4 sm:w-4 rounded border-zinc-600 bg-zinc-900 text-emerald-500 focus:ring-emerald-500"
                                             />
-                                            <label htmlFor="remember-me" className="cursor-pointer text-sm text-zinc-200">
+                                            <label htmlFor="remember-me" className="cursor-pointer text-xs sm:text-sm text-zinc-200">
                                                 Remember me
                                             </label>
                                         </div>
                                         <button
                                             type="submit"
                                             disabled={loading}
-                                            className="w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-zinc-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+                                            className="w-full rounded-xl sm:rounded-2xl bg-emerald-500 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold uppercase tracking-[0.12em] text-zinc-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                             {loading ? "Please wait..." : "Sign in"}
                                         </button>
@@ -532,16 +532,16 @@ const SignIn = () => {
                                                 type="button"
                                                 onClick={handleCreateAccount}
                                                 disabled={loading}
-                                                className="w-full rounded-2xl border border-emerald-500 px-4 py-3 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/10 disabled:opacity-60"
+                                                className="w-full rounded-xl sm:rounded-2xl border border-emerald-500 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/10 disabled:opacity-60"
                                             >
                                                 Create account with this email
                                             </button>
                                         )}
-                                        {successMessage && <p className="text-sm text-emerald-300">{successMessage}</p>}
-                                        {error && <p className="text-sm text-red-400">{error}</p>}
+                                        {successMessage && <p className="text-xs sm:text-sm text-emerald-300">{successMessage}</p>}
+                                        {error && <p className="text-xs sm:text-sm text-red-400">{error}</p>}
                                     </form>
                                 )}
-                                <p className="mt-8 text-center text-sm text-zinc-400">
+                                <p className="mt-4 sm:mt-8 text-center text-xs sm:text-sm text-zinc-400">
                                     Don&apos;t have an account?{' '}
                                     <Link to="/signup" className="font-semibold text-amber-400 hover:text-amber-300">
                                         Sign up here!
