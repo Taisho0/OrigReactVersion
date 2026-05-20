@@ -466,8 +466,8 @@ export const Tracking = () => {
                   const isCurrent = order.status === step;
                   
                   return (
-                    <div key={step} className="flex flex-col items-center gap-2 sm:gap-4 group flex-shrink-0 sm:flex-shrink-1">
-                      <div className={`w-8 sm:w-10 h-8 sm:h-10 rounded-full flex items-center justify-center transition-all duration-500 flex-shrink-0 ${
+                    <div key={step} className="flex flex-col items-center gap-2 sm:gap-4 group shrink-0 sm:shrink">
+                      <div className={`w-8 sm:w-10 h-8 sm:h-10 rounded-full flex items-center justify-center transition-all duration-500 shrink-0 ${
                         isActive ? 'bg-emerald-500 text-zinc-950' : 'bg-zinc-900 text-zinc-600 border border-zinc-800'
                       }`}>
                         {index === 0 && <Clock size={16} className="sm:w-5 sm:h-5" />}
@@ -496,7 +496,7 @@ export const Tracking = () => {
             </div>
 
             {/* Order Items Preview */}
-            <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="relative z-10 hidden sm:grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
               {order.items.slice(0, 4).map(item => (
                 <div key={`${item.product.id}-${item.size || 'default'}`} className="aspect-3/4 bg-zinc-900 rounded-sm overflow-hidden border border-zinc-800 relative group">
                   <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
@@ -514,17 +514,17 @@ export const Tracking = () => {
               )}
             </div>
 
-            <div className="relative z-10 mt-8 rounded-3xl border border-zinc-900 bg-zinc-950/70 p-6">
-              <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-4">Order items</p>
-              <div className="space-y-4">
+            <div className="relative z-10 mt-6 sm:mt-8 rounded-3xl border border-zinc-900 bg-zinc-950/70 p-3 sm:p-6">
+              <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-3 sm:mb-4">Order items</p>
+              <div className="space-y-2 sm:space-y-4">
                 {order.items.map((item) => (
-                  <div key={`${item.product.id}-${item.size || 'default'}`} className="grid gap-3 md:grid-cols-[1fr_auto] items-center rounded-3xl border border-zinc-900 bg-zinc-900/80 p-4">
-                    <div>
-                      <p className="font-semibold text-zinc-100">{item.product.name}</p>
-                      <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 mt-1">Size: {item.size || 'One size'}</p>
-                      <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">Qty: {item.quantity}</p>
+                  <div key={`${item.product.id}-${item.size || 'default'}`} className="grid gap-2 sm:gap-3 grid-cols-1 md:grid-cols-[1fr_auto] items-start sm:items-center rounded-2xl sm:rounded-3xl border border-zinc-900 bg-zinc-900/80 p-3 sm:p-4">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-xs sm:text-sm text-zinc-100 truncate">{item.product.name}</p>
+                      <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-zinc-500 mt-1">Size: {item.size || 'One size'}</p>
+                      <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-zinc-500">Qty: {item.quantity}</p>
                     </div>
-                    <p className="text-right text-sm font-semibold text-emerald-300">₱{((item.itemPrice || item.product.price) * item.quantity).toFixed(2)}</p>
+                    <p className="text-right text-xs sm:text-sm font-semibold text-emerald-300 whitespace-nowrap">₱{((item.itemPrice || item.product.price) * item.quantity).toFixed(2)}</p>
                   </div>
                 ))}
               </div>
@@ -537,7 +537,7 @@ export const Tracking = () => {
   );
 
   return (
-    <div className="px-6 md:px-12 py-12 relative">
+    <div className="px-4 sm:px-6 md:px-12 py-8 sm:py-12 relative">
       {mainContent}
 
       {previousOrders.length > 0 && (
