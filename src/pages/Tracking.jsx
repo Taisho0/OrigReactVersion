@@ -264,7 +264,7 @@ export const Tracking = () => {
     <div className="px-4 sm:px-6 md:px-12 py-8 sm:py-12">
       <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tighter uppercase mb-8 sm:mb-12">Order {selectedPreviousOrder.id}</h1>
 
-        <div className="grid gap-4 sm:gap-6 xl:grid-cols-[1.35fr_0.85fr] mb-8 sm:mb-10">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-[1.35fr_0.85fr] mb-8 sm:mb-10">
           <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-4 sm:p-6">
             <div className="flex items-center justify-between gap-4 mb-6">
               <div>
@@ -374,7 +374,7 @@ export const Tracking = () => {
               </div>
             </div>
 
-            <div className="relative z-10 grid gap-6 xl:grid-cols-[1.35fr_0.85fr] mb-10">
+            <div className="relative z-10 grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-[1.35fr_0.85fr] mb-8 sm:mb-10">
               <div className="rounded-3xl border border-zinc-900 bg-zinc-950/70 p-6">
                 <div className="flex items-center justify-between gap-4 mb-6">
                   <div>
@@ -446,7 +446,7 @@ export const Tracking = () => {
             </div>
 
             {/* Timeline */}
-            <div className="relative z-10 mb-12 py-6">
+            <div className="relative z-10 mb-8 sm:mb-12 py-4 sm:py-6 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
               <div className="absolute top-1/2 left-0 w-full h-0.5 bg-zinc-900 -translate-y-1/2" />
               
               {/* Progress Line */}
@@ -459,32 +459,32 @@ export const Tracking = () => {
                 transition={{ duration: 1, ease: 'easeOut' }}
               />
 
-              <div className="relative flex justify-between items-center">
+              <div className="relative flex justify-between items-center gap-2 sm:gap-4 min-w-max sm:min-w-0">
                 {STATUS_STEPS.map((step, index) => {
                   const statusIndex = STATUS_STEPS.indexOf(order.status);
                   const isActive = statusIndex >= index;
                   const isCurrent = order.status === step;
                   
                   return (
-                    <div key={step} className="flex flex-col items-center gap-4 group">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ${
+                    <div key={step} className="flex flex-col items-center gap-2 sm:gap-4 group flex-shrink-0 sm:flex-shrink-1">
+                      <div className={`w-8 sm:w-10 h-8 sm:h-10 rounded-full flex items-center justify-center transition-all duration-500 flex-shrink-0 ${
                         isActive ? 'bg-emerald-500 text-zinc-950' : 'bg-zinc-900 text-zinc-600 border border-zinc-800'
                       }`}>
-                        {index === 0 && <Clock size={20} />}
-                        {index === 1 && <Package size={20} />}
-                        {index === 2 && <Truck size={20} />}
-                        {index === 3 && <CheckCircle size={20} />}
-                        {index === 4 && <CheckCircle size={20} />}
+                        {index === 0 && <Clock size={16} className="sm:w-5 sm:h-5" />}
+                        {index === 1 && <Package size={16} className="sm:w-5 sm:h-5" />}
+                        {index === 2 && <Truck size={16} className="sm:w-5 sm:h-5" />}
+                        {index === 3 && <CheckCircle size={16} className="sm:w-5 sm:h-5" />}
+                        {index === 4 && <CheckCircle size={16} className="sm:w-5 sm:h-5" />}
                         
                         {isCurrent && (
                           <motion.div 
-                            className="absolute w-14 h-14 border-2 border-emerald-500 rounded-full opacity-50"
+                            className="absolute w-11 sm:w-14 h-11 sm:h-14 border-2 border-emerald-500 rounded-full opacity-50"
                             animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
                             transition={{ duration: 1.5, repeat: Infinity }}
                           />
                         )}
                       </div>
-                      <span className={`text-xs md:text-sm font-bold uppercase tracking-widest ${
+                      <span className={`text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-tight sm:tracking-widest text-center leading-tight ${
                         isActive ? 'text-zinc-50' : 'text-zinc-600'
                       }`}>
                         {step}
