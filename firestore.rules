@@ -72,6 +72,37 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).changedKeys().hasOnly(['status']);
     }
 
+    function isOrderFeedbackSubmission() {
+      return signedIn()
+        && resource.data.purchaserUid == request.auth.uid
+        && resource.data.status == 'Complete'
+        && resource.data.feedback == null
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.feedback is map
+        && request.resource.data.feedback.rating is number
+        && request.resource.data.feedback.rating >= 1
+        && request.resource.data.feedback.rating <= 5
+        && request.resource.data.feedback.comment is string
+        && request.resource.data.feedback.submittedAt is string
+        && request.resource.data.feedbackSubmittedAt is string
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(['feedback', 'feedbackSubmittedAt']);
+    }
+
+    function isCustomerFeedbackCreate() {
+      return signedIn()
+        && request.resource.data.orderId is string
+        && request.resource.data.orderFirestoreId is string
+        && request.resource.data.purchaserUid == request.auth.uid
+        && exists(/databases/$(database)/documents/orders/$(request.resource.data.orderFirestoreId))
+        && get(/databases/$(database)/documents/orders/$(request.resource.data.orderFirestoreId)).data.purchaserUid == request.auth.uid
+        && get(/databases/$(database)/documents/orders/$(request.resource.data.orderFirestoreId)).data.status in ['Complete', 'Delivered']
+        && request.resource.data.rating is number
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.comment is string
+        && request.resource.data.submittedAt is string;
+    }
+
     match /orders/{orderDocId} {
       // Customer submits receipt proof and creates own order.
       allow create: if signedIn()
@@ -84,8 +115,14 @@ service cloud.firestore {
       allow read: if isAdmin() || (signedIn() && resource.data.purchaserUid == request.auth.uid);
 
       // Admin confirms/rejects receipt proof and moves tracking status.
-      allow update: if isAdmin() || isOrderCancellation();
+      allow update: if isAdmin() || isOrderCancellation() || isOrderFeedbackSubmission();
       allow delete: if isAdmin();
+    }
+
+    match /feedbacks/{feedbackId} {
+      allow read: if isAdmin();
+      allow create: if isCustomerFeedbackCreate();
+      allow update, delete: if isAdmin();
     }
 
     match /showcase/{showcaseId} {

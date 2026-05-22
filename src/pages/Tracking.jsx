@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
-import { Package, Truck, CheckCircle, Clock, XCircle, ChevronLeft } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, XCircle, ChevronLeft, Star } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -16,13 +16,105 @@ const STATUS_STEPS = ['Pending Payment Approval', 'Processing', 'Shipped', 'Deli
 const CANCELLABLE_STATUSES = ['Pending Payment Approval', 'Processing'];
 
 export const Tracking = () => {
-  const { orders, cancelOrder } = useStore();
+  const { orders, cancelOrder, submitOrderFeedback } = useStore();
   const [busyOrderId, setBusyOrderId] = useState('');
   const [orderMessage, setOrderMessage] = useState('');
   const [showPrevious, setShowPrevious] = useState(false);
-  const [selectedPreviousOrder, setSelectedPreviousOrder] = useState(null);
+  const [selectedPreviousOrderId, setSelectedPreviousOrderId] = useState('');
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [pendingCancelOrder, setPendingCancelOrder] = useState(null);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackOrderId, setFeedbackOrderId] = useState('');
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  const [feedbackComment, setFeedbackComment] = useState('');
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+
+  const selectedPreviousOrder = orders.find((order) => order.id === selectedPreviousOrderId) || null;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (feedbackOpen || feedbackOrderId) {
+      return;
+    }
+
+    const nextOrder = orders.find((order) => {
+      if (order.status !== 'Complete' || order.feedbackSubmittedAt) {
+        return false;
+      }
+
+      return !window.localStorage.getItem(`theoriginals.feedbackPrompted.${order.id}`);
+    });
+
+    if (!nextOrder) {
+      return;
+    }
+
+    setFeedbackOrderId(nextOrder.id);
+    setFeedbackRating(5);
+    setFeedbackComment('');
+    setFeedbackMessage('');
+    setFeedbackOpen(true);
+  }, [feedbackOpen, feedbackOrderId, orders]);
+
+  const openFeedbackDialog = (order) => {
+    if (!order || order.status !== 'Complete') {
+      return;
+    }
+
+    setFeedbackOrderId(order.id);
+    setFeedbackRating(5);
+    setFeedbackComment('');
+    setFeedbackMessage('');
+    setFeedbackOpen(true);
+  };
+
+  const closeFeedbackDialog = () => {
+    if (typeof window !== 'undefined' && feedbackOrderId) {
+      window.localStorage.setItem(`theoriginals.feedbackPrompted.${feedbackOrderId}`, 'dismissed');
+    }
+
+    setFeedbackOpen(false);
+    setFeedbackOrderId('');
+    setFeedbackMessage('');
+  };
+
+  const handleSubmitFeedback = async () => {
+    if (!feedbackOrderId) {
+      return;
+    }
+
+    setFeedbackSubmitting(true);
+    setFeedbackMessage('');
+
+    try {
+      const ok = await submitOrderFeedback({
+        orderId: feedbackOrderId,
+        rating: feedbackRating,
+        comment: feedbackComment,
+      });
+
+      if (!ok) {
+        setFeedbackMessage('Unable to send feedback right now. Please try again.');
+        return;
+      }
+
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(`theoriginals.feedbackPrompted.${feedbackOrderId}`, 'submitted');
+      }
+
+      setFeedbackMessage('Feedback sent to the admin.');
+      setFeedbackOpen(false);
+      setFeedbackOrderId('');
+      setFeedbackComment('');
+      setFeedbackRating(5);
+    } finally {
+      setFeedbackSubmitting(false);
+    }
+  };
 
   const canCancel = (order) => CANCELLABLE_STATUSES.includes(order.status);
 
@@ -249,6 +341,8 @@ export const Tracking = () => {
       if (!ok) {
         setOrderMessage('Unable to cancel the order. Please try again.');
       } else {
+        setShowPrevious(true);
+        setSelectedPreviousOrderId(pendingCancelOrder.id);
         setOrderMessage(`Order ${pendingCancelOrder.id} has been cancelled.`);
       }
     } finally {
@@ -292,7 +386,7 @@ export const Tracking = () => {
       <div className="mb-6">
         <button
           type="button"
-          onClick={() => setSelectedPreviousOrder(null)}
+          onClick={() => setSelectedPreviousOrderId('')}
           className="inline-flex items-center gap-2 text-sm sm:text-base font-bold uppercase tracking-widest text-emerald-200 hover:text-emerald-300"
         >
           <ChevronLeft size={18} />
@@ -338,13 +432,22 @@ export const Tracking = () => {
             </div>
 
             {selectedPreviousOrder.status === 'Complete' && (
-              <button
-                type="button"
-                onClick={() => handlePrintReceipt(selectedPreviousOrder)}
-                className="w-full rounded-2xl border border-emerald-400/40 bg-emerald-500/10 px-4 py-3 text-sm font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300"
-              >
-                Print Receipt
-              </button>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => handlePrintReceipt(selectedPreviousOrder)}
+                  className="w-full rounded-2xl border border-emerald-400/40 bg-emerald-500/10 px-4 py-3 text-sm font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300"
+                >
+                  Print Receipt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openFeedbackDialog(selectedPreviousOrder)}
+                  className="w-full rounded-2xl border border-sky-400/40 bg-sky-500/10 px-4 py-3 text-sm font-bold uppercase tracking-[0.25em] text-sky-200 hover:border-sky-300"
+                >
+                  Leave Feedback
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -485,26 +588,37 @@ export const Tracking = () => {
 
             {/* Timeline */}
             <div className="relative z-10 mb-8 sm:mb-12 py-4 sm:py-6 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-zinc-900 -translate-y-1/2" />
-              
-              {/* Progress Line */}
-              <motion.div 
-                className="absolute top-1/2 left-0 h-0.5 bg-emerald-500 -translate-y-1/2"
-                initial={{ width: '0%' }}
-                animate={{
-                  width: `${Math.max(0, (STATUS_STEPS.indexOf(order.status) / (STATUS_STEPS.length - 1)) * 100)}%`,
-                }}
-                transition={{ duration: 1, ease: 'easeOut' }}
-              />
+              <div className="absolute top-1/2 left-4 right-4 sm:left-0 sm:right-0 h-0.5 bg-zinc-900 -translate-y-1/2" />
 
-              <div className="relative flex justify-between items-center gap-2 sm:gap-4 min-w-max sm:min-w-0">
+              {/* Progress Line */}
+              {(() => {
+                const progressIndex = STATUS_STEPS.indexOf(order.status);
+                const progressPercent = Math.max(0, (progressIndex / (STATUS_STEPS.length - 1)) * 100);
+                const progressWidth =
+                  progressPercent <= 0
+                    ? '0%'
+                    : progressPercent >= 100
+                      ? '100%'
+                      : `calc(${progressPercent}% + 20px)`;
+
+                return (
+                  <motion.div
+                    className="absolute top-1/2 left-4 sm:left-0 h-0.5 bg-emerald-500 -translate-y-1/2"
+                    initial={{ width: '0%' }}
+                    animate={{ width: progressWidth }}
+                    transition={{ duration: 1, ease: 'easeOut' }}
+                  />
+                );
+              })()}
+
+              <div className="relative grid grid-cols-5 items-start gap-2 sm:gap-4 min-w-160 sm:min-w-0">
                 {STATUS_STEPS.map((step, index) => {
                   const statusIndex = STATUS_STEPS.indexOf(order.status);
                   const isActive = statusIndex >= index;
                   const isCurrent = order.status === step;
                   
                   return (
-                    <div key={step} className="flex flex-col items-center gap-2 sm:gap-4 group shrink-0 sm:shrink">
+                    <div key={step} className="relative flex flex-col items-center gap-2 sm:gap-4 group">
                       <div className={`w-8 sm:w-10 h-8 sm:h-10 rounded-full flex items-center justify-center transition-all duration-500 shrink-0 ${
                         isActive ? 'bg-emerald-500 text-zinc-950' : 'bg-zinc-900 text-zinc-600 border border-zinc-800'
                       }`}>
@@ -597,6 +711,85 @@ export const Tracking = () => {
         </DialogContent>
       </Dialog>
 
+      <Dialog
+        open={feedbackOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeFeedbackDialog();
+            return;
+          }
+
+          setFeedbackOpen(open);
+        }}
+      >
+        <DialogContent className="bg-zinc-950/95 backdrop-blur-md border border-zinc-800 text-zinc-50 sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>How was your order?</DialogTitle>
+            <DialogDescription>
+              Your feedback will be great help for our performance! Thank You!.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <p className="mb-3 text-xs uppercase tracking-[0.35em] text-zinc-400">Rating</p>
+              <div className="grid grid-cols-5 gap-2">
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setFeedbackRating(value)}
+                    className={`flex items-center justify-center rounded-xl border px-3 py-3 text-sm font-bold transition-colors ${feedbackRating === value ? 'border-amber-400 bg-amber-400/15 text-amber-200' : 'border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700'}`}
+                  >
+                    <Star size={14} className="mr-1" />
+                    {value}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs uppercase tracking-[0.35em] text-zinc-400" htmlFor="order-feedback-comment">
+                Comment
+              </label>
+              <textarea
+                id="order-feedback-comment"
+                value={feedbackComment}
+                onChange={(event) => setFeedbackComment(event.target.value)}
+                rows={4}
+                placeholder="Tell us what went well or what we should improve."
+                className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-sky-400"
+              />
+            </div>
+
+            {feedbackMessage && (
+              <p className="rounded-2xl border border-sky-400/20 bg-sky-400/10 px-4 py-3 text-sm text-sky-100">
+                {feedbackMessage}
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={closeFeedbackDialog}
+              disabled={feedbackSubmitting}
+              className="rounded-2xl border border-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-200 hover:border-zinc-700 disabled:opacity-60"
+            >
+              Later
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmitFeedback}
+              disabled={feedbackSubmitting || !feedbackComment.trim()}
+              className="rounded-2xl bg-sky-400 px-4 py-2 text-sm font-bold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {feedbackSubmitting ? 'Sending...' : 'Send Feedback'}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {previousOrders.length > 0 && (
         <div className="fixed right-2 sm:right-8 top-36 z-40 flex flex-col items-end gap-3">
           {!showPrevious ? (
@@ -625,7 +818,7 @@ export const Tracking = () => {
                 {previousOrders.map((o) => (
                   <button
                     key={o.id}
-                    onClick={() => setSelectedPreviousOrder(o)}
+                    onClick={() => setSelectedPreviousOrderId(o.id)}
                     className="w-full text-left rounded-md border border-zinc-900 p-2 sm:p-3 bg-zinc-900 hover:border-emerald-400/40 hover:bg-zinc-800 transition-colors"
                   >
                     <p className="text-[9px] sm:text-xs text-zinc-400 truncate">{o.id}</p>
@@ -642,6 +835,3 @@ export const Tracking = () => {
     </div>
   );
 };
-
-
-//perfect
