@@ -132,10 +132,11 @@ export const Tracking = () => {
     const totalItems = order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
     const lineItems = order.items
       .map((item) => {
-        const amount = (item.itemPrice || item.product.price) * item.quantity;
+        const price = item.itemPrice || item.product?.price || 0;
+        const amount = price * (item.quantity || 0);
         return `
           <tr>
-            <td>${item.product.name}</td>
+            <td>${item.product?.name || 'Unknown product'}</td>
             <td>${item.size || 'One size'}</td>
             <td>${item.quantity}</td>
             <td>₱${amount.toFixed(2)}</td>
@@ -456,13 +457,13 @@ export const Tracking = () => {
           <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-4">Order items</p>
           <div className="space-y-4">
             {selectedPreviousOrder.items.map((item) => (
-                  <div key={`${item.product.id}-${item.size || 'default'}`} className="grid gap-3 md:grid-cols-[1fr_auto] items-center rounded-3xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-4">
+                  <div key={`${item.product?.id || 'unknown'}-${item.size || 'default'}`} className="grid gap-3 md:grid-cols-[1fr_auto] items-center rounded-3xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-4">
                 <div>
-                  <p className="font-semibold text-zinc-100">{item.product.name}</p>
+                  <p className="font-semibold text-zinc-100">{item.product?.name || 'Unknown product'}</p>
                   <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 mt-1">Size: {item.size || 'One size'}</p>
                   <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">Qty: {item.quantity}</p>
                 </div>
-                <p className="text-right text-sm font-semibold text-emerald-300">₱{((item.itemPrice || item.product.price) * item.quantity).toFixed(2)}</p>
+                <p className="text-right text-sm font-semibold text-emerald-300">₱{((item.itemPrice || item.product?.price || 0) * item.quantity).toFixed(2)}</p>
               </div>
             ))}
           </div>
@@ -650,10 +651,14 @@ export const Tracking = () => {
             {/* Order Items Preview */}
             <div className="relative z-10 hidden sm:grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
               {order.items.slice(0, 4).map(item => (
-                <div key={`${item.product.id}-${item.size || 'default'}`} className="aspect-3/4 bg-zinc-900 rounded-sm overflow-hidden border border-zinc-800 relative group">
-                  <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
+                <div key={`${item.product?.id || 'unknown'}-${item.size || 'default'}`} className="aspect-3/4 bg-zinc-900 rounded-sm overflow-hidden border border-zinc-800 relative group">
+                  {item.product?.image ? (
+                    <img src={item.product.image} alt={item.product?.name || 'Product image'} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-sm text-zinc-500">No image</div>
+                  )}
                   <div className="absolute inset-0 bg-zinc-950/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 text-center backdrop-blur-sm">
-                    <p className="text-xs font-bold uppercase">{item.product.name}</p>
+                    <p className="text-xs font-bold uppercase">{item.product?.name || 'Unknown product'}</p>
                     <p className="text-xs text-emerald-400 mt-1">Qty {item.quantity}</p>
                     <p className="text-[10px] text-zinc-400 mt-1 uppercase tracking-widest">{item.size || 'One size'}</p>
                   </div>
@@ -670,13 +675,13 @@ export const Tracking = () => {
               <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-3 sm:mb-4">Order items</p>
               <div className="space-y-2 sm:space-y-4">
                 {order.items.map((item) => (
-                  <div key={`${item.product.id}-${item.size || 'default'}`} className="grid gap-2 sm:gap-3 grid-cols-1 md:grid-cols-[1fr_auto] items-start sm:items-center rounded-2xl sm:rounded-3xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-3 sm:p-4">
+                  <div key={`${item.product?.id || 'unknown'}-${item.size || 'default'}`} className="grid gap-2 sm:gap-3 grid-cols-1 md:grid-cols-[1fr_auto] items-start sm:items-center rounded-2xl sm:rounded-3xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-3 sm:p-4">
                     <div className="min-w-0">
-                      <p className="font-semibold text-xs sm:text-sm text-zinc-100 truncate">{item.product.name}</p>
+                      <p className="font-semibold text-xs sm:text-sm text-zinc-100 truncate">{item.product?.name || 'Unknown product'}</p>
                       <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-zinc-500 mt-1">Size: {item.size || 'One size'}</p>
                       <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-zinc-500">Qty: {item.quantity}</p>
                     </div>
-                    <p className="text-right text-xs sm:text-sm font-semibold text-emerald-300 whitespace-nowrap">₱{((item.itemPrice || item.product.price) * item.quantity).toFixed(2)}</p>
+                    <p className="text-right text-xs sm:text-sm font-semibold text-emerald-300 whitespace-nowrap">₱{((item.itemPrice || item.product?.price || 0) * item.quantity).toFixed(2)}</p>
                   </div>
                 ))}
               </div>

@@ -541,8 +541,19 @@ export const StoreProvider = ({ children }) => {
       }
 
       if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(body?.message || `Unable to cancel order. (${response.status})`);
+        // Try to parse JSON error body, otherwise read plain text for better debugging
+        let body = null;
+        try {
+          body = await response.json();
+        } catch (jsonErr) {
+          try {
+            body = { raw: await response.text() };
+          } catch (textErr) {
+            body = { raw: '<unreadable response body>' };
+          }
+        }
+        console.error('cancelOrder backend response not ok', response.status, body);
+        throw new Error(body?.message || body?.raw || `Unable to cancel order. (${response.status})`);
       }
 
       setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: 'Cancelled' } : o)));
