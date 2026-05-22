@@ -292,16 +292,26 @@ export const Checkout = () => {
     const isIOS = /iPhone|iPad|iPod/i.test(ua);
 
     if (isAndroid && paymentCheckoutUrl) {
+      // 1) Try the native GCash URI scheme first (fastest if app supports it)
       try {
-        const intentUrl = `intent://pay?url=${encodeURIComponent(paymentCheckoutUrl)}#Intent;package=com.globe.gcash.android;scheme=gcash;end`;
-        window.location.href = intentUrl;
-        // Fallback to opening the checkout URL after a short delay if the intent fails
+        const schemeUrl = `gcash://pay?url=${encodeURIComponent(paymentCheckoutUrl)}`;
+        window.location.href = schemeUrl;
+
+        // If the app is installed, navigation will leave this page and timers won't run.
+        // 2) After a short delay, try the Android intent URI which allows a browser fallback.
+        setTimeout(() => {
+          const intentUrl = `intent://pay?url=${encodeURIComponent(paymentCheckoutUrl)}#Intent;scheme=gcash;package=com.globe.gcash.android;S.browser_fallback_url=${encodeURIComponent(paymentCheckoutUrl)};end`;
+          window.location.href = intentUrl;
+        }, 600);
+
+        // 3) Final fallback: after a longer delay, open the checkout page in the browser.
         setTimeout(() => {
           window.location.href = paymentCheckoutUrl;
-        }, 1200);
+        }, 1600);
+
         return;
       } catch (e) {
-        // continue to default behavior below
+        // fall through to the generic open below
       }
     }
 
