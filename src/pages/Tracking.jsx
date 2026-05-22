@@ -244,14 +244,20 @@ export const Tracking = () => {
   if (orders.length === 0) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 sm:px-6 text-center">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter uppercase mb-6 text-zinc-800">No Orders Yet</h1>
-        <p className="text-zinc-500 mb-12">You haven't placed any orders with us.</p>
-        <Link 
-          to="/shop" 
-          className="py-4 px-8 border border-zinc-800 text-zinc-50 font-bold tracking-widest uppercase hover:border-emerald-500 hover:text-emerald-400 transition-colors"
-        >
-          Start Shopping
-        </Link>
+        <div className="rounded-3xl border border-zinc-800 bg-black/40 px-8 py-10 backdrop-blur-md">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter uppercase mb-4 text-zinc-50 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]">
+            No Orders Yet
+          </h1>
+          <p className="text-zinc-300 mb-10 max-w-xl mx-auto text-lg">
+            You haven't placed any orders with us.
+          </p>
+          <Link 
+            to="/shop" 
+            className="inline-flex items-center justify-center py-4 px-10 rounded-full border border-zinc-700 bg-zinc-950/90 text-zinc-50 font-bold tracking-widest uppercase hover:border-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-300 transition-colors"
+          >
+            Start Shopping
+          </Link>
+        </div>
       </div>
     );
   }
