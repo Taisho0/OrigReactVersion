@@ -457,6 +457,22 @@ export const StoreProvider = ({ children }) => {
         prev.map((o) => (o.id === orderId ? { ...o, status: nextStatus, payment: { ...(o.payment || {}), status: 'approved', reviewedAt } } : o))
       );
 
+      try {
+        const actorToken = (typeof session?.getIdToken === 'function' ? await session.getIdToken(true) : await auth.currentUser?.getIdToken(true));
+        if (actorToken) {
+          await fetch(`${API_ORIGIN}/api/admin/orders/notify`, {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${actorToken}`,
+            },
+            body: JSON.stringify({ orderId: order.firestoreId, action: 'approved' }),
+          });
+        }
+      } catch (notifyErr) {
+        console.warn('Order notification failed:', notifyErr);
+      }
+
       return true;
     } catch (err) {
       console.error('approveOrderPayment failed:', err);
@@ -490,6 +506,22 @@ export const StoreProvider = ({ children }) => {
             : o
         )
       );
+
+      try {
+        const actorToken = (typeof session?.getIdToken === 'function' ? await session.getIdToken(true) : await auth.currentUser?.getIdToken(true));
+        if (actorToken) {
+          await fetch(`${API_ORIGIN}/api/admin/orders/notify`, {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${actorToken}`,
+            },
+            body: JSON.stringify({ orderId: order.firestoreId, action: 'rejected', reason }),
+          });
+        }
+      } catch (notifyErr) {
+        console.warn('Order rejection notification failed:', notifyErr);
+      }
 
       return true;
     } catch (err) {
