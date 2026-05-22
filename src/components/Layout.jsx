@@ -74,7 +74,7 @@ export const Layout = () => {
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-[60] bg-zinc-950/80 backdrop-blur-md flex flex-col pt-24 pb-12 px-6 pointer-events-auto overflow-y-auto sm:pt-20">
+        <div className="fixed inset-0 z-60 bg-zinc-950/80 backdrop-blur-md flex flex-col pt-24 pb-12 px-6 pointer-events-auto overflow-y-auto sm:pt-20">
           <button 
             className="absolute top-4 right-4 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-zinc-950/80 hover:bg-zinc-900 transition-colors sm:top-6 sm:right-6 sm:h-10 sm:w-10"
             onClick={() => setIsMenuOpen(false)}
