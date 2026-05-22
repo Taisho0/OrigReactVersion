@@ -304,30 +304,30 @@ export const Checkout = () => {
 
   if (completed) {
     return (
-      <div className="min-h-[80vh] flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 sm:px-6 text-center">
         <motion.div 
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', bounce: 0.5 }}
-          className="text-yellow-500 mb-8"
+          className="text-yellow-500 mb-6 sm:mb-8"
         >
-          <Smartphone size={80} />
+          <Smartphone size={64} className="sm:size-20" />
         </motion.div>
         
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase mb-6">Pending Admin Approval</h1>
-        <p className="text-xl font-light text-zinc-400 mb-2">Order #{orderId}</p>
-        <p className="text-zinc-500 mb-12 max-w-md">Your payment proof has been submitted. An admin will review and confirm your receipt shortly. Your order will be completed once approved.</p>
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tighter uppercase mb-4 sm:mb-6">Pending Admin Approval</h1>
+        <p className="text-base sm:text-xl font-light text-zinc-400 mb-2">Order #{orderId}</p>
+        <p className="text-sm sm:text-zinc-500 mb-8 sm:mb-12 max-w-md">Your payment proof has been submitted. An admin will review and confirm your receipt shortly. Your order will be completed once approved.</p>
         
-        <div className="flex flex-col sm:flex-row gap-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 w-full sm:w-auto">
           <button 
             onClick={() => navigate('/tracking')}
-            className="py-4 px-8 bg-zinc-50 text-zinc-950 font-bold tracking-widest uppercase hover:bg-emerald-400 transition-colors"
+            className="py-3 px-5 sm:py-4 sm:px-8 bg-zinc-50 text-zinc-950 text-sm sm:text-base font-bold tracking-widest uppercase hover:bg-emerald-400 transition-colors"
           >
             Track Order
           </button>
           <button 
             onClick={() => navigate('/shop')}
-            className="py-4 px-8 border border-zinc-800 text-zinc-50 font-bold tracking-widest uppercase hover:border-emerald-500 hover:text-emerald-400 transition-colors"
+            className="py-3 px-5 sm:py-4 sm:px-8 border border-zinc-800 text-zinc-50 text-sm sm:text-base font-bold tracking-widest uppercase hover:border-emerald-500 hover:text-emerald-400 transition-colors"
           >
             Continue Shopping
           </button>
@@ -337,29 +337,29 @@ export const Checkout = () => {
   }
 
   return (
-    <div className="px-6 md:px-12 py-12 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16">
+    <div className="px-4 sm:px-6 md:px-12 py-6 sm:py-10 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-12 md:gap-16">
       <div>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase mb-12">Checkout</h1>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter uppercase mb-8 sm:mb-12">Checkout</h1>
         
-        <form onSubmit={handleCheckout} className="space-y-6">
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-500 mb-6">Contact Info</h2>
+        <form onSubmit={handleCheckout} className="space-y-5 sm:space-y-6">
+          <div className="space-y-3 sm:space-y-4">
+            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-emerald-500 mb-4 sm:mb-6">Contact Info</h2>
             <div className="relative">
-              <input required type="email" value={contactEmail} onChange={(e) => { setContactEmail(e.target.value); setContactErrors((c)=>{ const copy={...c}; delete copy.email; return copy; }); }} placeholder="Email Address" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${contactErrors.email ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.email} />
+              <input required type="email" value={contactEmail} onChange={(e) => { setContactEmail(e.target.value); setContactErrors((c)=>{ const copy={...c}; delete copy.email; return copy; }); }} placeholder="Email Address" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${contactErrors.email ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.email} />
               {contactErrors.email && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
             </div>
             {contactErrors.email && <p className="text-xs text-red-400 mt-1">{contactErrors.email}</p>}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <div className="relative">
-<input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\-\s]+" value={firstName} onPaste={(e)=>{ const pasted = e.clipboardData.getData('text'); const clean = pasted.replace(/[^A-Za-zÀ-ž'\\-\\s]/g,''); e.preventDefault(); setFirstName(clean); setContactErrors((c)=>{ const copy={...c}; delete copy.firstName; return copy; }); }} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\\-\\s]/g, ''); setFirstName(v); setContactErrors((c)=>{ const copy={...c}; delete copy.firstName; return copy; }); }} placeholder="First Name" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${contactErrors.firstName ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.firstName} />
+<input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\-\s]+" value={firstName} onPaste={(e)=>{ const pasted = e.clipboardData.getData('text'); const clean = pasted.replace(/[^A-Za-zÀ-ž'\\-\\s]/g,''); e.preventDefault(); setFirstName(clean); setContactErrors((c)=>{ const copy={...c}; delete copy.firstName; return copy; }); }} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\\-\\s]/g, ''); setFirstName(v); setContactErrors((c)=>{ const copy={...c}; delete copy.firstName; return copy; }); }} placeholder="First Name" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${contactErrors.firstName ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.firstName} />
                   {contactErrors.firstName && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
                 </div>
                 {contactErrors.firstName && <p className="text-xs text-red-400 mt-1">{contactErrors.firstName}</p>}
               </div>
               <div>
                 <div className="relative">
-<input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\-\s]+" value={lastName} onPaste={(e)=>{ const pasted = e.clipboardData.getData('text'); const clean = pasted.replace(/[^A-Za-zÀ-ž'\\-\\s]/g,''); e.preventDefault(); setLastName(clean); setContactErrors((c)=>{ const copy={...c}; delete copy.lastName; return copy; }); }} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\\-\\s]/g, ''); setLastName(v); setContactErrors((c)=>{ const copy={...c}; delete copy.lastName; return copy; }); }} placeholder="Last Name" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${contactErrors.lastName ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.lastName} />
+<input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\-\s]+" value={lastName} onPaste={(e)=>{ const pasted = e.clipboardData.getData('text'); const clean = pasted.replace(/[^A-Za-zÀ-ž'\\-\\s]/g,''); e.preventDefault(); setLastName(clean); setContactErrors((c)=>{ const copy={...c}; delete copy.lastName; return copy; }); }} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\\-\\s]/g, ''); setLastName(v); setContactErrors((c)=>{ const copy={...c}; delete copy.lastName; return copy; }); }} placeholder="Last Name" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${contactErrors.lastName ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.lastName} />
                   {contactErrors.lastName && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
                 </div>
                 {contactErrors.lastName && <p className="text-xs text-red-400 mt-1">{contactErrors.lastName}</p>}
@@ -367,33 +367,33 @@ export const Checkout = () => {
             </div>
           </div>
 
-          <div className="space-y-4 pt-8 border-t border-zinc-900">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-500 mb-6">Shipping</h2>
+          <div className="space-y-3 sm:space-y-4 pt-6 sm:pt-8 border-t border-zinc-900">
+            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-emerald-500 mb-4 sm:mb-6">Shipping</h2>
             <div>
               <div className="relative">
-                <input required type="text" value={addressLine} onChange={(e) => { setAddressLine(e.target.value); setShippingErrors((s)=>{ const copy={...s}; delete copy.addressLine; return copy; }); }} placeholder="Address" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${shippingErrors.addressLine ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.addressLine} />
+                <input required type="text" value={addressLine} onChange={(e) => { setAddressLine(e.target.value); setShippingErrors((s)=>{ const copy={...s}; delete copy.addressLine; return copy; }); }} placeholder="Address" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${shippingErrors.addressLine ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.addressLine} />
                 {shippingErrors.addressLine && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
               </div>
               {shippingErrors.addressLine && <p className="text-xs text-red-400 mt-1">{shippingErrors.addressLine}</p>}
             </div>
             <div>
               <div className="relative">
-<input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\-\s]+" value={city} onPaste={(e)=>{ const pasted = e.clipboardData.getData('text'); const clean = pasted.replace(/[^A-Za-zÀ-ž'\\-\\s]/g,''); e.preventDefault(); setCity(clean); setShippingErrors((c)=>{ const copy={...c}; delete copy.city; return copy; }); }} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\\-\\s]/g, ''); setCity(v); setShippingErrors((c)=>{ const copy={...c}; delete copy.city; return copy; }); }} placeholder="City" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${shippingErrors.city ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.city} />
+<input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\-\s]+" value={city} onPaste={(e)=>{ const pasted = e.clipboardData.getData('text'); const clean = pasted.replace(/[^A-Za-zÀ-ž'\\-\\s]/g,''); e.preventDefault(); setCity(clean); setShippingErrors((c)=>{ const copy={...c}; delete copy.city; return copy; }); }} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\\-\\s]/g, ''); setCity(v); setShippingErrors((c)=>{ const copy={...c}; delete copy.city; return copy; }); }} placeholder="City" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${shippingErrors.city ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.city} />
                 {shippingErrors.city && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
               </div>
               {shippingErrors.city && <p className="text-xs text-red-400 mt-1">{shippingErrors.city}</p>}
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <div className="relative">
-                  <input required type="text" value={stateProvince} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\-\s]/g, ''); setStateProvince(v); setShippingErrors((s)=>{ const copy={...s}; delete copy.stateProvince; return copy; }); }} placeholder="State/Province" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${shippingErrors.stateProvince ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.stateProvince} />
+                  <input required type="text" value={stateProvince} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\-\s]/g, ''); setStateProvince(v); setShippingErrors((s)=>{ const copy={...s}; delete copy.stateProvince; return copy; }); }} placeholder="State/Province" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${shippingErrors.stateProvince ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.stateProvince} />
                   {shippingErrors.stateProvince && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
                 </div>
                 {shippingErrors.stateProvince && <p className="text-xs text-red-400 mt-1">{shippingErrors.stateProvince}</p>}
               </div>
               <div>
                 <div className="relative">
-                  <input required type="text" value={postalCode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); setPostalCode(v); setShippingErrors((s)=>{ const copy={...s}; delete copy.postalCode; return copy; }); }} placeholder="Postal Code" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${shippingErrors.postalCode ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.postalCode} />
+                  <input required type="text" value={postalCode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); setPostalCode(v); setShippingErrors((s)=>{ const copy={...s}; delete copy.postalCode; return copy; }); }} placeholder="Postal Code" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${shippingErrors.postalCode ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.postalCode} />
                   {shippingErrors.postalCode && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
                 </div>
                 {shippingErrors.postalCode && <p className="text-xs text-red-400 mt-1">{shippingErrors.postalCode}</p>}
@@ -402,37 +402,37 @@ export const Checkout = () => {
           </div>
 
           {shippingSubmitted && (
-            <div className="space-y-5 pt-8 border-t border-zinc-900">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-500">Payment</h2>
+            <div className="space-y-4 sm:space-y-5 pt-6 sm:pt-8 border-t border-zinc-900">
+              <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-emerald-500">Payment</h2>
               <p className="text-sm text-zinc-400">Pay via PayMongo using GCash or QR-enabled banking app.</p>
 
-              <div className="border border-zinc-800 bg-zinc-950 p-5 space-y-4">
-                <div className="bg-white p-3 w-max mx-auto rounded-sm">
+              <div className="border border-zinc-800 bg-zinc-950 p-4 sm:p-5 space-y-4">
+                <div className="bg-white p-2.5 sm:p-3 w-max mx-auto rounded-sm">
                   {paymentQrUrl ? (
                     <img
                       src={paymentQrUrl}
                       alt="PayMongo checkout QR code"
-                      className="w-40 h-40 object-contain"
+                      className="w-32 h-32 sm:w-40 sm:h-40 object-contain"
                     />
                   ) : (
-                    <div className="w-40 h-40 grid place-items-center text-center text-[11px] text-zinc-600 px-3">
+                    <div className="w-32 h-32 sm:w-40 sm:h-40 grid place-items-center text-center text-[11px] text-zinc-600 px-3">
                       {creatingSession ? 'Preparing QR...' : 'QR unavailable'}
                     </div>
                   )}
                 </div>
-                <p className="text-xs text-zinc-400 text-center">Ref: {paymentReference || 'Pending'} • Amount: ₱{cartTotal.toFixed(2)}</p>
+                <p className="text-[11px] sm:text-xs text-zinc-400 text-center">Ref: {paymentReference || 'Pending'} • Amount: ₱{cartTotal.toFixed(2)}</p>
 
                 <button
                   type="button"
                   onClick={handleRedirectToGcash}
                   disabled={creatingSession || (!paymentCheckoutUrl && !paymentQrUrl)}
-                  className="w-full py-3 border border-zinc-700 text-zinc-100 font-bold uppercase tracking-widest hover:border-emerald-500 hover:text-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-2.5 sm:py-3 border border-zinc-700 text-zinc-100 text-xs sm:text-sm font-bold uppercase tracking-widest hover:border-emerald-500 hover:text-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Smartphone size={16} />
                   Open Payment
                 </button>
 
-                <label className="w-full py-3 border border-zinc-700 text-zinc-100 font-bold uppercase tracking-widest hover:border-emerald-500 hover:text-emerald-400 transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                <label className="w-full py-2.5 sm:py-3 border border-zinc-700 text-zinc-100 text-xs sm:text-sm font-bold uppercase tracking-widest hover:border-emerald-500 hover:text-emerald-400 transition-colors flex items-center justify-center gap-2 cursor-pointer">
                   <Upload size={16} />
                   {receiptProofName ? 'Replace Receipt Proof' : 'Upload Receipt Proof'}
                   <input
@@ -449,7 +449,7 @@ export const Checkout = () => {
                     <img
                       src={receiptProofImage}
                       alt="Uploaded payment receipt proof"
-                      className="mx-auto max-h-52 w-auto rounded border border-zinc-800"
+                      className="mx-auto max-h-44 sm:max-h-52 w-auto rounded border border-zinc-800"
                     />
                   </div>
                 )}
@@ -458,7 +458,7 @@ export const Checkout = () => {
                   type="button"
                   onClick={handleSubmitPaymentProof}
                   disabled={submittingProof || !shippingSubmitted || !receiptProofImage || !paymentReference || !paymentIntentId}
-                  className="w-full py-3 border border-zinc-700 font-bold uppercase tracking-widest text-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-zinc-50 text-zinc-950 hover:bg-emerald-400"
+                  className="w-full py-2.5 sm:py-3 border border-zinc-700 text-xs sm:text-sm font-bold uppercase tracking-widest text-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-zinc-50 text-zinc-950 hover:bg-emerald-400"
                 >
                   {submittingProof ? 'Submitting Proof...' : 'Submit Proof For Admin Review'}
                 </button>
@@ -476,28 +476,28 @@ export const Checkout = () => {
           <button 
             type="submit" 
             disabled={submittingProof || shippingSubmitted}
-            className="w-full mt-12 py-5 bg-zinc-50 text-zinc-950 font-bold tracking-widest uppercase hover:bg-emerald-400 transition-colors flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full mt-8 sm:mt-12 py-4 sm:py-5 bg-zinc-50 text-zinc-950 text-sm sm:text-base font-bold tracking-widest uppercase hover:bg-emerald-400 transition-colors flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {shippingSubmitted ? (creatingSession ? 'Preparing Payment Session...' : 'Payment Session Ready') : 'Continue to Payment'}
           </button>
         </form>
       </div>
 
-      <div className="bg-zinc-950/80 border border-zinc-800 backdrop-blur-md p-8 h-max">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-500 mb-8">Order Summary</h2>
-        <div className="space-y-6 mb-8 max-h-[40vh] overflow-y-auto hide-scrollbar">
+      <div className="bg-zinc-950/80 border border-zinc-800 backdrop-blur-md p-4 sm:p-6 md:p-8 h-max">
+        <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-emerald-500 mb-5 sm:mb-8">Order Summary</h2>
+        <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8 max-h-[32vh] sm:max-h-[40vh] overflow-y-auto hide-scrollbar">
           {cart.map(item => (
-            <div key={`${item.product.id}-${item.size || 'default'}`} className="border border-zinc-800 rounded p-3 bg-zinc-950/80">
-              <div className="flex gap-4 mb-3">
-                <div className="w-16 h-20 bg-zinc-950 rounded-sm overflow-hidden shrink-0">
+            <div key={`${item.product.id}-${item.size || 'default'}`} className="border border-zinc-800 rounded p-2.5 sm:p-3 bg-zinc-950/80">
+              <div className="flex gap-3 sm:gap-4 mb-3">
+                <div className="w-14 h-16 sm:w-16 sm:h-20 bg-zinc-950 rounded-sm overflow-hidden shrink-0">
                   <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="grow flex flex-col justify-center">
                   <div className="flex justify-between items-start">
-                    <h3 className="font-bold text-sm uppercase tracking-wider">{item.product.name}</h3>
-                    <p className="font-medium">₱{((item.itemPrice || item.product.price) * item.quantity).toFixed(2)}</p>
+                    <h3 className="font-bold text-xs sm:text-sm uppercase tracking-wider">{item.product.name}</h3>
+                    <p className="font-medium text-sm sm:text-base">₱{((item.itemPrice || item.product.price) * item.quantity).toFixed(2)}</p>
                   </div>
-                  <p className="text-zinc-500 text-xs mt-1">Qty: {item.quantity} • Size: {item.size || 'One size'}</p>
+                  <p className="text-zinc-500 text-[11px] sm:text-xs mt-1">Qty: {item.quantity} • Size: {item.size || 'One size'}</p>
                 </div>
               </div>
               {item.layoutImage && (
@@ -514,7 +514,7 @@ export const Checkout = () => {
             </div>
           ))}
         </div>
-        <div className="pt-6 border-t border-zinc-800 flex justify-between items-center text-xl font-bold">
+        <div className="pt-4 sm:pt-6 border-t border-zinc-800 flex justify-between items-center text-lg sm:text-xl font-bold">
           <span className="uppercase tracking-widest">Total</span>
           <span className="text-emerald-400">₱{cartTotal.toFixed(2)}</span>
         </div>
