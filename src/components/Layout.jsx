@@ -172,9 +172,8 @@ export const Layout = () => {
       <footer className="py-12 px-6 md:px-12 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-zinc-500">
         <p>&copy; {new Date().getFullYear()} Originals Printing Co.</p>
         <div className="flex gap-6">
-          <Link to="#" className="hover:text-zinc-300">Instagram</Link>
-          <Link to="#" className="hover:text-zinc-300">Twitter</Link>
-          <Link to="#" className="hover:text-zinc-300">Terms</Link>
+          <Link to="/terms" className="hover:text-zinc-300">Terms</Link>
+          <Link to="/privacy" className="hover:text-zinc-300">Privacy</Link>
         </div>
       </footer>
     </div>
