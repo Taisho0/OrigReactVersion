@@ -79,7 +79,7 @@ export const Cart = () => {
                   <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:justify-between sm:items-start min-w-0">
                     <div className="min-w-0">
                       <p className="text-[10px] sm:text-xs text-emerald-500 font-bold uppercase tracking-widest mb-1">{item.product.category}</p>
-                      <h3 className="text-base sm:text-xl md:text-2xl font-bold leading-tight break-words">{item.product.name}</h3>
+                      <h3 className="text-base sm:text-xl md:text-2xl font-bold leading-tight wrap-break-word">{item.product.name}</h3>
                       <p className="mt-1 text-[10px] sm:text-xs uppercase tracking-widest text-zinc-500">Size: {item.size || 'One size'}</p>
                       {item.product.basePrice && item.product.area && (
                         <p className="mt-2 text-[10px] sm:text-xs text-zinc-400">
