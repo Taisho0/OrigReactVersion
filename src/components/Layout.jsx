@@ -20,7 +20,7 @@ export const Layout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans selection:bg-emerald-500/30">
+    <div className="min-h-screen text-zinc-50 font-sans selection:bg-emerald-500/30">
       <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-between px-6 py-6 md:px-12 pointer-events-none">
         <Link to="/" className="text-xl font-bold tracking-tighter uppercase pointer-events-auto">
           Originals Printing Co.
@@ -74,22 +74,94 @@ export const Layout = () => {
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-60 bg-zinc-950 flex flex-col items-center justify-center gap-8 text-2xl font-bold tracking-widest uppercase">
+        <div className="fixed inset-0 z-40 bg-zinc-950/95 backdrop-blur-sm flex flex-col pt-20 pb-12 px-6 pointer-events-auto overflow-y-auto">
           <button 
-            className="absolute top-6 right-6 p-2"
+            className="absolute top-6 right-6 p-2 hover:bg-zinc-900 rounded-lg transition-colors"
             onClick={() => setIsMenuOpen(false)}
           >
-            <X size={32} />
+            <X size={28} className="text-emerald-400" />
           </button>
-          <Link to="/" className="hover:text-emerald-400" onClick={() => setIsMenuOpen(false)}>Home</Link>
-          <Link to="/shop" className="hover:text-emerald-400" onClick={() => setIsMenuOpen(false)}>Shop</Link>
-          <Link to="/tracking" className="hover:text-emerald-400" onClick={() => setIsMenuOpen(false)}>Tracking</Link>
-          {isAdmin && (
-            <Link to="/admin" className="hover:text-emerald-400" onClick={() => setIsMenuOpen(false)}>Admin</Link>
-          )}
-          <Link to="/cart" className="hover:text-emerald-400 relative" onClick={() => setIsMenuOpen(false)}>
-            Cart {cartItemCount > 0 && `(${cartItemCount})`}
-          </Link>
+          
+          <div className="flex flex-col gap-6 text-center">
+            {/* Navigation Links */}
+            <Link 
+              to="/" 
+              className="py-3 text-lg font-bold tracking-wide uppercase hover:text-emerald-400 transition-colors border-b border-zinc-900"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/shop" 
+              className="py-3 text-lg font-bold tracking-wide uppercase hover:text-emerald-400 transition-colors border-b border-zinc-900"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Shop
+            </Link>
+            <Link 
+              to="/showcase" 
+              className="py-3 text-lg font-bold tracking-wide uppercase hover:text-emerald-400 transition-colors border-b border-zinc-900"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Showcase
+            </Link>
+            <Link 
+              to="/tracking" 
+              className="py-3 text-lg font-bold tracking-wide uppercase hover:text-emerald-400 transition-colors border-b border-zinc-900"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Tracking
+            </Link>
+            
+            {/* Admin Link */}
+            {isAdmin && (
+              <Link 
+                to="/admin" 
+                className="py-3 text-lg font-bold tracking-wide uppercase hover:text-emerald-400 transition-colors border-b border-zinc-900"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Admin
+              </Link>
+            )}
+            
+            {/* Cart Link */}
+            <Link 
+              to="/cart" 
+              className="py-3 text-lg font-bold tracking-wide uppercase hover:text-emerald-400 transition-colors border-b border-zinc-900 flex items-center justify-center gap-3"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Cart
+              {cartItemCount > 0 && (
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-zinc-950">
+                  {cartItemCount}
+                </span>
+              )}
+            </Link>
+
+            {/* Auth Section */}
+            <div className="mt-6 pt-6 border-t-2 border-zinc-800">
+              {!session ? (
+                <Link 
+                  to="/signin" 
+                  className="block py-3 px-6 text-lg font-bold tracking-wide uppercase bg-emerald-500 text-zinc-950 hover:bg-emerald-400 transition-colors rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full py-3 px-6 text-lg font-bold tracking-wide uppercase bg-emerald-500 text-zinc-950 hover:bg-emerald-400 transition-colors rounded-lg"
+                >
+                  Sign Out
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

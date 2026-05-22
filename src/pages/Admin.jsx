@@ -872,33 +872,33 @@ export default function Admin() {
       }}
     >
       <div className="border-b border-white/10 backdrop-blur-xl bg-slate-950/70 sticky top-0 z-20">
-        <div className="w-full max-w-none px-6 md:px-10 py-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="w-full max-w-none px-3 sm:px-6 md:px-10 py-3 sm:py-5 flex flex-col gap-2 sm:gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Admin Control Center</p>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tight uppercase">Operations dashboard</h1>
-            <p className="mt-2 text-sm text-zinc-400">Signed in as {userProfile?.email || session.email}</p>
+            <p className="text-[9px] sm:text-xs uppercase tracking-[0.35em] text-emerald-400">Admin Control Center</p>
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-black tracking-tight uppercase">Operations dashboard</h1>
+            <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-400">Signed in as {userProfile?.email || session.email}</p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Link to="/shop" className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-zinc-300 hover:border-emerald-400 hover:text-emerald-300 transition-colors">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <Link to="/shop" className="rounded-full border border-white/10 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold uppercase tracking-widest text-zinc-300 hover:border-emerald-400 hover:text-emerald-300 transition-colors">
               View shop
             </Link>
-            <button onClick={() => signOut()} className="rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-slate-950 hover:bg-emerald-300 transition-colors">
+            <button onClick={() => signOut()} className="rounded-full bg-emerald-400 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold uppercase tracking-widest text-slate-950 hover:bg-emerald-300 transition-colors">
               Sign out
             </button>
           </div>
         </div>
       </div>
 
-      <main className="w-full max-w-none px-6 md:px-10 py-10">
-        <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-          <aside className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
-            <div className="space-y-4 mb-8">
-              <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Admin sections</p>
-              <h2 className="text-2xl font-black uppercase tracking-tight">Manage everything</h2>
-              <p className="text-sm text-zinc-400">Select the area you want to work with, then use the panel to the right.</p>
+      <main className="w-full max-w-none px-3 sm:px-6 md:px-10 py-6 sm:py-10">
+        <div className="grid gap-6 sm:gap-8 lg:grid-cols-[280px_1fr]">
+          <aside className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/80 p-4 sm:p-6 md:p-8">
+            <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+              <p className="text-[9px] sm:text-xs uppercase tracking-[0.35em] text-emerald-400">Admin sections</p>
+              <h2 className="text-lg sm:text-2xl font-black uppercase tracking-tight">Manage everything</h2>
+              <p className="text-xs sm:text-sm text-zinc-400">Select the area you want to work with, then use the panel to the right.</p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {[
                 { value: 'dashboard', label: 'Dashboard' },
                 { value: 'products', label: 'Products' },
@@ -910,7 +910,7 @@ export default function Admin() {
                   key={tab.value}
                   type="button"
                   onClick={() => setActiveTab(tab.value)}
-                  className={`w-full rounded-3xl border px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.25em] transition ${
+                  className={`w-full rounded-2xl sm:rounded-3xl border px-3 sm:px-4 py-2.5 sm:py-4 text-left text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] transition ${
                     activeTab === tab.value
                       ? 'border-emerald-400 bg-emerald-400/10 text-emerald-300'
                       : 'border-white/10 bg-white/5 text-zinc-200 hover:border-emerald-400 hover:bg-emerald-400/5'
@@ -922,10 +922,10 @@ export default function Admin() {
             </div>
           </aside>
 
-          <div className="space-y-10">
+          <div className="space-y-6 sm:space-y-10">
             {activeTab === 'dashboard' && (
               <>
-                <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <section className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                   {[
                     { label: 'Active users', value: metrics.activeUsers, icon: Users },
                     { label: 'Total users', value: metrics.registeredUsers, icon: Users },
@@ -935,14 +935,14 @@ export default function Admin() {
                     const Icon = item.icon;
 
                     return (
-                      <div key={item.label} className="rounded-4xl border border-white/15 bg-slate-950/90 p-6 shadow-2xl shadow-black/30 backdrop-blur-md">
-                        <div className="flex items-start justify-between gap-4">
+                      <div key={item.label} className="rounded-2xl sm:rounded-4xl border border-white/15 bg-slate-950/90 p-4 sm:p-6 shadow-2xl shadow-black/30 backdrop-blur-md">
+                        <div className="flex items-start justify-between gap-3 sm:gap-4">
                           <div>
-                            <p className="text-xs uppercase tracking-[0.35em] text-zinc-300">{item.label}</p>
-                            <p className="mt-4 text-4xl font-black tracking-tight text-white">{item.value}</p>
+                            <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-300">{item.label}</p>
+                            <p className="mt-2 sm:mt-4 text-2xl sm:text-4xl font-black tracking-tight text-white">{item.value}</p>
                           </div>
-                          <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-emerald-400/15 text-emerald-300 ring-1 ring-emerald-400/20">
-                            <Icon size={24} />
+                          <div className="flex h-10 sm:h-12 w-10 sm:w-12 items-center justify-center rounded-2xl sm:rounded-3xl bg-emerald-400/15 text-emerald-300 ring-1 ring-emerald-400/20 shrink-0">
+                            <Icon size={20} className="sm:w-6 sm:h-6" />
                           </div>
                         </div>
                       </div>
@@ -950,9 +950,9 @@ export default function Admin() {
                   })}
                 </section>
 
-                <section className="grid gap-6 xl:grid-cols-2">
-                  <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
-                    <div className="space-y-4">
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+                  <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/80 p-4 sm:p-6 md:p-8">
+                    <div className="space-y-3 sm:space-y-4">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-zinc-400">Active users</span>
                         <span className="font-semibold text-zinc-100">{metrics.activeUsers}</span>
@@ -979,7 +979,7 @@ export default function Admin() {
                       </div>
                     </div>
 
-                    <div className="mt-8 space-y-4">
+                    <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
                       {Object.entries(metrics.categoryTotals).map(([category, count]) => {
                         const maxCount = Math.max(...Object.values(metrics.categoryTotals), 1);
                         return (
@@ -1003,13 +1003,13 @@ export default function Admin() {
                     </div>
                   </div>
 
-                  <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
-                    <div className="flex items-center gap-3 mb-6">
-                      <BarChart3 size={20} className="text-emerald-300" />
-                      <h2 className="text-2xl font-black uppercase tracking-tight">Recent sales</h2>
+                  <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/80 p-4 sm:p-6 md:p-8">
+                    <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                      <BarChart3 size={18} className="text-emerald-300 shrink-0" />
+                      <h2 className="text-lg sm:text-2xl font-black uppercase tracking-tight">Recent sales</h2>
                     </div>
 
-                    <div className="space-y-3 max-h-96 overflow-auto pr-1">
+                    <div className="space-y-2 sm:space-y-3 max-h-96 overflow-auto pr-1">
                       {orders.length === 0 ? (
                         <div className="rounded-3xl border border-dashed border-white/10 p-5 text-sm text-zinc-500">
                           No purchases recorded yet.
@@ -1019,17 +1019,17 @@ export default function Admin() {
                           const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
 
                           return (
-                            <div key={order.id} className="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm">
-                              <div className="flex items-start justify-between gap-4">
+                            <div key={order.id} className="rounded-2xl border border-white/10 bg-white/5 p-3 text-xs sm:text-sm">
+                              <div className="flex items-start justify-between gap-3">
                                 <div>
-                                  <p className="font-semibold text-zinc-100">{order.purchaserEmail || 'Unknown buyer'}</p>
-                                  <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">
+                                  <p className="font-semibold text-zinc-100 text-[11px] sm:text-sm">{order.purchaserEmail || 'Unknown buyer'}</p>
+                                  <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500">
                                     {order.purchaserRole || 'customer'} · {new Date(order.date).toLocaleDateString()}
                                   </p>
                                 </div>
-                                <div className="text-right">
-                                  <p className="font-semibold text-emerald-300">₱{order.total.toFixed(2)}</p>
-                                  <p className="text-xs text-zinc-500">{itemCount} items sold</p>
+                                <div className="text-right shrink-0">
+                                  <p className="font-semibold text-emerald-300 text-xs sm:text-sm">₱{order.total.toFixed(2)}</p>
+                                  <p className="text-[8px] sm:text-xs text-zinc-500">{itemCount} items</p>
                                 </div>
                               </div>
                             </div>
@@ -1043,7 +1043,7 @@ export default function Admin() {
             )}
 
             {activeTab === 'products' && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
                   <div className="flex items-center justify-between gap-4 mb-6">
                     <div>
@@ -1093,26 +1093,26 @@ export default function Admin() {
                   </div>
                 </div>
 
-                <div className="grid gap-6 xl:grid-cols-2">
-                  <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
-                    <div className="flex items-center justify-between gap-4 mb-6">
+                <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+                  <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/80 p-4 sm:p-6 md:p-8">
+                    <div className="flex items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Product creation</p>
-                        <h2 className="mt-2 text-2xl font-black uppercase tracking-tight">Add new product</h2>
+                        <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-emerald-400">Product creation</p>
+                        <h2 className="mt-1 sm:mt-2 text-lg sm:text-2xl font-black uppercase tracking-tight">Add new product</h2>
                       </div>
-                      <Plus size={20} className="text-emerald-300" />
+                      <Plus size={18} className="text-emerald-300 shrink-0" />
                     </div>
 
                     {!showCreateForm ? (
                       <button
                         onClick={() => setShowCreateForm(true)}
-                        className="rounded-2xl bg-emerald-400 px-5 py-3 text-sm font-bold uppercase tracking-[0.25em] text-slate-950 hover:bg-emerald-300"
+                        className="rounded-xl sm:rounded-2xl bg-emerald-400 px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-[0.25em] text-slate-950 hover:bg-emerald-300"
                       >
                         + Create New Product
                       </button>
                     ) : (
-                      <form onSubmit={handleCreateProduct} className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-2">
+                      <form onSubmit={handleCreateProduct} className="space-y-3 sm:space-y-4">
+                        <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
                           <label className="space-y-2 text-sm text-zinc-300">
                             <span>Product name *</span>
                             <input
@@ -1261,13 +1261,13 @@ export default function Admin() {
                     )}
                   </div>
 
-                  <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
-                    <div className="flex items-center justify-between gap-4 mb-6">
+                  <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/80 p-4 sm:p-6 md:p-8">
+                    <div className="flex items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Product editor</p>
-                        <h2 className="mt-2 text-2xl font-black uppercase tracking-tight">Edit image, price, sizes</h2>
+                        <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-emerald-400">Product editor</p>
+                        <h2 className="mt-1 sm:mt-2 text-lg sm:text-2xl font-black uppercase tracking-tight">Edit image, price, sizes</h2>
                       </div>
-                      <Upload size={20} className="text-emerald-300" />
+                      <Upload size={18} className="text-emerald-300 shrink-0" />
                     </div>
 
                     {activeProducts.length === 0 ? (
@@ -1275,8 +1275,8 @@ export default function Admin() {
                         No active products available to edit.
                       </div>
                     ) : (
-                      <form onSubmit={handleSaveProduct} className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-2">
+                      <form onSubmit={handleSaveProduct} className="space-y-3 sm:space-y-4">
+                        <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
                           <label className="space-y-2 text-sm text-zinc-300">
                             <span>Choose product</span>
                             <select
@@ -1360,17 +1360,17 @@ export default function Admin() {
             )}
 
             {activeTab === 'showcase' && (
-              <div className="space-y-6">
-                <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
-                  <div className="flex items-center justify-between gap-4 mb-6">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/80 p-4 sm:p-6 md:p-8">
+                  <div className="flex items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Showcase gallery</p>
-                      <h2 className="mt-2 text-2xl font-black uppercase tracking-tight">Upload showcase work</h2>
+                      <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-emerald-400">Showcase gallery</p>
+                      <h2 className="mt-1 sm:mt-2 text-lg sm:text-2xl font-black uppercase tracking-tight">Upload showcase work</h2>
                     </div>
-                    <Upload size={20} className="text-emerald-300" />
+                    <Upload size={18} className="text-emerald-300 shrink-0" />
                   </div>
-                  <form onSubmit={handleCreateShowcaseItem} className="space-y-4">
-                    <div className="grid gap-4 md:grid-cols-2">
+                  <form onSubmit={handleCreateShowcaseItem} className="space-y-3 sm:space-y-4">
+                    <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
                       <label className="space-y-2 text-sm text-zinc-300">
                         <span>Category</span>
                         <select
@@ -1402,24 +1402,24 @@ export default function Admin() {
                       </label>
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <label className="space-y-2 text-sm text-zinc-300">
+                    <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
+                      <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-zinc-300">
                         <span>Title</span>
                         <input
                           type="text"
                           value={showcaseForm.title}
                           onChange={(event) => setShowcaseForm((current) => ({ ...current, title: event.target.value }))}
-                          className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-50 outline-none focus:border-emerald-400"
+                          className="w-full rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 px-3 sm:px-4 py-2 sm:py-3 text-zinc-50 outline-none focus:border-emerald-400 text-xs sm:text-sm"
                           placeholder="Optional title"
                         />
                       </label>
-                      <label className="space-y-2 text-sm text-zinc-300">
+                      <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-zinc-300">
                         <span>Description</span>
                         <input
                           type="text"
                           value={showcaseForm.description}
                           onChange={(event) => setShowcaseForm((current) => ({ ...current, description: event.target.value }))}
-                          className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-50 outline-none focus:border-emerald-400"
+                          className="w-full rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 px-3 sm:px-4 py-2 sm:py-3 text-zinc-50 outline-none focus:border-emerald-400 text-xs sm:text-sm"
                           placeholder="Optional description"
                         />
                       </label>
@@ -1443,18 +1443,18 @@ export default function Admin() {
                       <p className="text-xs text-zinc-500">Use either an image URL or upload a photo directly.</p>
                     </label>
 
-                    <div className="flex flex-col gap-3 sm:flex-row">
+                    <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row">
                       <button
                         type="submit"
                         disabled={savingShowcase}
-                        className="flex-1 rounded-2xl bg-emerald-400 px-5 py-3 text-sm font-bold uppercase tracking-[0.25em] text-slate-950 hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex-1 rounded-xl sm:rounded-2xl bg-emerald-400 px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-[0.25em] text-slate-950 hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {savingShowcase ? 'Uploading…' : 'Upload Showcase Photo'}
                       </button>
                       <button
                         type="button"
                         onClick={resetShowcaseForm}
-                        className="flex-1 rounded-2xl border border-white/10 px-5 py-3 text-sm font-bold uppercase tracking-[0.25em] text-zinc-300 hover:border-emerald-400 hover:text-emerald-300"
+                        className="flex-1 rounded-xl sm:rounded-2xl border border-white/10 px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-[0.25em] text-zinc-300 hover:border-emerald-400 hover:text-emerald-300"
                       >
                         Reset
                       </button>
@@ -1466,21 +1466,21 @@ export default function Admin() {
                   </form>
                 </div>
 
-                <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
-                  <div className="flex items-center justify-between gap-4 mb-6">
+                <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/80 p-4 sm:p-6 md:p-8">
+                  <div className="flex items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Current showcase items</p>
-                      <h3 className="mt-2 text-xl font-black uppercase tracking-tight">Gallery entries</h3>
+                      <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-emerald-400">Current showcase items</p>
+                      <h3 className="mt-1 sm:mt-2 text-base sm:text-xl font-black uppercase tracking-tight">Gallery entries</h3>
                     </div>
-                    <span className="text-sm text-zinc-400">{showcaseItems.length} item{showcaseItems.length === 1 ? '' : 's'}</span>
+                    <span className="text-xs sm:text-sm text-zinc-400">{showcaseItems.length} item{showcaseItems.length === 1 ? '' : 's'}</span>
                   </div>
 
                   {showcaseItems.length === 0 ? (
-                    <div className="rounded-3xl border border-dashed border-white/10 p-8 text-center text-zinc-500">
+                    <div className="rounded-2xl sm:rounded-3xl border border-dashed border-white/10 p-6 sm:p-8 text-center text-sm sm:text-base text-zinc-500">
                       No showcase photos added yet.
                     </div>
                   ) : (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                       {showcaseItems.map((item) => (
                         <article key={item.id} className="rounded-3xl border border-white/10 bg-white/5 overflow-hidden">
                           <div className="aspect-square overflow-hidden bg-zinc-900">
@@ -1508,16 +1508,16 @@ export default function Admin() {
             )}
 
             {activeTab === 'users' && (
-              <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 md:p-8">
-                <div className="flex items-center justify-between gap-4 mb-6">
+              <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/80 p-4 sm:p-6 md:p-8">
+                <div className="flex items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">User control</p>
-                    <h2 className="mt-2 text-2xl font-black uppercase tracking-tight">Account moderation</h2>
+                    <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-emerald-400">User control</p>
+                    <h2 className="mt-1 sm:mt-2 text-lg sm:text-2xl font-black uppercase tracking-tight">Account moderation</h2>
                   </div>
-                  <ShieldCheck size={20} className="text-emerald-300" />
+                  <ShieldCheck size={18} className="text-emerald-300 shrink-0" />
                 </div>
 
-                <div className="space-y-4 max-h-136 overflow-auto pr-1">
+                <div className="space-y-3 sm:space-y-4 max-h-136 overflow-auto pr-1">
                   {accountUsers.map((user) => (
                     <div key={user.uid} className="rounded-3xl border border-white/10 bg-white/5 p-4">
                       <div className="flex items-start justify-between gap-4">
@@ -1585,13 +1585,13 @@ export default function Admin() {
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between mb-8">
                   <div className="flex items-center gap-3">
                     <BarChart3 size={20} className="text-emerald-300" />
-                      <div>
+                    <div>
                       <h2 className="text-3xl font-black uppercase tracking-tight">Sales analytics</h2>
-                      <p className="mt-1 text-sm text-zinc-400">Sales, product and category performance for approved sales.</p>
+                      <p className="mt-1 text-sm text-zinc-400">Revenue, product and category performance for approved sales.</p>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                     {[
                       { label: '7d', value: '7d' },
                       { label: '30d', value: '30d' },
@@ -1601,7 +1601,7 @@ export default function Admin() {
                         key={range.value}
                         type="button"
                         onClick={() => handleSelectRange(range.value)}
-                        className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.28em] transition ${
+                        className={`rounded-full border px-2.5 sm:px-3 py-1.5 sm:py-2 text-[9px] sm:text-xs font-semibold uppercase tracking-[0.28em] transition ${
                           selectedRange === range.value
                             ? 'border-emerald-400 bg-emerald-400/10 text-emerald-200'
                             : 'border-white/10 bg-slate-950 text-zinc-300 hover:border-emerald-400 hover:text-emerald-200'
@@ -1613,7 +1613,7 @@ export default function Admin() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between mb-6">
+                <div className="flex flex-col gap-2.5 sm:gap-3 lg:flex-row lg:items-center lg:justify-between mb-4 sm:mb-6">
                   <div className="flex flex-wrap items-center gap-3">
                     <label className="text-xs text-zinc-400">From</label>
                     <input
@@ -1641,23 +1641,25 @@ export default function Admin() {
                     <button
                       type="button"
                       onClick={handleDownloadSalesReport}
-                      className="rounded-2xl border border-emerald-400/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 flex items-center gap-2"
+                      className="rounded-lg sm:rounded-2xl border border-emerald-400/40 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 flex items-center gap-1 sm:gap-2 shrink-0"
                     >
-                      <Download size={14} />
-                      Download PDF
+                      <Download size={12} className="sm:w-3.5 sm:h-3.5" />
+                      <span className="hidden sm:inline">Download PDF</span>
+                      <span className="sm:hidden">PDF</span>
                     </button>
                     <button
                       type="button"
                       onClick={handleDownloadSalesReportExcel}
-                      className="rounded-2xl border border-cyan-400/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-cyan-200 hover:border-cyan-300 hover:text-cyan-100 flex items-center gap-2"
+                      className="rounded-lg sm:rounded-2xl border border-cyan-400/40 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-cyan-200 hover:border-cyan-300 hover:text-cyan-100 flex items-center gap-1 sm:gap-2 shrink-0"
                     >
-                      <Download size={14} />
-                      Download Excel
+                      <Download size={12} className="sm:w-3.5 sm:h-3.5" />
+                      <span className="hidden sm:inline">Download Excel</span>
+                      <span className="sm:hidden">Excel</span>
                     </button>
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-6">
+                <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 mb-4 sm:mb-6">
                   {[{
                     label: 'Sales',
                     value: `₱${salesAnalytics.totalRevenue.toFixed(2)}`,
@@ -1689,37 +1691,37 @@ export default function Admin() {
 
                 <div className="space-y-4 mb-6">
                   <div className="rounded-4xl border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
-                      <div className="flex items-center justify-between mb-5 gap-4">
+                    <div className="flex items-center justify-between mb-5 gap-4">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Daily sales</p>
-                        <p className="text-sm text-zinc-400">Sales movement across the selected range.</p>
+                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Daily revenue</p>
+                        <p className="text-sm text-zinc-400">Revenue movement across the selected range.</p>
                       </div>
-                      <span className="inline-flex rounded-full bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300">{salesAnalytics.dailySales.length} days</span>
+                      <span className="inline-flex rounded-full bg-white/5 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300 shrink-0">{salesAnalytics.dailySales.length} days</span>
                     </div>
-                    <ChartContainer className="h-72 rounded-[1.75rem] bg-slate-950/70 p-3" config={{ revenue: { color: '#34d399' } }}>
-                      <AreaChart data={salesAnalytics.dailySales} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
+                    <ChartContainer className="h-48 sm:h-64 lg:h-72 rounded-xl sm:rounded-[1.75rem] bg-slate-950/70 p-2 sm:p-3" config={{ revenue: { color: '#34d399' } }}>
+                      <AreaChart data={salesAnalytics.dailySales} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
                         <CartesianGrid stroke="rgba(148,163,184,0.12)" strokeDasharray="4 4" vertical={false} />
-                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 13 }} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 13 }} tickFormatter={(value) => `₱${value}`} />
+                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 10 }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 10 }} tickFormatter={(value) => `₱${value}`} />
                         <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: 10 }} formatter={(value) => `₱${value.toFixed(2)}`} />
-                        <Area type="monotone" dataKey="total" stroke="#34d399" fill="rgba(52,211,153,0.18)" strokeWidth={3} />
+                        <Area type="monotone" dataKey="total" stroke="#34d399" fill="rgba(52,211,153,0.18)" strokeWidth={2} />
                       </AreaChart>
                     </ChartContainer>
                   </div>
 
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div className="rounded-4xl border border-white/10 bg-slate-950/85 p-4 shadow-2xl shadow-black/20 backdrop-blur-sm flex flex-col min-h-0">
-                      <div className="flex items-center justify-between mb-3 gap-4 px-4 pt-4">
+                  <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
+                    <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/85 p-3 sm:p-4 shadow-2xl shadow-black/20 backdrop-blur-sm flex flex-col min-h-0">
+                      <div className="flex items-center justify-between mb-2 sm:mb-3 gap-3 sm:gap-4 px-2 sm:px-4 pt-2 sm:pt-4">
                         <div>
                           <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Top products</p>
-                          <p className="text-sm text-zinc-400">Sales share for your best sellers.</p>
+                          <p className="text-sm text-zinc-400">Revenue share for your best sellers.</p>
                         </div>
-                        <span className="text-xs uppercase tracking-[0.35em] text-zinc-500">By sales</span>
+                        <span className="text-xs uppercase tracking-[0.35em] text-zinc-500">By revenue</span>
                       </div>
                       {salesAnalytics.topProducts.length === 0 ? (
-                        <div className="grid h-80 place-items-center rounded-2xl border border-dashed border-white/10 text-sm text-zinc-500">No product sales yet.</div>
+                        <div className="grid h-80 place-items-center rounded-2xl border border-dashed border-white/10 text-sm text-zinc-500">No product revenue yet.</div>
                       ) : (
-                        <ChartContainer className="h-96 rounded-3xl bg-slate-950/80 p-4" config={{ revenue: { color: '#f59e0b' } }}>
+                        <ChartContainer className="h-80 rounded-3xl bg-slate-950/80 p-4" config={{ revenue: { color: '#f59e0b' } }}>
                           <PieChart>
                             <Pie
                               data={salesAnalytics.topProducts}
@@ -1729,9 +1731,9 @@ export default function Admin() {
                               cy="50%"
                               startAngle={90}
                               endAngle={-270}
-                              innerRadius={36}
-                              outerRadius={110}
-                              paddingAngle={2}
+                              innerRadius={48}
+                              outerRadius={78}
+                              paddingAngle={6}
                               stroke="#0f172a"
                               strokeWidth={2}
                               labelLine={false}
@@ -1768,13 +1770,13 @@ export default function Admin() {
                       )}
                     </div>
 
-                    <div className="rounded-4xl border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
-                      <div className="flex items-center justify-between mb-5 gap-4">
+                    <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/85 p-3 sm:p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                      <div className="flex items-center justify-between mb-3 sm:mb-5 gap-3 sm:gap-4">
                         <div>
-                          <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Category sales</p>
-                          <p className="text-sm text-zinc-400">Quantity breakdown by category.</p>
+                          <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-400">Category sales</p>
+                          <p className="text-[10px] sm:text-sm text-zinc-400">Quantity breakdown by category.</p>
                         </div>
-                        <span className="text-xs uppercase tracking-[0.35em] text-zinc-500">Quantity sold</span>
+                        <span className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500 shrink-0">Quantity sold</span>
                       </div>
                       {(() => {
                         const categoryData = Object.entries(salesAnalytics.categoryTotals).map(([category, count]) => ({ category, count }));
@@ -1787,7 +1789,7 @@ export default function Admin() {
                         else autoBarSize = 30;
 
                         return (
-                          <ChartContainer className="flex-1 w-full rounded-3xl bg-slate-950/80 p-3 min-h-0" config={{ count: { color: '#60a5fa' } }}>
+                          <ChartContainer className="flex-1 w-full rounded-2xl bg-slate-950/80 p-2 sm:p-3 min-h-0" config={{ count: { color: '#60a5fa' } }}>
                             <BarChart data={categoryData} margin={{ top: 14, right: 6, left: 6, bottom: 34 }} barSize={autoBarSize} barCategoryGap="10%" barGap={12}>
                                 <defs>
                                   <linearGradient id={`barGrad-${barGradId}`} x1="0" y1="0" x2="0" y2="1">
@@ -1809,29 +1811,29 @@ export default function Admin() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr] mb-6">
-                  <div className="rounded-4xl border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
-                    <div className="flex items-center justify-between mb-5 gap-4">
+                <div className="grid gap-3 sm:gap-4 lg:grid-cols-[1.2fr_0.8fr] mb-4 sm:mb-6">
+                  <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/85 p-3 sm:p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-3 sm:mb-5 gap-3 sm:gap-4">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Sales details</p>
-                        <p className="text-sm text-zinc-400">Snapshot of top-selling products in the selected period.</p>
+                        <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-400">Sales details</p>
+                        <p className="text-[10px] sm:text-sm text-zinc-400">Snapshot of top-selling products in the selected period.</p>
                       </div>
-                      <span className="inline-flex rounded-full bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300">Top performers</span>
+                      <span className="inline-flex rounded-full bg-white/5 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300 shrink-0">Top performers</span>
                     </div>
                     {salesAnalytics.topProducts.length === 0 ? (
-                      <div className="rounded-2xl border border-dashed border-white/10 p-5 text-sm text-zinc-500">
+                      <div className="rounded-xl sm:rounded-2xl border border-dashed border-white/10 p-3 sm:p-5 text-xs sm:text-sm text-zinc-500">
                         No product sales in the selected range.
                       </div>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         {salesAnalytics.topProducts.map((product) => (
-                          <div key={product.name} className="rounded-3xl border border-white/10 bg-slate-950/80 p-4 shadow-sm shadow-black/10">
-                            <div className="flex items-center justify-between gap-3 text-sm">
+                          <div key={product.name} className="rounded-2xl border border-white/10 bg-slate-950/80 p-2.5 sm:p-4 shadow-sm shadow-black/10">
+                            <div className="flex items-center justify-between gap-3 text-xs sm:text-sm">
                               <div>
-                                <p className="font-semibold text-white">{product.name}</p>
-                                <p className="text-xs text-zinc-500">{product.quantity} sold</p>
+                                <p className="font-semibold text-white text-[10px] sm:text-sm">{product.name}</p>
+                                <p className="text-[8px] sm:text-xs text-zinc-500">{product.quantity} sold</p>
                               </div>
-                              <p className="text-sm font-semibold text-emerald-300">₱{product.revenue.toFixed(2)}</p>
+                              <p className="text-[10px] sm:text-sm font-semibold text-emerald-300 shrink-0">₱{product.revenue.toFixed(2)}</p>
                             </div>
                           </div>
                         ))}
@@ -1839,28 +1841,28 @@ export default function Admin() {
                     )}
                   </div>
 
-                  <div className="rounded-4xl border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
-                    <div className="flex items-center justify-between mb-5 gap-4">
+                  <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/85 p-3 sm:p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-3 sm:mb-5 gap-3 sm:gap-4">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Sales activity</p>
-                        <p className="text-sm text-zinc-400">Live metrics to keep your operations moving.</p>
+                        <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-400">Sales activity</p>
+                        <p className="text-[10px] sm:text-sm text-zinc-400">Live metrics to keep your operations moving.</p>
                       </div>
-                      <span className="inline-flex rounded-full bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300">Live</span>
+                      <span className="inline-flex rounded-full bg-white/5 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300 shrink-0">Live</span>
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-3xl border border-white/10 bg-slate-950/70 p-4 text-sm text-zinc-200 shadow-sm shadow-black/10">
-                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Approved orders</p>
-                        <p className="mt-3 text-3xl font-bold tracking-tight text-emerald-300">{salesAnalytics.orderCount}</p>
+                    <div className="grid gap-2 sm:gap-3 sm:grid-cols-2">
+                      <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-3 sm:p-4 text-xs sm:text-sm text-zinc-200 shadow-sm shadow-black/10">
+                        <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500">Approved orders</p>
+                        <p className="mt-2 sm:mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-emerald-300">{salesAnalytics.orderCount}</p>
                       </div>
-                      <div className="rounded-3xl border border-white/10 bg-slate-950/70 p-4 text-sm text-zinc-200 shadow-sm shadow-black/10">
-                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Total items sold</p>
-                        <p className="mt-3 text-3xl font-bold tracking-tight text-emerald-300">{salesAnalytics.itemCount}</p>
+                      <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-3 sm:p-4 text-xs sm:text-sm text-zinc-200 shadow-sm shadow-black/10">
+                        <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500">Total items sold</p>
+                        <p className="mt-2 sm:mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-emerald-300">{salesAnalytics.itemCount}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-3 max-h-96 overflow-auto pr-1">
+                <div className="space-y-2 sm:space-y-3 max-h-96 overflow-auto pr-1">
                   {orders.length === 0 ? (
                     <div className="rounded-3xl border border-dashed border-white/10 p-5 text-sm text-zinc-500">
                       No purchases recorded yet.
@@ -1888,17 +1890,17 @@ export default function Admin() {
                               </div>
                             </div>
 
-                            <div className="grid gap-4 xl:grid-cols-[1.3fr_0.9fr]">
-                              <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-3 space-y-4">
-                                <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Customer and order details</p>
+                            <div className="grid gap-2 sm:gap-4 lg:grid-cols-[1.3fr_0.9fr]">
+                              <div className="rounded-xl sm:rounded-2xl border border-white/10 bg-slate-950/70 p-2.5 sm:p-3 space-y-2 sm:space-y-4 text-xs">
+                                <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-400">Customer and order details</p>
 
-                                <div className="grid gap-3 md:grid-cols-2">
-                                  <div className="space-y-1 text-xs text-zinc-300">
+                                <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2">
+                                  <div className="space-y-0.5 sm:space-y-1 text-[9px] sm:text-xs text-zinc-300">
                                     <p><span className="text-zinc-500">Name:</span> {`${order.shipping?.firstName || ''} ${order.shipping?.lastName || ''}`.trim() || 'N/A'}</p>
                                     <p><span className="text-zinc-500">Email:</span> {order.shipping?.email || order.purchaserEmail || 'N/A'}</p>
                                     <p><span className="text-zinc-500">Phone:</span> {order.shipping?.phone || 'N/A'}</p>
                                   </div>
-                                  <div className="space-y-1 text-xs text-zinc-300">
+                                  <div className="space-y-0.5 sm:space-y-1 text-[9px] sm:text-xs text-zinc-300">
                                     <p><span className="text-zinc-500">Address:</span> {order.shipping?.addressLine || 'N/A'}</p>
                                     <p><span className="text-zinc-500">City:</span> {order.shipping?.city || 'N/A'}</p>
                                     <p><span className="text-zinc-500">Province:</span> {order.shipping?.stateProvince || 'N/A'}</p>
@@ -1906,16 +1908,16 @@ export default function Admin() {
                                   </div>
                                 </div>
 
-                                <div className="overflow-x-auto rounded-xl border border-white/10">
-                                  <table className="w-full min-w-160 text-left text-xs">
-                                    <thead className="bg-white/5 text-zinc-400 uppercase tracking-[0.2em]">
+                                <div className="overflow-x-auto rounded-lg sm:rounded-xl border border-white/10 -mx-2.5 sm:mx-0">
+                                  <table className="w-full min-w-140 text-left text-[8px] sm:text-xs">
+                                    <thead className="bg-white/5 text-zinc-400 uppercase tracking-[0.2em] text-[7px] sm:text-[10px]">
                                       <tr>
-                                        <th className="px-3 py-2 font-semibold">Item</th>
-                                        <th className="px-3 py-2 font-semibold">Category</th>
-                                        <th className="px-3 py-2 font-semibold">Size</th>
-                                        <th className="px-3 py-2 font-semibold">Quantity</th>
-                                        <th className="px-3 py-2 font-semibold">Unit Price</th>
-                                        <th className="px-3 py-2 font-semibold">Subtotal</th>
+                                        <th className="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold">Item</th>
+                                        <th className="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold">Category</th>
+                                        <th className="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold">Size</th>
+                                        <th className="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold text-right">Qty</th>
+                                        <th className="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold text-right">Price</th>
+                                        <th className="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold text-right">Subtotal</th>
                                       </tr>
                                     </thead>
                                     <tbody>
@@ -1925,13 +1927,13 @@ export default function Admin() {
                                         const subtotal = unitPrice * quantity;
 
                                         return (
-                                          <tr key={`${order.id}-${item.product?.id || item.productId || index}-${item.size || 'default'}`} className="border-t border-white/10 text-zinc-200">
-                                            <td className="px-3 py-2">{item.product?.name || item.name || 'Unnamed item'}</td>
-                                            <td className="px-3 py-2">{item.product?.category || 'N/A'}</td>
-                                            <td className="px-3 py-2">{item.size || 'N/A'}</td>
-                                            <td className="px-3 py-2">{quantity}</td>
-                                            <td className="px-3 py-2">₱{unitPrice.toFixed(2)}</td>
-                                            <td className="px-3 py-2">₱{subtotal.toFixed(2)}</td>
+                                          <tr key={`${order.id}-${item.product?.id || item.productId || index}-${item.size || 'default'}`} className="border-t border-white/10 text-zinc-200 text-[8px] sm:text-xs">
+                                            <td className="px-2 sm:px-3 py-1 sm:py-2 truncate">{item.product?.name || item.name || 'Unnamed item'}</td>
+                                            <td className="px-2 sm:px-3 py-1 sm:py-2">{item.product?.category || 'N/A'}</td>
+                                            <td className="px-2 sm:px-3 py-1 sm:py-2">{item.size || 'N/A'}</td>
+                                            <td className="px-2 sm:px-3 py-1 sm:py-2 text-right">{quantity}</td>
+                                            <td className="px-2 sm:px-3 py-1 sm:py-2 text-right">₱{unitPrice.toFixed(2)}</td>
+                                            <td className="px-2 sm:px-3 py-1 sm:py-2 text-right">₱{subtotal.toFixed(2)}</td>
                                           </tr>
                                         );
                                       })}
@@ -1968,35 +1970,37 @@ export default function Admin() {
                             </div>
 
                             {isPendingPayment && (
-                              <div className="grid gap-2 sm:grid-cols-2">
+                              <div className="grid gap-1.5 sm:gap-2 grid-cols-2 sm:grid-cols-2">
                                 <button
                                   type="button"
                                   onClick={() => handleApprovePayment(order.id)}
                                   disabled={busyOrderId === order.id}
-                                  className="rounded-2xl border border-emerald-400/40 px-4 py-3 text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 disabled:opacity-60 flex items-center justify-center gap-2"
+                                  className="rounded-lg sm:rounded-2xl border border-emerald-400/40 px-2.5 sm:px-4 py-1.5 sm:py-3 text-[8px] sm:text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 disabled:opacity-60 flex items-center justify-center gap-1 sm:gap-2"
                                 >
-                                  <CircleCheckBig size={14} />
-                                  Approve Payment
+                                  <CircleCheckBig size={12} className="sm:w-3.5 sm:h-3.5" />
+                                  <span className="hidden sm:inline">Approve Payment</span>
+                                  <span className="sm:hidden">Approve</span>
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleRejectPayment(order.id)}
                                   disabled={busyOrderId === order.id}
-                                  className="rounded-2xl border border-rose-400/40 px-4 py-3 text-xs font-bold uppercase tracking-[0.25em] text-rose-200 hover:border-rose-300 hover:text-rose-100 disabled:opacity-60 flex items-center justify-center gap-2"
+                                  className="rounded-lg sm:rounded-2xl border border-rose-400/40 px-2.5 sm:px-4 py-1.5 sm:py-3 text-[8px] sm:text-xs font-bold uppercase tracking-[0.25em] text-rose-200 hover:border-rose-300 hover:text-rose-100 disabled:opacity-60 flex items-center justify-center gap-1 sm:gap-2"
                                 >
-                                  <CircleX size={14} />
-                                  Reject Payment
+                                  <CircleX size={12} className="sm:w-3.5 sm:h-3.5" />
+                                  <span className="hidden sm:inline">Reject Payment</span>
+                                  <span className="sm:hidden">Reject</span>
                                 </button>
                               </div>
                             )}
 
-                            <div className="grid gap-3 sm:grid-cols-[1fr_auto] items-center">
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.35em] text-emerald-300">
+                            <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-[1fr_auto] items-center">
+                              <div className="space-y-1.5 sm:space-y-2">
+                                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                  <span className="rounded-full bg-emerald-500/10 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-emerald-300">
                                     {order.status}
                                   </span>
-                                  <span className="text-xs uppercase tracking-[0.35em] text-zinc-500">Order ID {order.id}</span>
+                                  <span className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500">ID {order.id.substring(0, 8)}…</span>
                                 </div>
                                 <label className="block text-xs uppercase tracking-[0.35em] text-zinc-400">
                                   Update tracking status

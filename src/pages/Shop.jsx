@@ -21,18 +21,18 @@ export const Shop = () => {
   }, [activeProducts, selectedCategory]);
 
   return (
-    <div className="px-6 md:px-12 py-12">
-      <header className="mb-20">
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase mb-6">
+    <div className="px-3 sm:px-6 md:px-12 py-8 sm:py-12">
+      <header className="mb-8 sm:mb-12 md:mb-20">
+        <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-bold tracking-tighter uppercase mb-4 sm:mb-6">
           The Collection
         </h1>
-        <div className="flex gap-4 text-sm tracking-widest uppercase overflow-x-auto pb-4 hide-scrollbar">
+        <div className="flex gap-2 sm:gap-4 text-[10px] sm:text-xs md:text-sm tracking-widest uppercase overflow-x-auto pb-4 hide-scrollbar">
           {categories.map((cat) => (
             <button
               key={cat}
               type="button"
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full border transition-colors whitespace-nowrap ${
+              className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full border transition-colors whitespace-nowrap text-[10px] sm:text-sm ${
                 selectedCategory === cat
                   ? 'border-emerald-500 text-emerald-400'
                   : 'border-zinc-800 hover:border-emerald-500 hover:text-emerald-400'
@@ -53,7 +53,7 @@ export const Shop = () => {
           No products found for {selectedCategory}.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4 lg:gap-6">
           {filteredProducts.map((product, index) => (
           <motion.div
             key={product.id}
@@ -62,7 +62,7 @@ export const Shop = () => {
             transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
             <Link to={`/product/${product.id}`} className="group block">
-              <div className="aspect-3/4 overflow-hidden rounded-sm bg-zinc-900 mb-6 relative">
+              <div className="aspect-3/4 overflow-hidden rounded-lg sm:rounded-2xl bg-zinc-900 mb-2 sm:mb-4 lg:mb-6 relative">
                 <motion.img 
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.6 }}
@@ -71,12 +71,10 @@ export const Shop = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-xl font-bold group-hover:text-emerald-400 transition-colors">{product.name}</h3>
-                  <p className="text-sm text-zinc-500 mt-1 uppercase tracking-widest">{product.category}</p>
-                </div>
-                <p className="text-lg font-medium">₱{product.price}</p>
+              <div className="flex flex-col gap-1 sm:gap-2">
+                <h3 className="text-xs sm:text-base lg:text-lg font-bold group-hover:text-emerald-400 transition-colors line-clamp-1">{product.name}</h3>
+                <p className="text-[8px] sm:text-xs text-zinc-500 uppercase tracking-widest hidden sm:block">{product.category}</p>
+                <p className="text-xs sm:text-base lg:text-lg font-medium">₱{product.price}</p>
               </div>
             </Link>
           </motion.div>
