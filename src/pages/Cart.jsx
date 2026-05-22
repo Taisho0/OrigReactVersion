@@ -3,7 +3,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router';
 import { useStore } from '../context/StoreContext';
-import { Trash2, Plus, Minus, ArrowRight, Upload, X } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowRight, Upload, X, AlertCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -173,6 +173,32 @@ export const Cart = () => {
                         <img src={item.layoutImage} alt="Layout preview" className="w-full h-auto max-h-32 object-contain rounded" />
                       </div>
                     )}
+                    
+                    {/* Per-Item Checkout Button */}
+                    <div className="mt-4 sm:mt-5">
+                      {!item.layoutImage && (
+                        <div className="flex items-center gap-2 p-3 sm:p-4 bg-amber-500/10 border border-amber-500/30 rounded-sm mb-3">
+                          <AlertCircle size={16} className="text-amber-400 shrink-0" />
+                          <p className="text-xs sm:text-sm text-amber-200">Please upload a design to checkout this item</p>
+                        </div>
+                      )}
+                      <button 
+                        onClick={() => {
+                          if (item.layoutImage) {
+                            navigate('/checkout');
+                          }
+                        }}
+                        disabled={!item.layoutImage}
+                        className={`w-full py-2.5 sm:py-3 px-4 rounded font-bold uppercase tracking-widest text-xs sm:text-sm transition-all flex items-center justify-center gap-2 group ${
+                          item.layoutImage 
+                            ? 'bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer' 
+                            : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+                        }`}
+                      >
+                        Checkout
+                        <ArrowRight size={16} className={`${item.layoutImage ? 'group-hover:translate-x-1' : ''} transition-transform`} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -200,13 +226,11 @@ export const Cart = () => {
               </div>
             </div>
 
-            <button 
-              onClick={() => navigate('/checkout')}
-              className="w-full py-3 sm:py-5 flex items-center justify-center gap-3 bg-zinc-50 text-zinc-950 text-xs sm:text-base font-bold tracking-widest uppercase hover:bg-emerald-400 transition-colors group"
-            >
-              Checkout
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </button>
+            <div className="p-3 sm:p-4 bg-zinc-900/50 rounded-sm border border-zinc-800">
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                To proceed with checkout, please upload a design for each item in your cart. Once uploaded, click the <span className="text-emerald-400 font-semibold">Checkout</span> button on that item to complete your order.
+              </p>
+            </div>
           </div>
         </div>
       </div>
