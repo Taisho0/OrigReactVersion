@@ -286,6 +286,26 @@ export const Checkout = () => {
     setPaymentError('');
     setPaymentMessage(paymentCheckoutUrl ? 'Opening PayMongo checkout. Complete payment with GCash, then return here.' : 'Opening the QR code in a new tab. Scan it with GCash or a QR-enabled banking app.');
 
+    // Best-effort: try to open GCash via Android intent when on Android devices.
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    const isAndroid = /Android/i.test(ua);
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
+    if (isAndroid && paymentCheckoutUrl) {
+      try {
+        const intentUrl = `intent://pay?url=${encodeURIComponent(paymentCheckoutUrl)}#Intent;package=com.globe.gcash.android;scheme=gcash;end`;
+        window.location.href = intentUrl;
+        // Fallback to opening the checkout URL after a short delay if the intent fails
+        setTimeout(() => {
+          window.location.href = paymentCheckoutUrl;
+        }, 1200);
+        return;
+      } catch (e) {
+        // continue to default behavior below
+      }
+    }
+
+    // On iOS or desktop, open in a new tab or navigate if popup blocked.
     const popup = window.open(targetUrl, '_blank', 'noopener,noreferrer');
     if (!popup) {
       window.location.href = targetUrl;
