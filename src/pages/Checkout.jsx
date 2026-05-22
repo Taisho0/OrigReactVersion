@@ -275,23 +275,6 @@ export const Checkout = () => {
     }
   };
 
-  const handleRedirectToGcash = () => {
-    const targetUrl = paymentCheckoutUrl || paymentQrUrl;
-
-    if (!targetUrl) {
-      setPaymentError('Payment session is not available yet. Please wait for the QR code.');
-      return;
-    }
-
-    setPaymentError('');
-    setPaymentMessage(paymentCheckoutUrl ? 'Opening PayMongo checkout. Complete payment with GCash, then return here.' : 'Opening the QR code in a new tab. Scan it with GCash or a QR-enabled banking app.');
-
-    const popup = window.open(targetUrl, '_blank', 'noopener,noreferrer');
-    if (!popup) {
-      window.location.href = targetUrl;
-    }
-  };
-
   if (shouldRedirectToCart) {
     return null;
   }
@@ -304,8 +287,8 @@ export const Checkout = () => {
         </div>
         
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tighter uppercase mb-4 sm:mb-6">Pending Admin Approval</h1>
-        <p className="text-base sm:text-xl font-light text-zinc-400 mb-2">Order #{orderId}</p>
-        <p className="text-sm sm:text-zinc-500 mb-8 sm:mb-12 max-w-md">Your payment proof has been submitted. An admin will review and confirm your receipt shortly. Your order will be completed once approved.</p>
+        <p className="text-base sm:text-xl font-semibold text-zinc-200 mb-3">Order #{orderId}</p>
+        <p className="text-base sm:text-lg md:text-xl leading-relaxed text-zinc-100 mb-8 sm:mb-12 max-w-lg mx-auto">Your payment proof has been submitted. An admin will review and confirm your receipt shortly, and your order will be completed once approved.</p>
         
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 w-full sm:w-auto">
           <button 
@@ -410,16 +393,6 @@ export const Checkout = () => {
                   )}
                 </div>
                 <p className="text-[11px] sm:text-xs text-zinc-400 text-center">Ref: {paymentReference || 'Pending'} • Amount: ₱{cartTotal.toFixed(2)}</p>
-
-                <button
-                  type="button"
-                  onClick={handleRedirectToGcash}
-                  disabled={creatingSession || (!paymentCheckoutUrl && !paymentQrUrl)}
-                  className="w-full py-2.5 sm:py-3 border border-zinc-700 text-zinc-100 text-xs sm:text-sm font-bold uppercase tracking-widest hover:border-emerald-500 hover:text-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Smartphone size={16} />
-                  Open Payment
-                </button>
 
                 <label className="w-full py-2.5 sm:py-3 border border-zinc-700 text-zinc-100 text-xs sm:text-sm font-bold uppercase tracking-widest hover:border-emerald-500 hover:text-emerald-400 transition-colors flex items-center justify-center gap-2 cursor-pointer">
                   <Upload size={16} />

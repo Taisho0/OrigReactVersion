@@ -341,6 +341,10 @@ export default function Admin() {
       const paymentStatus = order.payment?.status;
       return !paymentStatus || paymentStatus === 'approved';
     });
+    const pendingPaymentOrders = orders.filter((order) => {
+      const paymentStatus = order.payment?.status;
+      return ['pending_review', 'pending', 'review'].includes(paymentStatus) || order.status === 'Pending Payment Approval';
+    });
     const registeredUsers = firebaseUsers.length;
     const activeUsers = firebaseUsers.filter((user) => user.status === 'active').length;
     const suspendedUsers = firebaseUsers.filter((user) => user.status === 'suspended').length;
@@ -366,6 +370,7 @@ export default function Admin() {
       revenueFromNormalUsers,
       categoryTotals,
       approvedOrders,
+      pendingPaymentOrdersCount: pendingPaymentOrders.length,
     };
   }, [activeProducts, firebaseUsers, orders]);
 
@@ -407,7 +412,7 @@ export default function Admin() {
       end.setHours(23, 59, 59, 999);
     }
 
-    return metrics.approvedOrders.filter((order) => {
+    return orders.filter((order) => {
       // Date range filtering
       if (!order?.date) {
         return true;
@@ -432,7 +437,7 @@ export default function Admin() {
 
       return true;
     });
-  }, [metrics.approvedOrders, startDate, endDate, orderStatusFilter, orderSearchQuery]);
+  }, [orders, startDate, endDate, orderStatusFilter, orderSearchQuery]);
 
   const salesAnalytics = useMemo(() => {
     const orders = filteredSalesOrders;
@@ -1071,6 +1076,7 @@ export default function Admin() {
                   {[
                     { label: 'Active users', value: metrics.activeUsers, icon: Users },
                     { label: 'Total users', value: metrics.registeredUsers, icon: Users },
+                    { label: 'Pending approvals', value: metrics.pendingPaymentOrdersCount, icon: Bell },
                     { label: 'Items sold', value: metrics.soldItems, icon: ShoppingBag },
                     { label: 'Active products', value: activeProducts.length, icon: UserRoundCog },
                   ].map((item) => {
@@ -2087,11 +2093,13 @@ export default function Admin() {
                         className="w-full rounded-xl border border-white/10 bg-slate-950/50 px-3 sm:px-4 py-2 sm:py-2.5 text-sm text-white focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-all cursor-pointer appearance-none"
                       >
                         <option value="">All Statuses</option>
-                        <option value="Pending">Pending</option>
+                        <option value="Pending Payment Approval">Pending Payment Approval</option>
                         <option value="Processing">Processing</option>
                         <option value="Shipped">Shipped</option>
                         <option value="Delivered">Delivered</option>
-                        <option value="Complete">Completed</option>
+                        <option value="Complete">Complete</option>
+                        <option value="Payment Rejected">Payment Rejected</option>
+                        <option value="Cancelled">Cancelled</option>
                       </select>
                     </div>
                   </div>
