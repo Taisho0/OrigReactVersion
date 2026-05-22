@@ -1288,6 +1288,44 @@ app.get('/api/admin/users', async (req, res) => {
   }
 });
 
+// Get all customer feedback entries (admin only)
+app.get('/api/admin/feedbacks', async (req, res) => {
+  try {
+    const readBearerToken = (request) => {
+      const authHeader = String(request.headers?.authorization || "").trim();
+      if (!authHeader.toLowerCase().startsWith("bearer ")) {
+        return "";
+      }
+      return authHeader.slice(7).trim();
+    };
+
+    const actorToken = readBearerToken(req);
+    if (!actorToken) {
+      return res.status(401).json({ message: "Missing bearer token." });
+    }
+
+    const { auth: adminAuth, db: adminDb } = getFirebaseAdmin();
+    const decoded = await adminAuth.verifyIdToken(actorToken);
+
+    const actorProfileSnapshot = await adminDb.collection("users").doc(decoded.uid).get();
+    const actorProfile = actorProfileSnapshot.exists ? actorProfileSnapshot.data() : null;
+    const actorEmail = normalizeEmail(decoded.email || "");
+    const canReadFeedbacks = isActiveAdmin(actorProfile) || allowedAdminEmails.includes(actorEmail);
+
+    if (!canReadFeedbacks) {
+      return res.status(403).json({ message: "Only active admins can view feedbacks." });
+    }
+
+    const snapshot = await adminDb.collection("feedbacks").orderBy("submittedAt", "desc").get();
+    const feedbacks = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    return res.status(200).json({ ok: true, feedbacks });
+  } catch (error) {
+    const status = error?.code === "auth/id-token-expired" || error?.code === "auth/argument-error" ? 401 : 500;
+    return res.status(status).json({ message: error?.message || "Unable to load feedbacks." });
+  }
+});
+
 app.listen(port, () => {
   console.log(`PayMongo API listening on http://localhost:${port}`);
 });
