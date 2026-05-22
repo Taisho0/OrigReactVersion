@@ -154,6 +154,7 @@ export const Checkout = () => {
     if (!lastName || !namePattern.test(lastName)) {
       errors.lastName = 'Enter a valid last name (letters only)';
     }
+    
 
     setContactErrors(errors);
     return Object.keys(errors).length === 0;
@@ -324,14 +325,14 @@ export const Checkout = () => {
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <div className="relative">
-<input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\-\s]+" value={firstName} onPaste={(e)=>{ const pasted = e.clipboardData.getData('text'); const clean = pasted.replace(/[^A-Za-zÀ-ž'\\-\\s]/g,''); e.preventDefault(); setFirstName(clean); setContactErrors((c)=>{ const copy={...c}; delete copy.firstName; return copy; }); }} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\\-\\s]/g, ''); setFirstName(v); setContactErrors((c)=>{ const copy={...c}; delete copy.firstName; return copy; }); }} placeholder="First Name" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${contactErrors.firstName ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.firstName} />
+                  <input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\- ]+" value={firstName} onPaste={(e)=>{ setFirstName(e.clipboardData.getData('text')); setContactErrors((c)=>{ const copy={...c}; delete copy.firstName; return copy; }); }} onChange={(e) => { setFirstName(e.target.value); setContactErrors((c)=>{ const copy={...c}; delete copy.firstName; return copy; }); }} placeholder="First Name" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${contactErrors.firstName ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.firstName} />
                   {contactErrors.firstName && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
                 </div>
                 {contactErrors.firstName && <p className="text-xs text-red-400 mt-1">{contactErrors.firstName}</p>}
               </div>
               <div>
                 <div className="relative">
-<input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\-\s]+" value={lastName} onPaste={(e)=>{ const pasted = e.clipboardData.getData('text'); const clean = pasted.replace(/[^A-Za-zÀ-ž'\\-\\s]/g,''); e.preventDefault(); setLastName(clean); setContactErrors((c)=>{ const copy={...c}; delete copy.lastName; return copy; }); }} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\\-\\s]/g, ''); setLastName(v); setContactErrors((c)=>{ const copy={...c}; delete copy.lastName; return copy; }); }} placeholder="Last Name" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${contactErrors.lastName ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.lastName} />
+                  <input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\- ]+" value={lastName} onPaste={(e)=>{ setLastName(e.clipboardData.getData('text')); setContactErrors((c)=>{ const copy={...c}; delete copy.lastName; return copy; }); }} onChange={(e) => { setLastName(e.target.value); setContactErrors((c)=>{ const copy={...c}; delete copy.lastName; return copy; }); }} placeholder="Last Name" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${contactErrors.lastName ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.lastName} />
                   {contactErrors.lastName && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
                 </div>
                 {contactErrors.lastName && <p className="text-xs text-red-400 mt-1">{contactErrors.lastName}</p>}
@@ -349,8 +350,8 @@ export const Checkout = () => {
               {shippingErrors.addressLine && <p className="text-xs text-red-400 mt-1">{shippingErrors.addressLine}</p>}
             </div>
             <div>
-              <div className="relative">
-<input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\-\s]+" value={city} onPaste={(e)=>{ const pasted = e.clipboardData.getData('text'); const clean = pasted.replace(/[^A-Za-zÀ-ž'\\-\\s]/g,''); e.preventDefault(); setCity(clean); setShippingErrors((c)=>{ const copy={...c}; delete copy.city; return copy; }); }} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\\-\\s]/g, ''); setCity(v); setShippingErrors((c)=>{ const copy={...c}; delete copy.city; return copy; }); }} placeholder="City" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${shippingErrors.city ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.city} />
+                <div className="relative">
+                <input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\- ]+" value={city} onPaste={(e)=>{ setCity(e.clipboardData.getData('text')); setShippingErrors((c)=>{ const copy={...c}; delete copy.city; return copy; }); }} onChange={(e) => { setCity(e.target.value); setShippingErrors((c)=>{ const copy={...c}; delete copy.city; return copy; }); }} placeholder="City" className={`w-full bg-zinc-900 border p-3 sm:p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 text-sm sm:text-base ${shippingErrors.city ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.city} />
                 {shippingErrors.city && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
               </div>
               {shippingErrors.city && <p className="text-xs text-red-400 mt-1">{shippingErrors.city}</p>}
