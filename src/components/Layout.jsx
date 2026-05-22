@@ -44,7 +44,7 @@ export const Layout = () => {
           <Link to="/cart" className="relative hover:text-emerald-400 transition-colors flex items-center gap-2">
             CART
             {cartOrderCount > 0 && (
-              <span className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-zinc-950">
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-zinc-950">
                 {cartOrderCount}
               </span>
             )}
@@ -131,9 +131,9 @@ export const Layout = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               Cart
-              {cartItemCount > 0 && (
+              {cartOrderCount > 0 && (
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-zinc-950">
-                  {cartItemCount}
+                  {cartOrderCount}
                 </span>
               )}
             </Link>
