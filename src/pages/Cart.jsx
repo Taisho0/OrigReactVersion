@@ -4,10 +4,39 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router';
 import { useStore } from '../context/StoreContext';
 import { Trash2, Plus, Minus, ArrowRight, Upload, X } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '../components/ui/dialog';
 
 export const Cart = () => {
   const { cart, removeFromCart, updateQuantity, updateCartItemLayout, cartTotal } = useStore();
   const navigate = useNavigate();
+
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const [pendingRemove, setPendingRemove] = React.useState(null);
+
+  const handleRequestRemove = (productId, size, productName) => {
+    setPendingRemove({ productId, size, productName });
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmRemove = () => {
+    if (pendingRemove) {
+      removeFromCart(pendingRemove.productId, pendingRemove.size);
+      setPendingRemove(null);
+    }
+    setConfirmOpen(false);
+  };
+
+  const handleCancelRemove = () => {
+    setPendingRemove(null);
+    setConfirmOpen(false);
+  };
 
   if (cart.length === 0) {
     return (
@@ -40,7 +69,7 @@ export const Cart = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                className="flex gap-6 p-6 border border-zinc-900 rounded-sm bg-zinc-950/50 relative group"
+                className="flex gap-6 p-6 border border-zinc-900 rounded-sm bg-zinc-950/80 backdrop-blur-md relative group"
               >
                 <Link to={`/product/${item.product.id}`} className="w-24 h-32 md:w-32 md:h-40 shrink-0 bg-zinc-900 overflow-hidden">
                   <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
@@ -96,7 +125,7 @@ export const Cart = () => {
                     </div>
                     
                     <button 
-                      onClick={() => removeFromCart(item.product.id, item.size)}
+                      onClick={() => handleRequestRemove(item.product.id, item.size, item.product.name)}
                       className="text-zinc-500 hover:text-red-500 transition-colors p-2"
                     >
                       <Trash2 size={20} />
@@ -181,6 +210,21 @@ export const Cart = () => {
           </div>
         </div>
       </div>
+      {/* Confirm Remove Dialog */}
+      <Dialog open={confirmOpen} onOpenChange={(open) => setConfirmOpen(open)}>
+        <DialogContent className="bg-zinc-950/80 backdrop-blur-md">
+          <DialogHeader>
+            <DialogTitle>Remove item</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove {pendingRemove?.productName ? `"${pendingRemove.productName}"` : 'this item'} from your cart? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button onClick={handleCancelRemove} className="px-4 py-2 rounded border border-zinc-700 text-sm text-zinc-200">Cancel</button>
+            <button onClick={handleConfirmRemove} className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-sm text-white">Remove</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

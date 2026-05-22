@@ -10,7 +10,7 @@ export const Layout = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartOrderCount = cart.length;
 
   const handleSignOut = async () => {
     const result = await signOut();
@@ -43,9 +43,9 @@ export const Layout = () => {
           )}
           <Link to="/cart" className="relative hover:text-emerald-400 transition-colors flex items-center gap-2">
             CART
-            {cartItemCount > 0 && (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-zinc-950">
-                {cartItemCount}
+            {cartOrderCount > 0 && (
+              <span className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-zinc-950">
+                {cartOrderCount}
               </span>
             )}
           </Link>
@@ -74,7 +74,7 @@ export const Layout = () => {
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-zinc-950/95 backdrop-blur-sm flex flex-col pt-20 pb-12 px-6 pointer-events-auto overflow-y-auto">
+        <div className="fixed inset-0 z-40 bg-zinc-950/80 backdrop-blur-md flex flex-col pt-20 pb-12 px-6 pointer-events-auto overflow-y-auto">
           <button 
             className="absolute top-6 right-6 p-2 hover:bg-zinc-900 rounded-lg transition-colors"
             onClick={() => setIsMenuOpen(false)}

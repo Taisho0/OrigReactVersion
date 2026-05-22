@@ -119,6 +119,13 @@ export const validatePricingData = (data) => {
       if (!data?.height || parseFloat(data.height) <= 0) {
         errors.height = 'Height is required';
       }
+      // Enforce sensible maximums for dimensions
+      if (data?.width && parseFloat(data.width) > 100) {
+        errors.width = 'Width must be 100 or less';
+      }
+      if (data?.height && parseFloat(data.height) > 100) {
+        errors.height = 'Height must be 100 or less';
+      }
     }
   }
 

@@ -258,7 +258,7 @@ const SignUp = () => {
                                 </p>
                             </div>
                         </div>
-                        <div className="relative overflow-hidden rounded-4xl bg-zinc-950/90 px-4 py-8 sm:px-8 sm:py-10 md:px-12 md:py-14">
+                        <div className="relative overflow-hidden rounded-4xl bg-zinc-950/80 backdrop-blur-md px-4 py-8 sm:px-8 sm:py-10 md:px-12 md:py-14">
                             <div className="absolute inset-x-0 top-0 h-28 bg-linear-to-b from-emerald-500/10 to-transparent" />
                             <div className="relative">
                                 <button type="button" className="absolute right-4 top-4 text-zinc-400 transition hover:text-white" onClick={() => navigate("/") }>

@@ -45,11 +45,11 @@ export const Shop = () => {
       </header>
 
       {activeProducts.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/60 p-12 text-center text-zinc-400">
+        <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/80 backdrop-blur-md p-12 text-center text-zinc-300">
           The catalog is empty right now. Add items from the admin dashboard to repopulate the shop.
         </div>
       ) : filteredProducts.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/60 p-12 text-center text-zinc-400">
+        <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/80 backdrop-blur-md p-12 text-center text-zinc-300">
           No products found for {selectedCategory}.
         </div>
       ) : (
@@ -73,7 +73,7 @@ export const Shop = () => {
               </div>
               <div className="flex flex-col gap-1 sm:gap-2">
                 <h3 className="text-xs sm:text-base lg:text-lg font-bold group-hover:text-emerald-400 transition-colors line-clamp-1">{product.name}</h3>
-                <p className="text-[8px] sm:text-xs text-zinc-500 uppercase tracking-widest hidden sm:block">{product.category}</p>
+                <p className="text-[8px] sm:text-xs text-zinc-300 uppercase tracking-widest hidden sm:block">{product.category}</p>
                 <p className="text-xs sm:text-base lg:text-lg font-medium">₱{product.price}</p>
               </div>
             </Link>

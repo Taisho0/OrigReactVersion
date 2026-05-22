@@ -2,7 +2,15 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
-import { Package, Truck, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, XCircle, ChevronLeft } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '../components/ui/dialog';
 
 const STATUS_STEPS = ['Pending Payment Approval', 'Processing', 'Shipped', 'Delivered', 'Complete'];
 const CANCELLABLE_STATUSES = ['Pending Payment Approval', 'Processing'];
@@ -13,6 +21,8 @@ export const Tracking = () => {
   const [orderMessage, setOrderMessage] = useState('');
   const [showPrevious, setShowPrevious] = useState(false);
   const [selectedPreviousOrder, setSelectedPreviousOrder] = useState(null);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+  const [pendingCancelOrder, setPendingCancelOrder] = useState(null);
 
   const canCancel = (order) => CANCELLABLE_STATUSES.includes(order.status);
 
@@ -216,29 +226,40 @@ export const Tracking = () => {
     receiptWindow.document.close();
   };
 
-  const handleCancelOrder = async (order) => {
+  const requestCancelOrder = (order) => {
     if (!canCancel(order)) {
       return;
     }
 
-    const confirmed = window.confirm('Cancel this order? This will stop further processing.');
-    if (!confirmed) {
+    setPendingCancelOrder(order);
+    setCancelConfirmOpen(true);
+  };
+
+  const handleCancelOrder = async () => {
+    if (!pendingCancelOrder) {
       return;
     }
 
-    setBusyOrderId(order.id);
+    setCancelConfirmOpen(false);
+    setBusyOrderId(pendingCancelOrder.id);
     setOrderMessage('');
 
     try {
-      const ok = await cancelOrder(order.id);
+      const ok = await cancelOrder(pendingCancelOrder.id);
       if (!ok) {
         setOrderMessage('Unable to cancel the order. Please try again.');
       } else {
-        setOrderMessage(`Order ${order.id} has been cancelled.`);
+        setOrderMessage(`Order ${pendingCancelOrder.id} has been cancelled.`);
       }
     } finally {
       setBusyOrderId('');
+      setPendingCancelOrder(null);
     }
+  };
+
+  const closeCancelDialog = () => {
+    setCancelConfirmOpen(false);
+    setPendingCancelOrder(null);
   };
 
   if (orders.length === 0) {
@@ -268,10 +289,21 @@ export const Tracking = () => {
   // Main content - either showing active orders or a selected previous order
   const mainContent = selectedPreviousOrder ? (
     <div className="px-4 sm:px-6 md:px-12 py-8 sm:py-12">
+      <div className="mb-6">
+        <button
+          type="button"
+          onClick={() => setSelectedPreviousOrder(null)}
+          className="inline-flex items-center gap-2 text-sm sm:text-base font-bold uppercase tracking-widest text-emerald-200 hover:text-emerald-300"
+        >
+          <ChevronLeft size={18} />
+          Back
+        </button>
+      </div>
+
       <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tighter uppercase mb-8 sm:mb-12">Order {selectedPreviousOrder.id}</h1>
 
         <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-[1.35fr_0.85fr] mb-8 sm:mb-10">
-          <div className="rounded-3xl border border-zinc-900 bg-zinc-950/95 p-4 sm:p-6">
+          <div className="rounded-3xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-4 sm:p-6">
             <div className="flex items-start sm:items-center justify-between gap-2 sm:gap-4 mb-3 sm:mb-6">
               <div className="min-w-0">
                 <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-emerald-400">Order details</p>
@@ -296,7 +328,7 @@ export const Tracking = () => {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-zinc-900 bg-zinc-950/95 p-4 sm:p-6">
+          <div className="rounded-3xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-4 sm:p-6">
             <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-4">Shipping</p>
             <div className="space-y-2 text-sm text-zinc-100 mb-6">
               <p className="font-semibold">{selectedPreviousOrder.shipping?.firstName} {selectedPreviousOrder.shipping?.lastName}</p>
@@ -317,11 +349,11 @@ export const Tracking = () => {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-zinc-900 bg-zinc-950/95 p-4 sm:p-6">
+        <div className="rounded-3xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-4 sm:p-6">
           <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-4">Order items</p>
           <div className="space-y-4">
             {selectedPreviousOrder.items.map((item) => (
-                  <div key={`${item.product.id}-${item.size || 'default'}`} className="grid gap-3 md:grid-cols-[1fr_auto] items-center rounded-3xl border border-zinc-900 bg-zinc-900/95 p-4">
+                  <div key={`${item.product.id}-${item.size || 'default'}`} className="grid gap-3 md:grid-cols-[1fr_auto] items-center rounded-3xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-4">
                 <div>
                   <p className="font-semibold text-zinc-100">{item.product.name}</p>
                   <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 mt-1">Size: {item.size || 'One size'}</p>
@@ -347,7 +379,7 @@ export const Tracking = () => {
 
       <div className="space-y-12">
         {currentOrders.length === 0 ? (
-          <div className="min-h-[40vh] flex flex-col items-center justify-center text-center p-8 rounded-2xl border border-zinc-900 bg-zinc-950/95">
+          <div className="min-h-[40vh] flex flex-col items-center justify-center text-center p-8 rounded-2xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md">
             <p className="text-lg text-zinc-400 mb-4">You have no active orders right now.</p>
             <button onClick={() => setShowPrevious(true)} className="rounded-2xl border border-emerald-400/40 px-4 py-2 text-sm font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300">View previous orders</button>
           </div>
@@ -358,7 +390,7 @@ export const Tracking = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="border border-zinc-900 bg-zinc-950/95 p-4 sm:p-6 md:p-8 rounded-sm relative overflow-hidden"
+            className="border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-4 sm:p-6 md:p-8 rounded-sm relative overflow-hidden"
           >
             {/* Animated background glow for active order */}
             {order.status !== 'Delivered' && order.status !== 'Complete' && (
@@ -381,7 +413,7 @@ export const Tracking = () => {
             </div>
 
             <div className="relative z-10 grid gap-3 sm:gap-6 grid-cols-1 lg:grid-cols-[1.35fr_0.85fr] mb-6 sm:mb-10">
-              <div className="rounded-2xl sm:rounded-3xl border border-zinc-900 bg-zinc-950/95 p-3 sm:p-6">
+              <div className="rounded-2xl sm:rounded-3xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-3 sm:p-6">
                 <div className="flex items-start sm:items-center justify-between gap-2 sm:gap-4 mb-3 sm:mb-6">
                   <div className="min-w-0">
                     <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-emerald-400">Order details</p>
@@ -407,7 +439,7 @@ export const Tracking = () => {
                 </div>
               </div>
 
-              <div className="rounded-2xl sm:rounded-3xl border border-zinc-900 bg-zinc-950/95 p-3 sm:p-6">
+              <div className="rounded-2xl sm:rounded-3xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-3 sm:p-6">
                 <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-emerald-400 mb-2 sm:mb-4">Shipping</p>
                 <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-zinc-100 mb-3 sm:mb-4">
                   <p className="truncate font-semibold">{order.shipping?.firstName} {order.shipping?.lastName}</p>
@@ -419,7 +451,7 @@ export const Tracking = () => {
                 {canCancel(order) && (
                   <button
                     type="button"
-                    onClick={() => handleCancelOrder(order)}
+                    onClick={() => requestCancelOrder(order)}
                     disabled={busyOrderId === order.id}
                     className="w-full rounded-2xl border border-rose-400/40 bg-rose-500/10 px-4 py-3 text-sm font-bold uppercase tracking-[0.25em] text-rose-200 hover:border-rose-300 hover:text-white disabled:opacity-60"
                   >
@@ -520,11 +552,11 @@ export const Tracking = () => {
               )}
             </div>
 
-            <div className="relative z-10 mt-6 sm:mt-8 rounded-3xl border border-zinc-900 bg-zinc-950/95 p-3 sm:p-6">
+            <div className="relative z-10 mt-6 sm:mt-8 rounded-3xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-3 sm:p-6">
               <p className="text-xs uppercase tracking-[0.35em] text-emerald-400 mb-3 sm:mb-4">Order items</p>
               <div className="space-y-2 sm:space-y-4">
                 {order.items.map((item) => (
-                  <div key={`${item.product.id}-${item.size || 'default'}`} className="grid gap-2 sm:gap-3 grid-cols-1 md:grid-cols-[1fr_auto] items-start sm:items-center rounded-2xl sm:rounded-3xl border border-zinc-900 bg-zinc-900/95 p-3 sm:p-4">
+                  <div key={`${item.product.id}-${item.size || 'default'}`} className="grid gap-2 sm:gap-3 grid-cols-1 md:grid-cols-[1fr_auto] items-start sm:items-center rounded-2xl sm:rounded-3xl border border-zinc-900 bg-zinc-950/80 backdrop-blur-md p-3 sm:p-4">
                     <div className="min-w-0">
                       <p className="font-semibold text-xs sm:text-sm text-zinc-100 truncate">{item.product.name}</p>
                       <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-zinc-500 mt-1">Size: {item.size || 'One size'}</p>
@@ -546,6 +578,25 @@ export const Tracking = () => {
     <div className="px-4 sm:px-6 md:px-12 py-8 sm:py-12 relative bg-linear-to-br from-zinc-950 via-zinc-950/95 to-zinc-950">
       {mainContent}
 
+      <Dialog open={cancelConfirmOpen} onOpenChange={(open) => { if (!open) { closeCancelDialog(); } setCancelConfirmOpen(open); }}>
+        <DialogContent className="bg-zinc-950/80 backdrop-blur-md">
+          <DialogHeader>
+            <DialogTitle>Cancel order</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel {pendingCancelOrder ? `order ${pendingCancelOrder.id}` : 'this order'}? This will stop further processing.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button type="button" onClick={closeCancelDialog} className="px-4 py-2 rounded border border-zinc-700 text-sm text-zinc-200">
+              Keep order
+            </button>
+            <button type="button" onClick={handleCancelOrder} className="px-4 py-2 rounded bg-rose-600 hover:bg-rose-700 text-sm text-white">
+              Confirm cancellation
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {previousOrders.length > 0 && (
         <div className="fixed right-2 sm:right-8 top-36 z-40 flex flex-col items-end gap-3">
           {!showPrevious ? (
@@ -557,7 +608,7 @@ export const Tracking = () => {
               Show Previous Orders
             </button>
           ) : (
-            <div id="previous-orders-panel" className="w-72 sm:w-96 bg-zinc-950/95 border border-zinc-900 rounded-l-2xl sm:rounded-l-3xl p-2 sm:p-4 shadow-2xl max-h-[80vh] overflow-auto">
+            <div id="previous-orders-panel" className="w-72 sm:w-96 bg-zinc-950/80 backdrop-blur-md border border-zinc-900 rounded-l-2xl sm:rounded-l-3xl p-2 sm:p-4 shadow-2xl max-h-[80vh] overflow-auto">
               <div className="flex items-center justify-between mb-2 sm:mb-4">
                 <h3 className="text-xs sm:text-sm font-bold uppercase text-zinc-100 truncate">Previous orders</h3>
                 <button

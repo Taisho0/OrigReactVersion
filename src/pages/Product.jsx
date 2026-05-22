@@ -17,6 +17,7 @@ export const ProductDetail = () => {
   const [width, setWidth] = useState('');
   const [length, setLength] = useState('');
   const [quantity, setQuantity] = useState('');
+  const [inputMessages, setInputMessages] = useState({});
   const [selectedVariant, setSelectedVariant] = useState('');
 
   useEffect(() => {
@@ -99,6 +100,11 @@ export const ProductDetail = () => {
       return;
     }
 
+    if (parsedQuantity > 1000) {
+      alert('Maximum quantity per item is 1000.');
+      return;
+    }
+
     const sqMeter = calculateSqMeter();
     const calculatedPrice = parseFloat(calculatePrice());
     const variantSuffix = selectedVariant ? ` • ${selectedVariant}` : '';
@@ -131,7 +137,7 @@ export const ProductDetail = () => {
     <div className="px-6 md:px-12 py-12">
       <button 
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm uppercase tracking-widest text-zinc-500 hover:text-zinc-50 mb-12 transition-colors"
+        className="flex items-center gap-2 text-sm uppercase tracking-widest text-zinc-300 hover:text-zinc-50 mb-12 transition-colors"
       >
         <ArrowLeft size={16} /> Back
       </button>
@@ -161,7 +167,7 @@ export const ProductDetail = () => {
             {product.name}
           </h1>
           <div className="mb-12">
-            <p className="text-sm text-zinc-400 mb-2">Price per {product.pricingUnit || 'unit'}</p>
+            <p className="text-sm text-zinc-200 mb-2">Price per {product.pricingUnit || 'unit'}</p>
             <p className="text-3xl font-light">₱{product.price}</p>
             {(product.requiresDimensions ? width && length : true) && (
               <p className="text-lg text-emerald-400 mt-3">
@@ -171,15 +177,15 @@ export const ProductDetail = () => {
           </div>
           
           <div className="mb-12">
-            <p className="text-sm font-semibold uppercase tracking-widest text-zinc-500 mb-3">Description</p>
-            <p className="text-lg text-zinc-400 font-light leading-relaxed">
+            <p className="text-sm font-semibold uppercase tracking-widest text-zinc-300 mb-3">Description</p>
+            <p className="text-lg text-zinc-200 font-light leading-relaxed">
               {product.description}
             </p>
           </div>
 
           {productVariants.length > 0 && (
             <div className="mb-12">
-              <p className="text-sm font-semibold uppercase tracking-widest text-zinc-500 mb-3">Variants</p>
+              <p className="text-sm font-semibold uppercase tracking-widest text-zinc-300 mb-3">Variants</p>
               <div className="flex flex-wrap gap-2">
                 {productVariants.map((variant) => (
                   <button
@@ -200,7 +206,7 @@ export const ProductDetail = () => {
           )}
 
           <div className="mb-8 space-y-4">
-            <p className="text-sm font-semibold uppercase tracking-widest text-zinc-500">Custom Size</p>
+            <p className="text-sm font-semibold uppercase tracking-widest text-zinc-300">Custom Size</p>
             {product.requiresDimensions ? (
               <>
                 <div className="grid grid-cols-2 gap-4">
@@ -210,8 +216,27 @@ export const ProductDetail = () => {
                       type="number"
                       step="0.1"
                       min="0"
+                      max="100"
                       value={width}
-                      onChange={(e) => setWidth(e.target.value)}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === '' || /^\d*\.?\d*$/.test(v)) {
+                          if (v !== '') {
+                            const parsed = parseFloat(v);
+                            if (!Number.isNaN(parsed)) {
+                              if (parsed > 100) {
+                                setInputMessages((prev) => ({ ...prev, width: 'Maximum is 100' }));
+                                setTimeout(() => setInputMessages((prev) => { const c = { ...prev }; if (c.width === 'Maximum is 100') delete c.width; return c; }), 2500);
+                              }
+                              setWidth(String(Math.min(parsed, 100)));
+                            } else {
+                              setWidth('');
+                            }
+                          } else {
+                            setWidth(v);
+                          }
+                        }
+                      }}
                       placeholder="e.g. 2"
                       className="quantity-input-no-spinner w-full rounded-2xl border border-zinc-800 bg-white/5 px-4 py-3 text-zinc-50 placeholder:text-zinc-600 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
                     />
@@ -222,8 +247,27 @@ export const ProductDetail = () => {
                       type="number"
                       step="0.1"
                       min="0"
+                      max="100"
                       value={length}
-                      onChange={(e) => setLength(e.target.value)}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === '' || /^\d*\.?\d*$/.test(v)) {
+                          if (v !== '') {
+                            const parsed = parseFloat(v);
+                            if (!Number.isNaN(parsed)) {
+                              if (parsed > 100) {
+                                setInputMessages((prev) => ({ ...prev, length: 'Maximum is 100' }));
+                                setTimeout(() => setInputMessages((prev) => { const c = { ...prev }; if (c.length === 'Maximum is 100') delete c.length; return c; }), 2500);
+                              }
+                              setLength(String(Math.min(parsed, 100)));
+                            } else {
+                              setLength('');
+                            }
+                          } else {
+                            setLength(v);
+                          }
+                        }
+                      }}
                       placeholder="e.g. 3"
                       className="quantity-input-no-spinner w-full rounded-2xl border border-zinc-800 bg-white/5 px-4 py-3 text-zinc-50 placeholder:text-zinc-600 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
                     />
@@ -250,17 +294,29 @@ export const ProductDetail = () => {
             <input
               type="number"
               min="1"
+              max="1000"
               step="1"
               inputMode="numeric"
               value={quantity}
               onChange={(e) => {
                 const nextValue = e.target.value;
                 if (nextValue === '' || /^[0-9]+$/.test(nextValue)) {
-                  setQuantity(nextValue);
+                  // Clamp empty string or numeric input to <= 1000 when set
+                  if (nextValue !== '') {
+                    const parsed = Number.parseInt(nextValue, 10);
+                    if (parsed > 1000) {
+                      setInputMessages((prev) => ({ ...prev, quantity: 'Maximum is 1000' }));
+                      setTimeout(() => setInputMessages((prev) => { const c = { ...prev }; if (c.quantity === 'Maximum is 1000') delete c.quantity; return c; }), 2500);
+                    }
+                    setQuantity(String(Math.max(1, Math.min(1000, parsed))));
+                  } else {
+                    setQuantity(nextValue);
+                  }
                 }
               }}
               className="quantity-input-no-spinner w-full rounded-2xl border border-zinc-800 bg-white/5 px-4 py-3 text-zinc-50 placeholder:text-zinc-600 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
             />
+            {inputMessages.quantity && <p className="text-amber-400 text-xs mt-1">{inputMessages.quantity}</p>}
           </div>
 
           <div className="space-y-6">

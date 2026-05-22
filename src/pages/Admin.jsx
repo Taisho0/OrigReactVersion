@@ -105,6 +105,11 @@ export default function Admin() {
 
   const accountUsers = useMemo(() => firebaseUsers.filter((user) => user.role !== 'admin'), [firebaseUsers]);
 
+  const categoryOptions = useMemo(() => {
+    const cats = [...new Set(activeProducts.map((p) => p.category).filter(Boolean))];
+    return cats;
+  }, [activeProducts]);
+
   useEffect(() => {
     let mounted = true;
 
@@ -1127,14 +1132,20 @@ export default function Admin() {
 
                           <label className="space-y-2 text-sm text-zinc-300">
                             <span>Category *</span>
-                            <input
-                              type="text"
-                              value={newProductForm.category}
-                              onChange={(event) => setNewProductForm((current) => ({ ...current, category: event.target.value }))}
-                              placeholder="e.g., Tarpaulin, DTF, Sticker"
-                              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-50 outline-none focus:border-emerald-400"
-                              required
-                            />
+                            <div className="relative">
+                              <select
+                                value={newProductForm.category}
+                                onChange={(event) => setNewProductForm((current) => ({ ...current, category: event.target.value }))}
+                                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 pr-10 text-zinc-50 outline-none focus:border-emerald-400 appearance-none"
+                                required
+                              >
+                                <option value="" className="bg-slate-950 text-zinc-50" disabled>Select category</option>
+                                {categoryOptions.map((c) => (
+                                  <option key={c} value={c} className="bg-slate-950 text-zinc-50">{c}</option>
+                                ))}
+                              </select>
+                              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-400">▾</span>
+                            </div>
                           </label>
                         </div>
 

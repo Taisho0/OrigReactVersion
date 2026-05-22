@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import { useStore } from '../context/StoreContext';
-import { CheckCircle, Smartphone, Upload } from 'lucide-react';
+import { CheckCircle, Smartphone, Upload, AlertCircle } from 'lucide-react';
 
 export const Checkout = () => {
   const { cart, cartTotal, submitOrderForPaymentReview } = useStore();
@@ -29,6 +29,8 @@ export const Checkout = () => {
   const [city, setCity] = useState('');
   const [stateProvince, setStateProvince] = useState('');
   const [postalCode, setPostalCode] = useState('');
+  const [contactErrors, setContactErrors] = useState({});
+  const [shippingErrors, setShippingErrors] = useState({});
   const shouldRedirectToCart = cart.length === 0 && !completed;
 
   useEffect(() => {
@@ -130,10 +132,58 @@ export const Checkout = () => {
     e.preventDefault();
 
     if (!shippingSubmitted) {
+      // validate contact and shipping fields before creating payment session
+      const contactValid = validateContactFields();
+      const shippingValid = validateShippingFields();
+      if (!contactValid || !shippingValid) {
+        return;
+      }
+
       setShippingSubmitted(true);
       await createPaymentSession();
       return;
     }
+  };
+
+  const validateContactFields = () => {
+    const errors = {};
+    // basic email validation
+    if (!contactEmail || !/^\S+@\S+\.\S+$/.test(contactEmail)) {
+      errors.email = 'Enter a valid email address';
+    }
+    // names should contain letters, spaces, hyphens or apostrophes only
+    const namePattern = /^[A-Za-zÀ-ž'\-\s]{1,50}$/;
+    if (!firstName || !namePattern.test(firstName)) {
+      errors.firstName = 'Enter a valid first name (letters only)';
+    }
+    if (!lastName || !namePattern.test(lastName)) {
+      errors.lastName = 'Enter a valid last name (letters only)';
+    }
+
+    setContactErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateShippingFields = () => {
+    const errors = {};
+    if (!addressLine || String(addressLine).trim().length === 0) {
+      errors.addressLine = 'Address is required';
+    }
+    // city and state should be letters/spaces only
+    const locationPattern = /^[A-Za-zÀ-ž'\-\s]{1,80}$/;
+    if (!city || !locationPattern.test(city)) {
+      errors.city = 'Enter a valid city (letters only)';
+    }
+    if (!stateProvince || !locationPattern.test(stateProvince)) {
+      errors.stateProvince = 'Enter a valid state/province (letters only)';
+    }
+    // postal code digits only (3-10 digits)
+    if (!postalCode || !/^\d{3,10}$/.test(postalCode)) {
+      errors.postalCode = 'Postal code must be numeric (3-10 digits)';
+    }
+
+    setShippingErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleReceiptUpload = (event) => {
@@ -171,6 +221,14 @@ export const Checkout = () => {
   const handleSubmitPaymentProof = async () => {
     if (!shippingSubmitted) {
       setPaymentError('Complete shipping details and generate a payment session first.');
+      return;
+    }
+
+    // Re-validate before final submission in case user modified fields
+    const contactValid = validateContactFields();
+    const shippingValid = validateShippingFields();
+    if (!contactValid || !shippingValid) {
+      setPaymentError('Please fix shipping/contact errors before submitting.');
       return;
     }
 
@@ -286,20 +344,60 @@ export const Checkout = () => {
         <form onSubmit={handleCheckout} className="space-y-6">
           <div className="space-y-4">
             <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-500 mb-6">Contact Info</h2>
-            <input required type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="Email Address" className="w-full bg-zinc-900 border border-zinc-800 p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50" />
+            <div className="relative">
+              <input required type="email" value={contactEmail} onChange={(e) => { setContactEmail(e.target.value); setContactErrors((c)=>{ const copy={...c}; delete copy.email; return copy; }); }} placeholder="Email Address" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${contactErrors.email ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.email} />
+              {contactErrors.email && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
+            </div>
+            {contactErrors.email && <p className="text-xs text-red-400 mt-1">{contactErrors.email}</p>}
             <div className="grid grid-cols-2 gap-4">
-              <input required type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name" className="w-full bg-zinc-900 border border-zinc-800 p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50" />
-              <input required type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name" className="w-full bg-zinc-900 border border-zinc-800 p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50" />
+              <div>
+                <div className="relative">
+<input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\-\s]+" value={firstName} onPaste={(e)=>{ const pasted = e.clipboardData.getData('text'); const clean = pasted.replace(/[^A-Za-zÀ-ž'\\-\\s]/g,''); e.preventDefault(); setFirstName(clean); setContactErrors((c)=>{ const copy={...c}; delete copy.firstName; return copy; }); }} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\\-\\s]/g, ''); setFirstName(v); setContactErrors((c)=>{ const copy={...c}; delete copy.firstName; return copy; }); }} placeholder="First Name" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${contactErrors.firstName ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.firstName} />
+                  {contactErrors.firstName && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
+                </div>
+                {contactErrors.firstName && <p className="text-xs text-red-400 mt-1">{contactErrors.firstName}</p>}
+              </div>
+              <div>
+                <div className="relative">
+<input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\-\s]+" value={lastName} onPaste={(e)=>{ const pasted = e.clipboardData.getData('text'); const clean = pasted.replace(/[^A-Za-zÀ-ž'\\-\\s]/g,''); e.preventDefault(); setLastName(clean); setContactErrors((c)=>{ const copy={...c}; delete copy.lastName; return copy; }); }} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\\-\\s]/g, ''); setLastName(v); setContactErrors((c)=>{ const copy={...c}; delete copy.lastName; return copy; }); }} placeholder="Last Name" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${contactErrors.lastName ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!contactErrors.lastName} />
+                  {contactErrors.lastName && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
+                </div>
+                {contactErrors.lastName && <p className="text-xs text-red-400 mt-1">{contactErrors.lastName}</p>}
+              </div>
             </div>
           </div>
 
           <div className="space-y-4 pt-8 border-t border-zinc-900">
             <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-500 mb-6">Shipping</h2>
-            <input required type="text" value={addressLine} onChange={(e) => setAddressLine(e.target.value)} placeholder="Address" className="w-full bg-zinc-900 border border-zinc-800 p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50" />
-            <input required type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" className="w-full bg-zinc-900 border border-zinc-800 p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50" />
+            <div>
+              <div className="relative">
+                <input required type="text" value={addressLine} onChange={(e) => { setAddressLine(e.target.value); setShippingErrors((s)=>{ const copy={...s}; delete copy.addressLine; return copy; }); }} placeholder="Address" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${shippingErrors.addressLine ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.addressLine} />
+                {shippingErrors.addressLine && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
+              </div>
+              {shippingErrors.addressLine && <p className="text-xs text-red-400 mt-1">{shippingErrors.addressLine}</p>}
+            </div>
+            <div>
+              <div className="relative">
+<input required type="text" inputMode="text" pattern="[A-Za-zÀ-ž'\-\s]+" value={city} onPaste={(e)=>{ const pasted = e.clipboardData.getData('text'); const clean = pasted.replace(/[^A-Za-zÀ-ž'\\-\\s]/g,''); e.preventDefault(); setCity(clean); setShippingErrors((c)=>{ const copy={...c}; delete copy.city; return copy; }); }} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\\-\\s]/g, ''); setCity(v); setShippingErrors((c)=>{ const copy={...c}; delete copy.city; return copy; }); }} placeholder="City" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${shippingErrors.city ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.city} />
+                {shippingErrors.city && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
+              </div>
+              {shippingErrors.city && <p className="text-xs text-red-400 mt-1">{shippingErrors.city}</p>}
+            </div>
             <div className="grid grid-cols-2 gap-4">
-              <input required type="text" value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} placeholder="State/Province" className="w-full bg-zinc-900 border border-zinc-800 p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50" />
-              <input required type="text" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder="Postal Code" className="w-full bg-zinc-900 border border-zinc-800 p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50" />
+              <div>
+                <div className="relative">
+                  <input required type="text" value={stateProvince} onChange={(e) => { const v = e.target.value.replace(/[^A-Za-zÀ-ž'\-\s]/g, ''); setStateProvince(v); setShippingErrors((s)=>{ const copy={...s}; delete copy.stateProvince; return copy; }); }} placeholder="State/Province" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${shippingErrors.stateProvince ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.stateProvince} />
+                  {shippingErrors.stateProvince && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
+                </div>
+                {shippingErrors.stateProvince && <p className="text-xs text-red-400 mt-1">{shippingErrors.stateProvince}</p>}
+              </div>
+              <div>
+                <div className="relative">
+                  <input required type="text" value={postalCode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); setPostalCode(v); setShippingErrors((s)=>{ const copy={...s}; delete copy.postalCode; return copy; }); }} placeholder="Postal Code" className={`w-full bg-zinc-900 border p-4 focus:outline-none focus:border-emerald-500 transition-colors text-zinc-50 ${shippingErrors.postalCode ? 'border-red-500' : 'border-zinc-800'}`} aria-invalid={!!shippingErrors.postalCode} />
+                  {shippingErrors.postalCode && <AlertCircle size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />}
+                </div>
+                {shippingErrors.postalCode && <p className="text-xs text-red-400 mt-1">{shippingErrors.postalCode}</p>}
+              </div>
             </div>
           </div>
 
@@ -385,11 +483,11 @@ export const Checkout = () => {
         </form>
       </div>
 
-      <div className="bg-zinc-900/50 border border-zinc-800 p-8 h-max">
+      <div className="bg-zinc-950/80 border border-zinc-800 backdrop-blur-md p-8 h-max">
         <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-500 mb-8">Order Summary</h2>
         <div className="space-y-6 mb-8 max-h-[40vh] overflow-y-auto hide-scrollbar">
           {cart.map(item => (
-            <div key={`${item.product.id}-${item.size || 'default'}`} className="border border-zinc-800 rounded p-3 bg-zinc-950/50">
+            <div key={`${item.product.id}-${item.size || 'default'}`} className="border border-zinc-800 rounded p-3 bg-zinc-950/80">
               <div className="flex gap-4 mb-3">
                 <div className="w-16 h-20 bg-zinc-950 rounded-sm overflow-hidden shrink-0">
                   <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />

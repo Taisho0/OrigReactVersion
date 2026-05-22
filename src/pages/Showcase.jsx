@@ -63,7 +63,7 @@ export const Showcase = () => {
         <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tighter uppercase mb-2 sm:mb-4">
           Showcase
         </h1>
-        <p className="text-zinc-400 text-xs sm:text-lg">Explore our previous works and projects across various product categories.</p>
+        <p className="text-zinc-300 text-xs sm:text-lg">Explore our previous works and projects across various product categories.</p>
       </div>
 
       {/* Category Filter */}
@@ -77,7 +77,7 @@ export const Showcase = () => {
               className={`rounded-full px-2 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold uppercase tracking-widest transition-colors whitespace-nowrap ${
                 selectedCategory === category
                   ? 'bg-emerald-400 text-slate-950'
-                  : 'border border-white/10 text-zinc-300 hover:border-emerald-400 hover:text-emerald-300'
+                  : 'border border-white/10 text-zinc-100 hover:border-emerald-400 hover:text-emerald-200'
               }`}
             >
               {category}
@@ -89,9 +89,9 @@ export const Showcase = () => {
       {/* Gallery Grid */}
       <div>
         {loading ? (
-          <div className="text-center py-16 text-zinc-500">Loading showcase items...</div>
+          <div className="text-center py-16 text-zinc-300">Loading showcase items...</div>
         ) : showcaseItems.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-white/10 p-12 text-center text-zinc-500">
+          <div className="rounded-3xl border border-dashed border-white/10 p-12 text-center text-zinc-300">
             <p>No showcase items available for {selectedCategory} yet.</p>
           </div>
         ) : (
@@ -113,11 +113,11 @@ export const Showcase = () => {
                 </div>
                 <div className="p-2 sm:p-4 lg:p-5 space-y-1 sm:space-y-2 lg:space-y-3">
                   <div>
-                    <p className="text-[8px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-emerald-400 mb-0.5 sm:mb-1">{item.category}</p>
+                    <p className="text-[8px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-emerald-300 mb-0.5 sm:mb-1">{item.category}</p>
                     {item.title && <h3 className="text-xs sm:text-base lg:text-lg font-semibold text-zinc-50 line-clamp-1">{item.title}</h3>}
                   </div>
                   {item.description && (
-                    <p className="text-[8px] sm:text-xs lg:text-sm text-zinc-400 line-clamp-2 hidden sm:block">{item.description}</p>
+                    <p className="text-[8px] sm:text-xs lg:text-sm text-zinc-300 line-clamp-2 hidden sm:block">{item.description}</p>
                   )}
                 </div>
               </motion.div>

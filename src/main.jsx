@@ -8,6 +8,13 @@ import { router } from './router'
 import { AuthContextProvider } from './auth/AuthContext'
 import { StoreProvider } from './context/StoreContext'
 
+// Prevent right-click context menu (client-side only; not a security feature)
+if (typeof window !== 'undefined') {
+  window.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+  });
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <div className="flex flex-col relative">  
