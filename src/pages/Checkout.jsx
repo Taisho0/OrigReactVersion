@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { motion } from 'motion/react';
 import { useStore } from '../context/StoreContext';
 import { CheckCircle, Smartphone, Upload, AlertCircle } from 'lucide-react';
 
@@ -14,7 +13,6 @@ export const Checkout = () => {
   const [paymentError, setPaymentError] = useState('');
   const [paymentReference, setPaymentReference] = useState('');
   const [paymentIntentId, setPaymentIntentId] = useState('');
-  const [paymentStatus, setPaymentStatus] = useState('idle');
   const [paymentMessage, setPaymentMessage] = useState('');
   const [creatingSession, setCreatingSession] = useState(false);
   const [paymentQrUrl, setPaymentQrUrl] = useState('');
@@ -73,7 +71,6 @@ export const Checkout = () => {
     setCreatingSession(true);
     setPaymentError('');
     setPaymentConfigHint('');
-    setPaymentStatus('creating');
     setPaymentMessage('Creating PayMongo payment session...');
     setPaymentIntentId('');
 
@@ -113,10 +110,8 @@ export const Checkout = () => {
       setPaymentQrUrl(data.qrImageUrl || '');
       setPaymentCheckoutUrl(data.checkoutUrl || '');
 
-      setPaymentStatus('waiting');
       setPaymentMessage('Payment session ready. Scan the QR, pay, then upload your receipt proof below.');
     } catch (error) {
-      setPaymentStatus('failed');
       setPaymentMessage('');
       if (error instanceof TypeError) {
         setPaymentError('Payment API is unreachable. Start it with: npm run api');
@@ -289,7 +284,6 @@ export const Checkout = () => {
     }
 
     setPaymentError('');
-    setPaymentStatus(paymentCheckoutUrl ? 'verifying' : 'waiting');
     setPaymentMessage(paymentCheckoutUrl ? 'Opening PayMongo checkout. Complete payment with GCash, then return here.' : 'Opening the QR code in a new tab. Scan it with GCash or a QR-enabled banking app.');
 
     const popup = window.open(targetUrl, '_blank', 'noopener,noreferrer');
@@ -305,14 +299,9 @@ export const Checkout = () => {
   if (completed) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 sm:px-6 text-center">
-        <motion.div 
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', bounce: 0.5 }}
-          className="text-yellow-500 mb-6 sm:mb-8"
-        >
+        <div className="text-yellow-500 mb-6 sm:mb-8">
           <Smartphone size={64} className="sm:size-20" />
-        </motion.div>
+        </div>
         
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tighter uppercase mb-4 sm:mb-6">Pending Admin Approval</h1>
         <p className="text-base sm:text-xl font-light text-zinc-400 mb-2">Order #{orderId}</p>
@@ -337,7 +326,7 @@ export const Checkout = () => {
   }
 
   return (
-    <div className="px-4 sm:px-6 md:px-12 py-6 sm:py-10 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-12 md:gap-16">
+    <div className="px-4 sm:px-6 md:px-12 py-4 sm:py-8 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
       <div>
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter uppercase mb-8 sm:mb-12">Checkout</h1>
         
@@ -476,28 +465,28 @@ export const Checkout = () => {
           <button 
             type="submit" 
             disabled={submittingProof || shippingSubmitted}
-            className="w-full mt-8 sm:mt-12 py-4 sm:py-5 bg-zinc-50 text-zinc-950 text-sm sm:text-base font-bold tracking-widest uppercase hover:bg-emerald-400 transition-colors flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full mt-6 sm:mt-10 py-3 sm:py-4 bg-zinc-50 text-zinc-950 text-sm font-bold tracking-widest uppercase hover:bg-emerald-400 transition-colors flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {shippingSubmitted ? (creatingSession ? 'Preparing Payment Session...' : 'Payment Session Ready') : 'Continue to Payment'}
           </button>
         </form>
       </div>
 
-      <div className="bg-zinc-950/80 border border-zinc-800 backdrop-blur-md p-4 sm:p-6 md:p-8 h-max">
-        <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-emerald-500 mb-5 sm:mb-8">Order Summary</h2>
-        <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8 max-h-[32vh] sm:max-h-[40vh] overflow-y-auto hide-scrollbar">
+      <div className="bg-zinc-950/80 border border-zinc-800 backdrop-blur-md p-3 sm:p-5 md:p-6 h-max">
+        <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-emerald-500 mb-4 sm:mb-6">Order Summary</h2>
+        <div className="space-y-3 sm:space-y-5 mb-4 sm:mb-8 max-h-[28vh] sm:max-h-[36vh] overflow-y-auto hide-scrollbar">
           {cart.map(item => (
-            <div key={`${item.product.id}-${item.size || 'default'}`} className="border border-zinc-800 rounded p-2.5 sm:p-3 bg-zinc-950/80">
-              <div className="flex gap-3 sm:gap-4 mb-3">
-                <div className="w-14 h-16 sm:w-16 sm:h-20 bg-zinc-950 rounded-sm overflow-hidden shrink-0">
+            <div key={`${item.product.id}-${item.size || 'default'}`} className="border border-zinc-800 rounded p-2 bg-zinc-950/80">
+              <div className="flex gap-3 sm:gap-4 mb-2.5">
+                <div className="w-12 h-14 sm:w-14 sm:h-16 bg-zinc-950 rounded-sm overflow-hidden shrink-0">
                   <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="grow flex flex-col justify-center">
                   <div className="flex justify-between items-start">
-                    <h3 className="font-bold text-xs sm:text-sm uppercase tracking-wider">{item.product.name}</h3>
-                    <p className="font-medium text-sm sm:text-base">₱{((item.itemPrice || item.product.price) * item.quantity).toFixed(2)}</p>
+                    <h3 className="font-bold text-xs uppercase tracking-wider">{item.product.name}</h3>
+                    <p className="font-medium text-sm">₱{((item.itemPrice || item.product.price) * item.quantity).toFixed(2)}</p>
                   </div>
-                  <p className="text-zinc-500 text-[11px] sm:text-xs mt-1">Qty: {item.quantity} • Size: {item.size || 'One size'}</p>
+                  <p className="text-zinc-500 text-[11px] mt-1">Qty: {item.quantity} • Size: {item.size || 'One size'}</p>
                 </div>
               </div>
               {item.layoutImage && (

@@ -10,25 +10,25 @@ export const Home = () => {
   const marqueeProducts = [...featuredProducts, ...featuredProducts];
 
   return (
-    <div className="relative bg-zinc-950">
+    <div className="relative bg-zinc-950 overflow-x-hidden">
       {/* Hero Section */}
-      <section className="h-[90vh] flex flex-col justify-center px-6 md:px-12 relative overflow-hidden pt-24">
+      <section className="min-h-[calc(100svh-5rem)] flex flex-col justify-center px-4 sm:px-6 md:px-12 relative overflow-hidden pt-20 sm:pt-24 pb-10 sm:pb-0">
         <motion.div className="z-10 relative">
-          <h1 className="text-7xl md:text-9xl font-extrabold tracking-tighter uppercase leading-[0.85] text-zinc-50">
+          <h1 className="text-4xl sm:text-6xl md:text-9xl font-extrabold tracking-tighter uppercase leading-[0.9] sm:leading-[0.85] text-zinc-50 max-w-[10ch]">
             Design <br />
             <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-cyan-500">
               Forward.
             </span>
           </h1>
-          <p className="mt-8 text-xl text-zinc-400 max-w-xl font-light leading-relaxed">
+          <p className="mt-5 sm:mt-8 text-sm sm:text-xl text-zinc-400 max-w-[28ch] sm:max-w-xl font-light leading-relaxed">
             Curated objects for the modern minimalist. Elevate your space with functional art.
           </p>
           <Link 
             to="/shop" 
-            className="inline-flex items-center gap-3 mt-12 text-sm font-bold tracking-widest uppercase pb-2 border-b-2 border-emerald-500 hover:text-emerald-400 transition-colors group"
+            className="inline-flex items-center gap-2 sm:gap-3 mt-8 sm:mt-12 text-xs sm:text-sm font-bold tracking-widest uppercase pb-2 border-b-2 border-emerald-500 hover:text-emerald-400 transition-colors group"
           >
             Explore Collection
-            <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
+            <ArrowRight size={16} className="sm:size-4.5 group-hover:translate-x-2 transition-transform" />
           </Link>
         </motion.div>
 
@@ -40,10 +40,10 @@ export const Home = () => {
       </section>
 
       {/* Featured Horizontal Scroller */}
-      <section className="py-32 overflow-hidden bg-zinc-900 border-y border-zinc-800">
-        <div className="px-6 md:px-12 mb-16 flex justify-between items-end">
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">Featured Objects</h2>
-          <Link to="/shop" className="text-sm tracking-widest uppercase hover:text-emerald-400">View All</Link>
+      <section className="py-20 sm:py-32 overflow-hidden bg-zinc-900 border-y border-zinc-800">
+        <div className="px-4 sm:px-6 md:px-12 mb-10 sm:mb-16 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-end">
+          <h2 className="text-2xl sm:text-4xl md:text-6xl font-bold tracking-tighter uppercase">Featured Objects</h2>
+          <Link to="/shop" className="text-xs sm:text-sm tracking-widest uppercase hover:text-emerald-400">View All</Link>
         </div>
 
         {featuredProducts.length > 0 && (
@@ -53,7 +53,7 @@ export const Home = () => {
                 <Link
                   key={`${product.id}-${index}`}
                   to={`/product/${product.id}`}
-                  className="group block relative w-75 md:w-112.5 aspect-4/5 overflow-hidden rounded-sm bg-zinc-800 shrink-0"
+                  className="group block relative w-44 sm:w-56 md:w-96 aspect-4/5 overflow-hidden rounded-sm bg-zinc-800 shrink-0"
                 >
                   <motion.img
                     whileHover={{ scale: 1.05 }}
@@ -76,12 +76,12 @@ export const Home = () => {
       </section>
 
       {/* Philosophy Section */}
-      <section className="py-32 px-6 md:px-12 max-w-6xl mx-auto text-center">
+      <section className="py-20 sm:py-32 px-4 sm:px-6 md:px-12 max-w-6xl mx-auto text-center">
         <motion.h2 
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          className="text-3xl md:text-5xl font-bold tracking-tight leading-tight"
+          className="text-xl sm:text-3xl md:text-5xl font-bold tracking-tight leading-snug sm:leading-tight"
         >
           We believe in the power of less. Every item in our collection is rigorously selected for its uncompromising design and enduring quality.
         </motion.h2>

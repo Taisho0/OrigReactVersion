@@ -22,7 +22,7 @@ export const Layout = () => {
   return (
     <div className="min-h-screen text-zinc-50 font-sans selection:bg-emerald-500/30">
       <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-between px-4 py-4 sm:px-6 sm:py-6 md:px-12 pointer-events-none">
-        <Link to="/" className="text-xl font-bold tracking-tighter uppercase pointer-events-auto">
+        <Link to="/" className="text-sm sm:text-xl font-bold tracking-tighter uppercase pointer-events-auto whitespace-nowrap">
           Originals Printing Co.
         </Link>
         
