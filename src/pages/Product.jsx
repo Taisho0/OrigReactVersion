@@ -148,7 +148,7 @@ export const ProductDetail = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="aspect-[1/1] sm:aspect-4/5 bg-zinc-900 rounded-sm overflow-hidden"
+          className="aspect-square sm:aspect-4/5 bg-zinc-900 rounded-sm overflow-hidden"
         >
           <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
         </motion.div>
