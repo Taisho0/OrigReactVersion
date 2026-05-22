@@ -11,7 +11,6 @@ export const OrderDetails = () => {
   const { session } = useUserAuth();
   const [busyOrderId, setBusyOrderId] = useState('');
   const [orderStatusDrafts, setOrderStatusDrafts] = useState({});
-  const [paymentApprovalDrafts, setPaymentApprovalDrafts] = useState({});
   const [message, setMessage] = useState('');
 
   const order = orders.find((o) => o.id === orderId);
@@ -36,7 +35,7 @@ export const OrderDetails = () => {
     );
   }
 
-  const isPendingPayment = order.payment?.status === 'pending';
+  const isPendingPayment = ['pending_review', 'pending', 'review'].includes(order.payment?.status) || order.status === 'Pending Payment Approval';
   const isApprovedPayment = order.payment?.status === 'approved' || !order.payment;
   const receiptProofImage = order.payment?.proofImage || '';
 
@@ -46,12 +45,40 @@ export const OrderDetails = () => {
 
   const handleApprovePayment = async (orderId) => {
     setMessage('');
-    setPaymentApprovalDrafts((current) => ({ ...current, [orderId]: true }));
+    setBusyOrderId(orderId);
+
+    try {
+      const ok = await approveOrderPayment(orderId);
+      if (!ok) {
+        setMessage('Unable to approve payment for this order.');
+        return;
+      }
+
+      setMessage('Payment approved. Order moved to Processing.');
+    } catch (error) {
+      setMessage(error?.message || 'Unable to approve payment for this order.');
+    } finally {
+      setBusyOrderId('');
+    }
   };
 
   const handleRejectPayment = async (orderId) => {
     setMessage('');
-    setPaymentApprovalDrafts((current) => ({ ...current, [orderId]: false }));
+    setBusyOrderId(orderId);
+
+    try {
+      const ok = await rejectOrderPayment(orderId, 'Receipt proof needs verification.');
+      if (!ok) {
+        setMessage('Unable to reject payment for this order.');
+        return;
+      }
+
+      setMessage('Payment rejected.');
+    } catch (error) {
+      setMessage(error?.message || 'Unable to reject payment for this order.');
+    } finally {
+      setBusyOrderId('');
+    }
   };
 
   const handleOrderStatusSave = async (orderId) => {
@@ -60,36 +87,23 @@ export const OrderDetails = () => {
     setMessage('');
 
     try {
-      const isDraftApproval = paymentApprovalDrafts[orderId] !== undefined;
-      if (isDraftApproval) {
-        const ok = await approveOrderPayment(orderId, paymentApprovalDrafts[orderId]);
-        if (!ok) {
-          setMessage('Unable to approve payment for this order.');
-          return;
-        }
-
-        if (newStatus !== order.status) {
-          const updateOk = await updateOrderStatus(orderId, newStatus);
-          if (!updateOk) {
-            setMessage('Payment approved, but unable to update tracking status for this order.');
-            return;
-          }
-        }
-
-        setMessage('Payment approved.');
-        setPaymentApprovalDrafts((current) => {
-          const next = { ...current };
-          delete next[orderId];
-          return next;
-        });
-      } else {
-        const ok = await updateOrderStatus(orderId, newStatus);
-        if (!ok) {
-          setMessage('Unable to update tracking status for this order.');
-          return;
-        }
+      if (!isApprovedPayment) {
+        setMessage('Approve payment before updating the tracking status.');
+        return;
       }
 
+      if (newStatus === order.status) {
+        setMessage('No tracking status change to save.');
+        return;
+      }
+
+      const ok = await updateOrderStatus(orderId, newStatus);
+      if (!ok) {
+        setMessage('Unable to update tracking status for this order.');
+        return;
+      }
+
+      setMessage('Order tracking status updated.');
       setOrderStatusDrafts((current) => {
         const next = { ...current };
         delete next[orderId];
@@ -250,7 +264,14 @@ export const OrderDetails = () => {
         {/* Payment & Status Management */}
         <div className="space-y-4 pt-4 border-t border-white/10">
           {isPendingPayment && (
-            <div className="grid gap-3 grid-cols-2">
+            <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-amber-100">
+              <p className="text-sm font-semibold">Payment review required</p>
+              <p className="mt-2 text-sm text-amber-100/90">This order is awaiting manual payment approval. Review the proof of payment and choose the correct action before processing the order.</p>
+            </div>
+          )}
+
+          {isPendingPayment && (
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={() => handleApprovePayment(order.id)}
