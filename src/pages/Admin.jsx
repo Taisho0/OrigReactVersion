@@ -59,7 +59,7 @@ export default function Admin() {
   const [salesMessage, setSalesMessage] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [selectedRange, setSelectedRange] = useState('7d');
+  const [selectedRange, setSelectedRange] = useState('all');
   const [showcaseForm, setShowcaseForm] = useState({
     category: SHOWCASE_CATEGORIES[0],
     productId: '',
@@ -393,17 +393,6 @@ export default function Admin() {
     setStartDate(formatDate(start));
     setEndDate(formatDate(now));
   };
-
-  useEffect(() => {
-    if (!startDate && !endDate) {
-      const now = new Date();
-      const start = new Date(now);
-      start.setDate(now.getDate() - 6);
-      setStartDate(formatDate(start));
-      setEndDate(formatDate(now));
-      setSelectedRange('7d');
-    }
-  }, []);
 
   const filteredSalesOrders = useMemo(() => {
     const start = startDate ? new Date(startDate) : null;
