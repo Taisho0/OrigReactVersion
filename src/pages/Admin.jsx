@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState, useId } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'motion/react';
-import { ArchiveRestore, BarChart3, ShieldCheck, ShoppingBag, Users, UserRoundCog, Upload, DollarSign, Plus, Download, CircleCheckBig, CircleX } from 'lucide-react';
+import { ArchiveRestore, BarChart3, Bell, ShieldCheck, ShoppingBag, Users, UserRoundCog, Upload, DollarSign, Plus, Download, CircleCheckBig, CircleX, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { addDoc, collection, getFirestore } from 'firebase/firestore';
+import { addDoc, collection, getFirestore, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Label, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { ChartContainer } from '../components/ui/chart';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
@@ -16,7 +16,7 @@ import { SHOWCASE_CATEGORIES } from './Showcase';
 const API_ORIGIN = '';
 
 export default function Admin() {
-  const { session, userProfile, signOut, suspendUser, deleteUser, restoreUser, setUserRole } = useUserAuth();
+  const { session, userProfile, signOut, suspendUser, deleteUser, restoreUser, setUserRole, isConfiguredAdminEmail, authReady } = useUserAuth();
   const {
     activeProducts,
     archivedProducts,
@@ -74,6 +74,7 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [paymentApprovalDrafts, setPaymentApprovalDrafts] = useState({});
   const [firebaseUsers, setFirebaseUsers] = useState([]);
+  const [feedbackCollectionInbox, setFeedbackCollectionInbox] = useState([]);
 
   const barGradId = useId();
 
@@ -199,6 +200,115 @@ export default function Admin() {
       return nextDrafts;
     });
   }, [orders]);
+
+  useEffect(() => {
+    const isAdmin = userProfile?.role === 'admin' || (userProfile == null && session?.email && isConfiguredAdminEmail(session.email));
+
+    if (!authReady) {
+      console.debug('Admin.jsx - auth not ready, skipping feedback subscription');
+      return undefined;
+    }
+
+    if (!session?.uid || !isAdmin) {
+      console.debug('Admin.jsx - not subscribing to feedbacks: not authenticated admin', { sessionUid: session?.uid, isAdmin });
+      setFeedbackCollectionInbox([]);
+      return undefined;
+    }
+
+    const loadFromServer = async () => {
+      try {
+        const actorToken = typeof session?.getIdToken === 'function' ? await session.getIdToken(true) : await auth.currentUser?.getIdToken(true);
+        const resp = await fetch('/api/admin/feedbacks', {
+          method: 'GET',
+          headers: {
+            authorization: `Bearer ${actorToken}`,
+          },
+        });
+
+        if (!resp.ok) {
+          const body = await resp.json().catch(() => ({}));
+          throw new Error(body?.message || `Unable to load feedbacks. (${resp.status})`);
+        }
+
+        const body = await resp.json();
+        const docs = Array.isArray(body.feedbacks) ? body.feedbacks : [];
+        console.debug('Admin.jsx - server returned feedbacks count:', docs.length, 'sample:', docs[0] || null);
+        setFeedbackCollectionInbox(docs);
+      } catch (err) {
+        console.error('Unable to sync customer feedback:', err);
+        setFeedbackCollectionInbox([]);
+      }
+    };
+
+    loadFromServer();
+
+    return undefined;
+  }, [db, session?.uid, userProfile?.role, session?.email, authReady, isConfiguredAdminEmail]);
+
+  const feedbackInbox = useMemo(() => {
+    const toMillis = (value) => {
+      if (!value) {
+        return 0;
+      }
+
+      if (typeof value === 'string' || typeof value === 'number') {
+        const parsed = new Date(value).getTime();
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+
+      if (typeof value?.toDate === 'function') {
+        return value.toDate().getTime();
+      }
+
+      if (typeof value?.seconds === 'number') {
+        return value.seconds * 1000;
+      }
+
+      return 0;
+    };
+
+    const keyFor = (item) => String(item.orderFirestoreId || item.feedbackId || item.orderId || item.id || '').trim();
+    const merged = new Map();
+
+    feedbackCollectionInbox.forEach((entry) => {
+      const key = keyFor(entry) || `feedback-${entry.id}`;
+      merged.set(key, {
+        ...entry,
+        id: entry.id || key,
+      });
+    });
+
+    orders.forEach((order) => {
+      if (!order?.feedback?.comment) {
+        return;
+      }
+
+      const key = String(order.firestoreId || order.id || '').trim();
+      if (!key || merged.has(key)) {
+        return;
+      }
+
+      merged.set(key, {
+        id: `order-feedback-${key}`,
+        feedbackId: key,
+        orderFirestoreId: key,
+        orderId: order.id || '',
+        orderStatus: order.status || '',
+        orderDate: order.date || '',
+        orderTotal: Number(order.total || 0),
+        purchaserUid: order.purchaserUid || '',
+        customerEmail: order.feedback.customerEmail || order.purchaserEmail || order.shipping?.email || '',
+        customerName:
+          order.feedback.customerName
+          || `${order.shipping?.firstName || ''} ${order.shipping?.lastName || ''}`.trim(),
+        rating: Number(order.feedback.rating || 0),
+        comment: String(order.feedback.comment || '').trim(),
+        submittedAt: order.feedback.submittedAt || order.feedbackSubmittedAt || order.updatedAt || order.date || '',
+      });
+    });
+
+    return [...merged.values()].sort((a, b) => toMillis(b.submittedAt) - toMillis(a.submittedAt));
+  }, [feedbackCollectionInbox, orders]);
 
   useEffect(() => {
     const product = activeProducts.find((entry) => entry.id === selectedProductId);
@@ -909,6 +1019,7 @@ export default function Admin() {
                 { value: 'products', label: 'Products' },
                 { value: 'showcase', label: 'Showcase' },
                 { value: 'users', label: 'Users' },
+                { value: 'feedbacks', label: 'Feedback' },
                 { value: 'sales', label: 'Sales' },
               ].map((tab) => (
                 <button
@@ -921,7 +1032,15 @@ export default function Admin() {
                       : 'border-white/10 bg-white/5 text-zinc-200 hover:border-emerald-400 hover:bg-emerald-400/5'
                   }`}
                 >
-                  {tab.label}
+                  <span className="inline-flex items-center gap-2">
+                    {tab.value === 'feedbacks' && <Bell size={14} />}
+                    {tab.label}
+                    {tab.value === 'feedbacks' && feedbackInbox.length > 0 && (
+                      <span className="rounded-full bg-emerald-400/15 px-2 py-0.5 text-[10px] font-bold tracking-normal text-emerald-300 normal-case">
+                        {feedbackInbox.length}
+                      </span>
+                    )}
+                  </span>
                 </button>
               ))}
             </div>
@@ -1588,6 +1707,52 @@ export default function Admin() {
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'feedbacks' && (
+              <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/80 p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6">
+                <div className="flex items-center justify-between gap-3 sm:gap-4">
+                  <div>
+                    <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-emerald-400">Customer notifications</p>
+                    <h2 className="mt-1 sm:mt-2 text-lg sm:text-2xl font-black uppercase tracking-tight">Feedback inbox</h2>
+                    <p className="mt-1 text-xs sm:text-sm text-zinc-400">Messages customers submit after completing an order.</p>
+                  </div>
+                  <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-zinc-300">
+                    {feedbackInbox.length} item{feedbackInbox.length === 1 ? '' : 's'}
+                  </div>
+                </div>
+
+                {feedbackInbox.length === 0 ? (
+                  <div className="rounded-3xl border border-dashed border-white/10 p-8 text-center text-zinc-500">
+                    No customer feedback yet.
+                  </div>
+                ) : (
+                  <div className="grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3 max-h-112 overflow-auto pr-1">
+                    {feedbackInbox.map((feedback) => {
+                      const customerName = feedback.customerName || feedback.customerEmail || 'Customer';
+                      const submittedAt = feedback.submittedAt ? new Date(feedback.submittedAt).toLocaleString() : '';
+
+                      return (
+                        <article key={feedback.id} className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4 shadow-sm shadow-black/10">
+                          <div className="flex items-start justify-between gap-3 mb-3">
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-zinc-100 truncate">{customerName}</p>
+                              <p className="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] text-zinc-500 truncate">Order {feedback.orderId}</p>
+                            </div>
+                            <div className="flex items-center gap-1 rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-1 text-[10px] font-bold text-amber-200 shrink-0">
+                              <Star size={10} />
+                              {feedback.rating || 0}/5
+                            </div>
+                          </div>
+
+                          <p className="text-xs sm:text-sm text-zinc-200 leading-6">{feedback.comment}</p>
+                          <p className="mt-3 text-[8px] sm:text-[10px] uppercase tracking-[0.28em] text-zinc-500">{submittedAt}</p>
+                        </article>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 

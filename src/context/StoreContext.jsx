@@ -165,9 +165,11 @@ export const StoreProvider = ({ children }) => {
     const unsubscribe = onSnapshot(
       ordersQuery,
       (snapshot) => {
-        const nextOrders = snapshot.docs
-          .map((entry) => ({ firestoreId: entry.id, ...entry.data() }))
-          .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+        const nextOrders = snapshot.docs.map((entry) => ({ firestoreId: entry.id, ...entry.data() }));
+
+        console.debug('StoreContext - orders snapshot count:', snapshot.size, 'sample:', nextOrders[0] || null);
+
+        nextOrders.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
         setOrders(nextOrders);
       },
       (error) => {
@@ -551,6 +553,99 @@ export const StoreProvider = ({ children }) => {
     }
   };
 
+  const submitOrderFeedback = async ({ orderId, rating, comment }) => {
+    const order = orders.find((entry) => entry.id === orderId);
+    if (!order?.firestoreId || order.status !== 'Complete') {
+      return false;
+    }
+
+    const numericRating = Math.min(5, Math.max(1, Math.round(Number(rating) || 0)));
+    const trimmedComment = String(comment || '').trim();
+
+    if (!trimmedComment) {
+      return false;
+    }
+
+    const submittedAt = new Date().toISOString();
+    const feedbackPayload = {
+      feedbackId: order.firestoreId,
+      orderId,
+      orderFirestoreId: order.firestoreId,
+      orderStatus: order.status,
+      orderDate: order.date || submittedAt,
+      orderTotal: Number(order.total || 0),
+      purchaserUid: order.purchaserUid || '',
+      customerEmail: order.purchaserEmail || order.shipping?.email || '',
+      customerName: `${order.shipping?.firstName || ''} ${order.shipping?.lastName || ''}`.trim(),
+      rating: numericRating,
+      comment: trimmedComment,
+      submittedAt,
+    };
+
+    try {
+      const actorToken = (typeof session?.getIdToken === 'function'
+        ? await session.getIdToken(true)
+        : await auth.currentUser?.getIdToken(true));
+
+      // Prefer backend endpoint; if unavailable (404), fall back to direct Firestore writes.
+      if (actorToken) {
+        const payload = {
+          orderId: order.firestoreId,
+          rating: numericRating,
+          comment: trimmedComment,
+          submittedAt,
+        };
+
+        const endpoints = [`${API_ORIGIN}/api/feedbacks/create`, `${API_ORIGIN}/api/feedbacks`];
+        let response = null;
+        let lastError = null;
+
+        for (const endpoint of endpoints) {
+          response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${actorToken}`,
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (response.ok) {
+            return true;
+          }
+
+          const body = await response.json().catch(() => ({}));
+          lastError = body?.message || `Unable to submit feedback. (${response.status})`;
+
+          if (response.status !== 404) {
+            throw new Error(lastError);
+          }
+        }
+      }
+
+      try {
+        await addDoc(collection(db, 'feedbacks'), feedbackPayload);
+        return true;
+      } catch (feedbackCollectionErr) {
+        await updateDoc(doc(db, 'orders', order.firestoreId), {
+          feedback: {
+            rating: numericRating,
+            comment: trimmedComment,
+            submittedAt,
+            customerEmail: feedbackPayload.customerEmail,
+            customerName: feedbackPayload.customerName,
+          },
+          feedbackSubmittedAt: submittedAt,
+        });
+      }
+
+      return true;
+    } catch (err) {
+      console.error('submitOrderFeedback failed:', err);
+      return false;
+    }
+  };
+
   const updateOrderStatus = async (orderId, nextStatus) => {
     if (!ORDER_STATUS_STEPS.includes(nextStatus)) {
       return false;
@@ -599,6 +694,7 @@ export const StoreProvider = ({ children }) => {
         approveOrderPayment,
         rejectOrderPayment,
         cancelOrder,
+        submitOrderFeedback,
         updateOrderStatus,
       }}
     >
