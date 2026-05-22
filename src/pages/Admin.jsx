@@ -698,7 +698,7 @@ export default function Admin() {
     doc.setFontSize(10);
     doc.text(`Generated: ${now.toLocaleString()}`, 14, 24);
     doc.text(`Approved Orders: ${reportOrders.length}`, 14, 30);
-    doc.text(`Total Revenue: PHP ${totalRevenue.toFixed(2)}`, 14, 36);
+    doc.text(`Total Sales: PHP ${totalRevenue.toFixed(2)}`, 14, 36);
 
     autoTable(doc, {
       startY: 42,
@@ -974,7 +974,7 @@ export default function Admin() {
                         <span className="font-semibold text-zinc-100">{orders.length}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-zinc-400">Normal user revenue</span>
+                        <span className="text-zinc-400">Normal user sales</span>
                         <span className="font-semibold text-zinc-100">₱{metrics.revenueFromNormalUsers.toFixed(2)}</span>
                       </div>
                     </div>
@@ -1585,9 +1585,9 @@ export default function Admin() {
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between mb-8">
                   <div className="flex items-center gap-3">
                     <BarChart3 size={20} className="text-emerald-300" />
-                    <div>
+                      <div>
                       <h2 className="text-3xl font-black uppercase tracking-tight">Sales analytics</h2>
-                      <p className="mt-1 text-sm text-zinc-400">Revenue, product and category performance for approved sales.</p>
+                      <p className="mt-1 text-sm text-zinc-400">Sales, product and category performance for approved sales.</p>
                     </div>
                   </div>
 
@@ -1659,7 +1659,7 @@ export default function Admin() {
 
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-6">
                   {[{
-                    label: 'Revenue',
+                    label: 'Sales',
                     value: `₱${salesAnalytics.totalRevenue.toFixed(2)}`,
                     description: `${salesAnalytics.orderCount} approved orders`,
                   }, {
@@ -1689,10 +1689,10 @@ export default function Admin() {
 
                 <div className="space-y-4 mb-6">
                   <div className="rounded-4xl border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
-                    <div className="flex items-center justify-between mb-5 gap-4">
+                      <div className="flex items-center justify-between mb-5 gap-4">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Daily revenue</p>
-                        <p className="text-sm text-zinc-400">Revenue movement across the selected range.</p>
+                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Daily sales</p>
+                        <p className="text-sm text-zinc-400">Sales movement across the selected range.</p>
                       </div>
                       <span className="inline-flex rounded-full bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300">{salesAnalytics.dailySales.length} days</span>
                     </div>
@@ -1712,28 +1712,28 @@ export default function Admin() {
                       <div className="flex items-center justify-between mb-3 gap-4 px-4 pt-4">
                         <div>
                           <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Top products</p>
-                          <p className="text-sm text-zinc-400">Revenue share for your best sellers.</p>
+                          <p className="text-sm text-zinc-400">Sales share for your best sellers.</p>
                         </div>
-                        <span className="text-xs uppercase tracking-[0.35em] text-zinc-500">By revenue</span>
+                        <span className="text-xs uppercase tracking-[0.35em] text-zinc-500">By sales</span>
                       </div>
                       {salesAnalytics.topProducts.length === 0 ? (
-                        <div className="grid h-80 place-items-center rounded-2xl border border-dashed border-white/10 text-sm text-zinc-500">No product revenue yet.</div>
+                        <div className="grid h-80 place-items-center rounded-2xl border border-dashed border-white/10 text-sm text-zinc-500">No product sales yet.</div>
                       ) : (
-                        <ChartContainer className="h-80 rounded-3xl bg-slate-950/80 p-4" config={{ revenue: { color: '#f59e0b' } }}>
+                        <ChartContainer className="h-96 rounded-3xl bg-slate-950/80 p-4" config={{ revenue: { color: '#f59e0b' } }}>
                           <PieChart>
                             <Pie
                               data={salesAnalytics.topProducts}
                               dataKey="revenue"
                               nameKey="name"
                               cx="50%"
-                              cy="45%"
+                              cy="50%"
                               startAngle={90}
                               endAngle={-270}
-                              innerRadius={48}
-                              outerRadius={78}
-                              paddingAngle={6}
+                              innerRadius={36}
+                              outerRadius={110}
+                              paddingAngle={2}
                               stroke="#0f172a"
-                              strokeWidth={4}
+                              strokeWidth={2}
                               labelLine={false}
                             >
                               {salesAnalytics.topProducts.map((entry, index) => (
@@ -1746,7 +1746,7 @@ export default function Admin() {
                                 value={`₱${salesAnalytics.topProducts.reduce((sum, item) => sum + item.revenue, 0).toFixed(0)}`}
                                 position="center"
                                 fill="#f8fafc"
-                                style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.1 }}
+                                style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.1 }}
                               />
                             </Pie>
                             <Tooltip
