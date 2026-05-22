@@ -33,15 +33,11 @@ export const Tracking = () => {
   const selectedPreviousOrder = orders.find((order) => order.id === selectedPreviousOrderId) || null;
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || feedbackOpen || feedbackOrderId) {
       return;
     }
 
-    if (feedbackOpen || feedbackOrderId) {
-      return;
-    }
-
-    const nextOrder = orders.find((order) => {
+    const nextCompleteOrder = orders.find((order) => {
       if (order.status !== 'Complete' || order.feedbackSubmittedAt) {
         return false;
       }
@@ -49,11 +45,11 @@ export const Tracking = () => {
       return !window.localStorage.getItem(`theoriginals.feedbackPrompted.${order.id}`);
     });
 
-    if (!nextOrder) {
+    if (!nextCompleteOrder) {
       return;
     }
 
-    setFeedbackOrderId(nextOrder.id);
+    setFeedbackOrderId(nextCompleteOrder.id);
     setFeedbackRating(5);
     setFeedbackComment('');
     setFeedbackMessage('');
