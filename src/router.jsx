@@ -9,6 +9,8 @@ import { Cart } from "./pages/Cart";
 import { Checkout } from "./pages/Checkout";
 import { Tracking } from "./pages/Tracking";
 import { Showcase } from "./pages/Showcase";
+import { Terms } from "./pages/Terms";
+import { Privacy } from "./pages/Privacy";
 import PrivateRoute from "./pages/PrivateRoute";
 import AdminRoute from "./pages/AdminRoute";
 import Admin from "./pages/Admin";
@@ -45,6 +47,8 @@ export const router = createBrowserRouter([
       { path: "/cart", element: <Cart /> },
       { path: "/checkout", element: <Checkout /> },
       { path: "/tracking", element: <Tracking /> },
+      { path: "/terms", element: <Terms /> },
+      { path: "/privacy", element: <Privacy /> },
     ],
     
   },
