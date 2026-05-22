@@ -101,6 +101,49 @@ const sendBrevoOtpEmail = async (email, code) => {
   return responseBody || {};
 };
 
+const sendBrevoEmail = async (email, subject, htmlContent, textContent) => {
+  if (!BREVO_API_KEY) {
+    throw new Error('BREVO_API_KEY is not configured.');
+  }
+
+  const payload = {
+    sender: { name: BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
+    to: [{ email }],
+    subject: subject,
+    htmlContent: htmlContent,
+    textContent: textContent || htmlContent.replace(/<[^>]+>/g, ''),
+  };
+
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'api-key': BREVO_API_KEY,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const bodyText = await response.text();
+  let responseBody = null;
+  try {
+    responseBody = JSON.parse(bodyText);
+  } catch {
+    responseBody = bodyText;
+  }
+
+  console.log('Brevo send response:', { email, subject, status: response.status, ok: response.ok, body: responseBody });
+
+  if (!response.ok) {
+    const error = new Error(`Brevo request failed: ${response.status} ${typeof responseBody === 'string' ? responseBody : responseBody?.message || JSON.stringify(responseBody)}`);
+    error.status = response.status;
+    error.details = responseBody;
+    throw error;
+  }
+
+  return responseBody || {};
+};
+
 const createAuthorizationHeader = () => {
   if (!paymongoSecretKey) {
     return '';
@@ -1328,4 +1371,61 @@ app.get('/api/admin/feedbacks', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`PayMongo API listening on http://localhost:${port}`);
+});
+
+// Send order notification email to purchaser (admin only)
+app.post('/api/admin/orders/notify', async (req, res) => {
+  try {
+    const readBearerToken = (request) => {
+      const authHeader = String(request.headers?.authorization || '').trim();
+      if (!authHeader.toLowerCase().startsWith('bearer ')) return '';
+      return authHeader.slice(7).trim();
+    };
+
+    const actorToken = readBearerToken(req);
+    if (!actorToken) return res.status(401).json({ message: 'Missing bearer token.' });
+
+    const { auth: adminAuth, db: adminDb } = getFirebaseAdmin();
+    const decoded = await adminAuth.verifyIdToken(actorToken);
+
+    const actorProfileSnapshot = await adminDb.collection('users').doc(decoded.uid).get();
+    const actorProfile = actorProfileSnapshot.exists ? actorProfileSnapshot.data() : null;
+    const actorEmail = normalizeEmail(decoded.email || '');
+    const canNotify = isActiveAdmin(actorProfile) || allowedAdminEmails.includes(actorEmail);
+
+    if (!canNotify) return res.status(403).json({ message: 'Only active admins can send notifications.' });
+
+    const firestoreId = String(req.body?.orderId || '').trim();
+    const action = String(req.body?.action || '').trim(); // 'approved' | 'rejected'
+    const reason = String(req.body?.reason || '').trim();
+
+    if (!firestoreId || !['approved', 'rejected'].includes(action)) {
+      return res.status(400).json({ message: 'Invalid request. Provide orderId and action (approved|rejected).' });
+    }
+
+    const orderDoc = await adminDb.collection('orders').doc(firestoreId).get();
+    if (!orderDoc.exists) return res.status(404).json({ message: 'Order not found.' });
+
+    const order = orderDoc.data() || {};
+    const purchaserEmail = String(order.purchaserEmail || order.shipping?.email || '').trim();
+    if (!purchaserEmail) return res.status(400).json({ message: 'Order has no purchaser email.' });
+
+    // Compose email
+    let subject = '';
+    let html = '';
+    if (action === 'approved') {
+      subject = `Your Originals order ${order.id} has been approved`;
+      html = `<p>Hello ${order.shipping?.firstName || ''},</p><p>Your payment for order <strong>${order.id}</strong> has been approved. We will process and ship your order shortly.</p><p>Thank you for shopping with Originals Printing Co.</p>`;
+    } else {
+      subject = `Your Originals order ${order.id} payment was rejected`;
+      html = `<p>Hello ${order.shipping?.firstName || ''},</p><p>We're sorry — the payment for order <strong>${order.id}</strong> was rejected.${reason ? `<p>Reason: ${reason}</p>` : ''}</p><p>Please reach out to support if you need assistance.</p>`;
+    }
+
+    await sendBrevoEmail(purchaserEmail, subject, html);
+
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error('Unable to send order notification:', err);
+    return res.status(500).json({ message: err?.message || 'Unable to send notification.' });
+  }
 });
