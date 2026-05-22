@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import { Package, Truck, CheckCircle, Clock, XCircle, ChevronLeft, Star } from 'lucide-react';
@@ -32,11 +33,15 @@ export const Tracking = () => {
   const selectedPreviousOrder = orders.find((order) => order.id === selectedPreviousOrderId) || null;
 
   useEffect(() => {
-    if (typeof window === 'undefined' || feedbackOpen || feedbackOrderId) {
+    if (typeof window === 'undefined') {
       return;
     }
 
-    const nextCompleteOrder = orders.find((order) => {
+    if (feedbackOpen || feedbackOrderId) {
+      return;
+    }
+
+    const nextOrder = orders.find((order) => {
       if (order.status !== 'Complete' || order.feedbackSubmittedAt) {
         return false;
       }
@@ -44,11 +49,11 @@ export const Tracking = () => {
       return !window.localStorage.getItem(`theoriginals.feedbackPrompted.${order.id}`);
     });
 
-    if (!nextCompleteOrder) {
+    if (!nextOrder) {
       return;
     }
 
-    setFeedbackOrderId(nextCompleteOrder.id);
+    setFeedbackOrderId(nextOrder.id);
     setFeedbackRating(5);
     setFeedbackComment('');
     setFeedbackMessage('');
@@ -483,7 +488,7 @@ export const Tracking = () => {
           </div>
         ) : (
           currentOrders.map((order, idx) => (
-          <div 
+          <motion.div 
             key={order.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -492,7 +497,7 @@ export const Tracking = () => {
           >
             {/* Animated background glow for active order */}
             {order.status !== 'Delivered' && order.status !== 'Complete' && (
-              <div 
+              <motion.div 
                 className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px]"
                 animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -597,7 +602,7 @@ export const Tracking = () => {
                       : `calc(${progressPercent}% + 20px)`;
 
                 return (
-                  <div
+                  <motion.div
                     className="absolute top-1/2 left-4 sm:left-0 h-0.5 bg-emerald-500 -translate-y-1/2"
                     initial={{ width: '0%' }}
                     animate={{ width: progressWidth }}
@@ -624,7 +629,7 @@ export const Tracking = () => {
                         {index === 4 && <CheckCircle size={16} className="sm:w-5 sm:h-5" />}
                         
                         {isCurrent && (
-                          <div 
+                          <motion.div 
                             className="absolute w-11 sm:w-14 h-11 sm:h-14 border-2 border-emerald-500 rounded-full opacity-50"
                             animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
                             transition={{ duration: 1.5, repeat: Infinity }}
@@ -676,7 +681,7 @@ export const Tracking = () => {
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
           ))
         )}
       </div>
