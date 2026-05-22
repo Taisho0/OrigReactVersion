@@ -11,6 +11,7 @@ import { Tracking } from "./pages/Tracking";
 import { Showcase } from "./pages/Showcase";
 import { Terms } from "./pages/Terms";
 import { Privacy } from "./pages/Privacy";
+import { OrderDetails } from "./pages/OrderDetails";
 import PrivateRoute from "./pages/PrivateRoute";
 import AdminRoute from "./pages/AdminRoute";
 import Admin from "./pages/Admin";
@@ -49,6 +50,7 @@ export const router = createBrowserRouter([
       { path: "/tracking", element: <Tracking /> },
       { path: "/terms", element: <Terms /> },
       { path: "/privacy", element: <Privacy /> },
+      { path: "/admin/order/:orderId", element: <OrderDetails /> },
     ],
     
   },

@@ -75,6 +75,8 @@ export default function Admin() {
   const [paymentApprovalDrafts, setPaymentApprovalDrafts] = useState({});
   const [firebaseUsers, setFirebaseUsers] = useState([]);
   const [feedbackCollectionInbox, setFeedbackCollectionInbox] = useState([]);
+  const [orderSearchQuery, setOrderSearchQuery] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('');
 
   const barGradId = useId();
 
@@ -406,15 +408,31 @@ export default function Admin() {
     }
 
     return metrics.approvedOrders.filter((order) => {
+      // Date range filtering
       if (!order?.date) {
         return true;
       }
       const orderDate = new Date(order.date);
       if (start && orderDate < start) return false;
       if (end && orderDate > end) return false;
+
+      // Status filtering
+      if (orderStatusFilter && order.status !== orderStatusFilter) {
+        return false;
+      }
+
+      // Search filtering - search by order ID
+      if (orderSearchQuery.trim()) {
+        const searchLower = orderSearchQuery.toLowerCase().trim();
+        const orderIdMatch = order.id && order.id.toLowerCase().includes(searchLower);
+        if (!orderIdMatch) {
+          return false;
+        }
+      }
+
       return true;
     });
-  }, [metrics.approvedOrders, startDate, endDate]);
+  }, [metrics.approvedOrders, startDate, endDate, orderStatusFilter, orderSearchQuery]);
 
   const salesAnalytics = useMemo(() => {
     const orders = filteredSalesOrders;
@@ -2038,192 +2056,104 @@ export default function Admin() {
                   </div>
                 </div>
 
-                <div className="space-y-2 sm:space-y-3 max-h-96 overflow-auto pr-1">
-                  {orders.length === 0 ? (
-                    <div className="rounded-3xl border border-dashed border-white/10 p-5 text-sm text-zinc-500">
-                      No purchases recorded yet.
+                <div className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/85 p-3 sm:p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                  <div className="flex items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
+                    <div>
+                      <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-400">All orders</p>
+                      <p className="text-[10px] sm:text-sm text-zinc-400">Manage and review customer orders.</p>
                     </div>
-                  ) : (
-                    orders.map((order) => {
-                      const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
-                      const isPendingPayment = order.payment?.status === 'pending_review' || order.status === 'Pending Payment Approval';
-                      const isApprovedPayment = order.payment?.status === 'approved' || !order.payment;
-                      const receiptProofImage = order.payment?.proofImage || '';
+                    <span className="inline-flex rounded-full bg-white/5 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300 shrink-0">
+                      {filteredSalesOrders.length} orders
+                    </span>
+                  </div>
 
-                      return (
-                        <div key={order.id} className="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm">
-                          <div className="flex flex-col gap-4">
-                            <div className="flex items-start justify-between gap-4">
-                              <div>
-                                <p className="font-semibold text-zinc-100">{order.purchaserEmail || 'Unknown buyer'}</p>
-                                <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">
-                                  {order.purchaserRole || 'customer'} · {new Date(order.date).toLocaleDateString()}
+                  {/* Search and Filter Controls */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6">
+                    <div>
+                      <label className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500 block mb-2">Search by Order Number</label>
+                      <input
+                        type="text"
+                        placeholder="Enter order ID..."
+                        value={orderSearchQuery}
+                        onChange={(e) => setOrderSearchQuery(e.target.value)}
+                        className="w-full rounded-xl border border-white/10 bg-slate-950/50 px-3 sm:px-4 py-2 sm:py-2.5 text-sm text-white placeholder-zinc-600 focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500 block mb-2">Filter by Status</label>
+                      <select
+                        value={orderStatusFilter}
+                        onChange={(e) => setOrderStatusFilter(e.target.value)}
+                        className="w-full rounded-xl border border-white/10 bg-slate-950/50 px-3 sm:px-4 py-2 sm:py-2.5 text-sm text-white focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-all cursor-pointer appearance-none"
+                      >
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Complete">Completed</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 sm:space-y-4">
+                    {filteredSalesOrders.length === 0 ? (
+                      <div className="rounded-2xl sm:rounded-3xl border border-dashed border-white/10 p-5 sm:p-8 text-center text-sm text-zinc-500">
+                        No orders in the selected date range.
+                      </div>
+                    ) : (
+                      filteredSalesOrders.map((order) => {
+                        const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                        const isPendingPayment = order.payment?.status === 'pending_review' || order.status === 'Pending Payment Approval';
+
+                        return (
+                          <Link
+                            key={order.id}
+                            to={`/admin/order/${order.id}`}
+                            className="group block rounded-2xl border border-white/5 bg-slate-950/40 hover:bg-slate-950/60 hover:border-emerald-400/30 p-4 sm:p-5 transition-all duration-200 cursor-pointer"
+                          >
+                            <div className="grid grid-cols-12 gap-4 sm:gap-5 items-start">
+                              {/* Email & Date */}
+                              <div className="col-span-12 sm:col-span-5 min-w-0">
+                                <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500 mb-1">Customer</p>
+                                <p className="font-semibold text-white text-sm sm:text-base truncate">{order.purchaserEmail || 'Unknown buyer'}</p>
+                                <p className="text-[10px] sm:text-xs text-zinc-500 mt-2">
+                                  {new Date(order.date).toLocaleDateString(undefined, { 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                  })} • <span className="text-zinc-400">{itemCount} {itemCount === 1 ? 'item' : 'items'}</span>
                                 </p>
                               </div>
-                              <div className="text-right">
-                                <p className="font-semibold text-emerald-300">₱{order.total.toFixed(2)}</p>
-                                <p className="text-xs text-zinc-500">{itemCount} items sold</p>
+
+                              {/* Amount & Status */}
+                              <div className="col-span-12 sm:col-span-4 text-right sm:text-left">
+                                <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500 mb-1">Amount</p>
+                                <p className="font-bold text-emerald-300 text-lg sm:text-xl mb-2">₱{order.total.toFixed(2)}</p>
+                                <span className={`inline-block rounded-lg px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.35em] ${
+                                  isPendingPayment
+                                    ? 'bg-amber-400/20 text-amber-200'
+                                    : order.status === 'Complete'
+                                    ? 'bg-emerald-400/20 text-emerald-200'
+                                    : 'bg-blue-400/20 text-blue-200'
+                                }`}>
+                                  {order.status}
+                                </span>
+                              </div>
+
+                              {/* Arrow */}
+                              <div className="col-span-12 sm:col-span-3 flex justify-end">
+                                <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 group-hover:bg-emerald-400/20 text-zinc-400 group-hover:text-emerald-300 transition-all">
+                                  →
+                                </div>
                               </div>
                             </div>
-
-                            <div className="grid gap-2 sm:gap-4 lg:grid-cols-[1.3fr_0.9fr]">
-                              <div className="rounded-xl sm:rounded-2xl border border-white/10 bg-slate-950/70 p-2.5 sm:p-3 space-y-2 sm:space-y-4 text-xs">
-                                <p className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-400">Customer and order details</p>
-
-                                <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2">
-                                  <div className="space-y-0.5 sm:space-y-1 text-[9px] sm:text-xs text-zinc-300">
-                                    <p><span className="text-zinc-500">Name:</span> {`${order.shipping?.firstName || ''} ${order.shipping?.lastName || ''}`.trim() || 'N/A'}</p>
-                                    <p><span className="text-zinc-500">Email:</span> {order.shipping?.email || order.purchaserEmail || 'N/A'}</p>
-                                    <p><span className="text-zinc-500">Phone:</span> {order.shipping?.phone || 'N/A'}</p>
-                                  </div>
-                                  <div className="space-y-0.5 sm:space-y-1 text-[9px] sm:text-xs text-zinc-300">
-                                    <p><span className="text-zinc-500">Address:</span> {order.shipping?.addressLine || 'N/A'}</p>
-                                    <p><span className="text-zinc-500">City:</span> {order.shipping?.city || 'N/A'}</p>
-                                    <p><span className="text-zinc-500">Province:</span> {order.shipping?.stateProvince || 'N/A'}</p>
-                                    <p><span className="text-zinc-500">Postal Code:</span> {order.shipping?.postalCode || 'N/A'}</p>
-                                  </div>
-                                </div>
-
-                                <div className="overflow-x-auto rounded-lg sm:rounded-xl border border-white/10 -mx-2.5 sm:mx-0">
-                                  <table className="w-full min-w-140 text-left text-[8px] sm:text-xs">
-                                    <thead className="bg-white/5 text-zinc-400 uppercase tracking-[0.2em] text-[7px] sm:text-[10px]">
-                                      <tr>
-                                        <th className="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold">Item</th>
-                                        <th className="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold">Category</th>
-                                        <th className="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold">Size</th>
-                                        <th className="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold text-right">Qty</th>
-                                        <th className="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold text-right">Price</th>
-                                        <th className="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold text-right">Subtotal</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {order.items.map((item, index) => {
-                                        const unitPrice = Number(item.itemPrice ?? item.product?.price ?? 0);
-                                        const quantity = Number(item.quantity ?? 0);
-                                        const subtotal = unitPrice * quantity;
-
-                                        return (
-                                          <tr key={`${order.id}-${item.product?.id || item.productId || index}-${item.size || 'default'}`} className="border-t border-white/10 text-zinc-200 text-[8px] sm:text-xs">
-                                            <td className="px-2 sm:px-3 py-1 sm:py-2 truncate">{item.product?.name || item.name || 'Unnamed item'}</td>
-                                            <td className="px-2 sm:px-3 py-1 sm:py-2">{item.product?.category || 'N/A'}</td>
-                                            <td className="px-2 sm:px-3 py-1 sm:py-2">{item.size || 'N/A'}</td>
-                                            <td className="px-2 sm:px-3 py-1 sm:py-2 text-right">{quantity}</td>
-                                            <td className="px-2 sm:px-3 py-1 sm:py-2 text-right">₱{unitPrice.toFixed(2)}</td>
-                                            <td className="px-2 sm:px-3 py-1 sm:py-2 text-right">₱{subtotal.toFixed(2)}</td>
-                                          </tr>
-                                        );
-                                      })}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </div>
-
-                              {receiptProofImage && (
-                                <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4 shadow-lg shadow-black/20">
-                                  <div className="space-y-3">
-                                    <div>
-                                      <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Proof of payment</p>
-                                      <p className="text-xs text-zinc-500">Receipt image uploaded for review</p>
-                                    </div>
-                                    <a
-                                      href={receiptProofImage}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-xs text-emerald-300 hover:text-emerald-200 underline"
-                                    >
-                                      View full receipt image
-                                    </a>
-                                    <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950">
-                                      <img
-                                        src={receiptProofImage}
-                                        alt={`Receipt proof for order ${order.id}`}
-                                        className="h-72 w-full object-cover"
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-
-                            {isPendingPayment && (
-                              <div className="grid gap-1.5 sm:gap-2 grid-cols-2 sm:grid-cols-2">
-                                <button
-                                  type="button"
-                                  onClick={() => handleApprovePayment(order.id)}
-                                  disabled={busyOrderId === order.id}
-                                  className="rounded-lg sm:rounded-2xl border border-emerald-400/40 px-2.5 sm:px-4 py-1.5 sm:py-3 text-[8px] sm:text-xs font-bold uppercase tracking-[0.25em] text-emerald-200 hover:border-emerald-300 hover:text-emerald-100 disabled:opacity-60 flex items-center justify-center gap-1 sm:gap-2"
-                                >
-                                  <CircleCheckBig size={12} className="sm:w-3.5 sm:h-3.5" />
-                                  <span className="hidden sm:inline">Approve Payment</span>
-                                  <span className="sm:hidden">Approve</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRejectPayment(order.id)}
-                                  disabled={busyOrderId === order.id}
-                                  className="rounded-lg sm:rounded-2xl border border-rose-400/40 px-2.5 sm:px-4 py-1.5 sm:py-3 text-[8px] sm:text-xs font-bold uppercase tracking-[0.25em] text-rose-200 hover:border-rose-300 hover:text-rose-100 disabled:opacity-60 flex items-center justify-center gap-1 sm:gap-2"
-                                >
-                                  <CircleX size={12} className="sm:w-3.5 sm:h-3.5" />
-                                  <span className="hidden sm:inline">Reject Payment</span>
-                                  <span className="sm:hidden">Reject</span>
-                                </button>
-                              </div>
-                            )}
-
-                            <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-[1fr_auto] items-center">
-                              <div className="space-y-1.5 sm:space-y-2">
-                                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                  <span className="rounded-full bg-emerald-500/10 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-emerald-300">
-                                    {order.status}
-                                  </span>
-                                  <span className="text-[8px] sm:text-xs uppercase tracking-[0.35em] text-zinc-500">ID {order.id.substring(0, 8)}…</span>
-                                </div>
-                                <label className="block text-xs uppercase tracking-[0.35em] text-zinc-400">
-                                  Update tracking status
-                                </label>
-                                <select
-                                  value={orderStatusDrafts[order.id] ?? order.status}
-                                  onChange={(event) => handleOrderStatusDraftChange(order.id, event.target.value)}
-                                  disabled={busyOrderId === order.id || !isApprovedPayment}
-                                  className="w-full rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-400"
-                                >
-                                  {[
-                                    'Processing',
-                                    'Shipped',
-                                    'Delivered',
-                                    'Complete',
-                                    ...(order.status && !['Processing', 'Shipped', 'Delivered', 'Complete'].includes(order.status)
-                                      ? [order.status]
-                                      : []),
-                                  ].map((statusOption) => (
-                                    <option key={statusOption} value={statusOption} className="bg-slate-950 text-zinc-100">
-                                      {statusOption}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              <button
-                                type="button"
-                                onClick={() => handleOrderStatusSave(order.id)}
-                                disabled={busyOrderId === order.id || (!isPendingPayment && !isApprovedPayment) || (!isPendingPayment && (orderStatusDrafts[order.id] ?? order.status) === order.status)}
-                                className="rounded-2xl bg-emerald-400 px-4 py-3 text-xs font-bold uppercase tracking-[0.25em] text-slate-950 transition-colors hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                Save
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
+                          </Link>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
-
-                {salesMessage && (
-                  <p className="mt-4 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200">
-                    {salesMessage}
-                  </p>
-                )}
               </div>
             )}
           </div>
