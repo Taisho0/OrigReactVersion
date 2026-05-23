@@ -32,21 +32,28 @@ const SignUp = () => {
     }, [authReady, navigate, session, userProfile, isConfiguredAdminEmail]);
 
     const normalizePhone = (value) => {
-        const digitsOnly = value.replace(/\D/g, "");
+        if (!value) return null;
 
-        if (digitsOnly.startsWith("09") && digitsOnly.length === 11) {
-            return `+63${digitsOnly.slice(1)}`;
+        const sanitized = value.replace(/[^\d+]/g, "").replace(/(?!^)\+/g, "");
+
+        // Accept either +63 followed by 10 digits, or 09 followed by 9 digits
+        const plus63Regex = /^\+63\d{10}$/;
+        const zeroNineRegex = /^09\d{9}$/;
+
+        if (plus63Regex.test(sanitized)) {
+            return sanitized;
         }
 
-        if (digitsOnly.startsWith("639") && digitsOnly.length === 12) {
-            return `+${digitsOnly}`;
-        }
-
-        if (digitsOnly.startsWith("9") && digitsOnly.length === 10) {
-            return `+63${digitsOnly}`;
+        if (zeroNineRegex.test(sanitized)) {
+            return `+63${sanitized.slice(1)}`;
         }
 
         return null;
+    };
+
+    const isValidEmail = (value) => {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailPattern.test(value.trim());
     };
 
     const parseApiPayload = (raw) => {
@@ -61,6 +68,18 @@ const SignUp = () => {
         }
     };
 
+    const getPhoneMaxLength = (value) => {
+        if (value.startsWith("+63")) {
+            return 13;
+        }
+
+        if (value.startsWith("09")) {
+            return 11;
+        }
+
+        return 13;
+    };
+
     const validations = {
         length: password.length >= 8,
         uppercase: /[A-Z]/.test(password),
@@ -71,10 +90,11 @@ const SignUp = () => {
 
     const strengthScore = Object.values(validations).filter(Boolean).length;
     const isPasswordValid = Object.values(validations).every(Boolean);
+    const isEmailValid = isValidEmail(email);
     const normalizedPhone = normalizePhone(phone);
     const isPhoneValid = normalizedPhone !== null;
     const doPasswordsMatch = confirmPassword.length > 0 && password === confirmPassword;
-    const isFormValid = isPasswordValid && isPhoneValid && doPasswordsMatch;
+    const isFormValid = isEmailValid && isPasswordValid && isPhoneValid && doPasswordsMatch;
 
     let strengthText = "";
     let strengthClassName = "";
@@ -99,8 +119,13 @@ const SignUp = () => {
         setSuccessMessage("");
         setOtpMessage("");
 
+        if (!isEmailValid) {
+            setError("Please enter a valid email address.");
+            return;
+        }
+
         if (!isPhoneValid) {
-            setError("Please enter a valid PH phone number (09XXXXXXXXX, 9XXXXXXXXX, 639XXXXXXXXX, or +639XXXXXXXXX).");
+            setError("Please enter a valid PH phone number (09XXXXXXXXX or +63XXXXXXXXXX).");
             return;
         }
         
@@ -154,7 +179,7 @@ const SignUp = () => {
             const response = await fetch("/api/auth", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: email.trim().toLowerCase(), code: otpCode.trim(), action: 'signup' }),
+                body: JSON.stringify({ email: email.trim().toLowerCase(), code: otpCode.trim(), action: 'verify-otp' }),
             });
             const raw = await response.text();
             const data = parseApiPayload(raw);
@@ -223,7 +248,7 @@ const SignUp = () => {
             .replace(/[^\d+]/g, "")
             .replace(/(?!^)\+/g, "");
 
-        setPhone(sanitized);
+        setPhone(sanitized.slice(0, getPhoneMaxLength(sanitized)));
     };
 
     const handleEmailChange = (e) => {
@@ -231,6 +256,14 @@ const SignUp = () => {
             handleEditDetails();
         }
         setEmail(e.target.value);
+    };
+
+    const handlePasswordChange = (e) => {
+        setPassword(e.target.value.slice(0, 20));
+    };
+
+    const handleConfirmPasswordChange = (e) => {
+        setConfirmPassword(e.target.value.slice(0, 20));
     };
 
     return (
@@ -278,7 +311,6 @@ const SignUp = () => {
                                             className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-zinc-500 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
                                             type="email"
                                             required
-                                            autoComplete="email"
                                             placeholder="sample@gmail.com"
                                             disabled={otpStage}
                                         />
@@ -292,12 +324,13 @@ const SignUp = () => {
                                             className={`w-full rounded-2xl border px-4 py-3 text-white placeholder:text-zinc-500 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 ${phone.length > 0 && !isPhoneValid ? "border-red-500/80" : "border-white/10 bg-white/5"}`}
                                             type="tel"
                                             required
+                                            maxLength={getPhoneMaxLength(phone)}
                                             autoComplete="tel"
                                             inputMode="numeric"
                                             placeholder="09XXXXXXXXX"
                                         />
                                         {phone.length > 0 && !isPhoneValid && (
-                                            <p className="text-xs text-red-400">Use 09XXXXXXXXX, 9XXXXXXXXX, 639XXXXXXXXX, or +639XXXXXXXXX.</p>
+                                            <p className="text-xs text-red-400">Use 09XXXXXXXXX or +63XXXXXXXXXX.</p>
                                         )}
                                     </div>
                                     <div className="space-y-3">
@@ -305,11 +338,12 @@ const SignUp = () => {
                                         <div className="relative">
                                             <input
                                                 id="password"
-                                                onChange={(e) => setPassword(e.target.value)}
+                                                onChange={handlePasswordChange}
                                                 className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 pr-12 text-white placeholder:text-zinc-500 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
                                                 type={showPassword ? "text" : "password"}
                                                 required
                                                 autoComplete="new-password"
+                                                maxLength={20}
                                                 placeholder="Sample@123"
                                             />
                                             <button
@@ -326,11 +360,12 @@ const SignUp = () => {
                                         <label htmlFor="confirm-password" className="block text-sm font-medium text-zinc-300">Confirm password</label>
                                         <input
                                             id="confirm-password"
-                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            onChange={handleConfirmPasswordChange}
                                             className={`w-full rounded-2xl border px-4 py-3 text-white placeholder:text-zinc-500 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 ${confirmPassword.length > 0 && doPasswordsMatch ? "border-emerald-500/80" : confirmPassword.length > 0 ? "border-red-500/80" : "border-white/10 bg-white/5"}`}
                                             type={showPassword ? "text" : "password"}
                                             required
                                             autoComplete="new-password"
+                                            maxLength={20}
                                             placeholder="Re-enter password"
                                         />
                                         {confirmPassword.length > 0 && !doPasswordsMatch && (
