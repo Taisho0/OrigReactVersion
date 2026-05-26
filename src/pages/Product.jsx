@@ -167,7 +167,7 @@ export const ProductDetail = () => {
             {product.name}
           </h1>
           <div className="mb-8 sm:mb-12">
-            <p className="text-xs sm:text-sm text-zinc-200 mb-1 sm:mb-2">Price per {product.pricingUnit || 'unit'}</p>
+            <p className="text-xs sm:text-sm text-yellow-300 font-bold mb-1 sm:mb-2">Price per {product.pricingUnit || 'unit'}</p>
             <p className="text-2xl sm:text-3xl font-light">₱{product.price}</p>
             {(product.requiresDimensions ? width && length : true) && (
               <p className="text-sm sm:text-lg text-emerald-400 mt-2 sm:mt-3">
@@ -177,8 +177,8 @@ export const ProductDetail = () => {
           </div>
           
           <div className="mb-8 sm:mb-12">
-            <p className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-zinc-300 mb-2 sm:mb-3">Description</p>
-            <p className="text-sm sm:text-lg text-zinc-200 font-light leading-relaxed">
+            <p className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-zinc-50 mb-2 sm:mb-3">Description</p>
+            <p className="text-sm sm:text-lg text-zinc-50 font-light leading-relaxed">
               {product.description}
             </p>
           </div>
@@ -206,12 +206,12 @@ export const ProductDetail = () => {
           )}
 
           <div className="mb-6 sm:mb-8 space-y-3 sm:space-y-4">
-            <p className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-zinc-300">Custom Size</p>
+            <p className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-zinc-50">Custom Size</p>
             {product.requiresDimensions ? (
               <>
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <label className="block text-[10px] sm:text-xs font-medium text-zinc-400">Width ({product.dimensionUnit || 'm'})</label>
+                    <label className="block text-[10px] sm:text-xs font-medium text-zinc-50">Width ({product.dimensionUnit || 'm'})</label>
                     <input
                       type="number"
                       step="0.1"
@@ -242,7 +242,7 @@ export const ProductDetail = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-[10px] sm:text-xs font-medium text-zinc-400">Height ({product.dimensionUnit || 'm'})</label>
+                    <label className="block text-[10px] sm:text-xs font-medium text-zinc-50">Height ({product.dimensionUnit || 'm'})</label>
                     <input
                       type="number"
                       step="0.1"
@@ -275,7 +275,7 @@ export const ProductDetail = () => {
                 </div>
                 {width && length && (
                   <div className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2.5 sm:px-4 sm:py-3">
-                    <p className="text-[10px] sm:text-xs text-zinc-400 mb-1.5 sm:mb-2">Area: {width} × {length} = {calculateSqMeter()} {product.pricingUnit || 'sq.m'}</p>
+                    <p className="text-[10px] sm:text-xs text-zinc-50 mb-1.5 sm:mb-2">Area: {width} × {length} = {calculateSqMeter()} {product.pricingUnit || 'sq.m'}</p>
                     <p className="text-xs sm:text-sm font-semibold text-emerald-300">
                       {width}{product.dimensionUnit || 'm'} × {length}{product.dimensionUnit || 'm'}
                     </p>
@@ -290,7 +290,7 @@ export const ProductDetail = () => {
           </div>
 
           <div className="mb-6 sm:mb-8 space-y-2">
-            <label className="block text-xs sm:text-sm font-semibold uppercase tracking-widest text-zinc-500">Quantity Per Order</label>
+            <label className="block text-xs sm:text-sm font-semibold uppercase tracking-widest text-zinc-50">Quantity Per Order</label>
             <input
               type="number"
               min="1"
