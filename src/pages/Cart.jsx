@@ -304,11 +304,11 @@ export const Cart = () => {
 
             <div className="space-y-2.5 sm:space-y-4 text-sm font-medium mb-3 sm:mb-8">
               <div className="flex justify-between">
-                <span className="text-zinc-400">Subtotal</span>
+                <span className="text-zinc-200">Subtotal</span>
                 <span>₱{selectedCartTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-400">Shipping</span>
+                <span className="text-zinc-200">Shipping</span>
                 <span>Free</span>
               </div>
               <div className="flex justify-between pt-4 border-t border-zinc-800 text-lg sm:text-xl font-bold">
@@ -324,7 +324,7 @@ export const Cart = () => {
             </div>
 
             <div className="mt-3 sm:mt-6 pt-3 sm:pt-6 border-t border-zinc-800 flex flex-col gap-3">
-              <div className="flex items-center justify-between text-[10px] sm:text-sm uppercase tracking-widest text-zinc-500">
+              <div className="flex items-center justify-between text-[10px] sm:text-sm uppercase tracking-widest text-zinc-200">
                 <span>{selectedCartItems.length} selected</span>
                 <span>Only selected items</span>
               </div>
@@ -340,8 +340,7 @@ export const Cart = () => {
                 disabled={selectedCartItems.length === 0}
                 className="inline-flex items-center justify-center gap-2 rounded-sm bg-emerald-500 px-6 py-3 text-sm sm:text-base font-bold uppercase tracking-widest text-white transition-colors hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500"
               >
-                Checkout Selected
-                <ArrowRight size={16} />
+                Checkout
               </button>
             </div>
           </div>

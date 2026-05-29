@@ -1,6 +1,8 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export const Privacy = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="px-4 sm:px-6 md:px-12 py-12 md:py-16 max-w-6xl mx-auto text-zinc-100">
       <div className="space-y-6">
@@ -64,9 +66,13 @@ export const Privacy = () => {
         </section>
 
         <div className="mt-10">
-          <Link to="/signup" className="inline-flex items-center gap-2 rounded-2xl border border-emerald-400 px-5 py-3 text-sm font-bold uppercase tracking-[0.3em] text-emerald-200 hover:bg-emerald-500/10 transition-colors">
-            Return to signup
-          </Link>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 rounded-2xl border border-emerald-400 px-5 py-3 text-sm font-bold uppercase tracking-[0.3em] text-emerald-200 hover:bg-emerald-500/10 transition-colors"
+          >
+            Return
+          </button>
         </div>
       </div>
     </div>
