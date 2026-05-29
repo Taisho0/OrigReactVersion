@@ -161,7 +161,6 @@ const AdminSignIn = () => {
 
         <div className="mt-6 flex flex-col gap-3 text-sm text-zinc-400">
           <Link to="/signin" className="hover:text-emerald-300 transition-colors">Open normal user sign in</Link>
-          <Link to="/admin/signup" className="hover:text-emerald-300 transition-colors">Create admin account</Link>
         </div>
       </div>
     </div>

@@ -21,15 +21,32 @@ const AdminSignUp = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { authReady, session, userProfile } = useUserAuth();
+  const { authReady, session, userProfile, isConfiguredAdminEmail } = useUserAuth();
   const auth = getAuth(app);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (authReady && session && userProfile?.role === "admin" && !loading) {
-      navigate("/admin", { replace: true });
+  const handleClose = () => {
+    try {
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        navigate('/admin');
+      }
+    } catch (err) {
+      navigate('/admin');
     }
-  }, [authReady, loading, navigate, session, userProfile?.role]);
+  };
+
+  useEffect(() => {
+    if (!authReady) return;
+
+    const isAdmin = userProfile?.role === 'admin' || isConfiguredAdminEmail(session?.email || '');
+
+    // If there's no session or the user isn't an admin/allowlisted, redirect to admin sign-in.
+    if (!session || !isAdmin) {
+      navigate('/admin/signin', { replace: true });
+    }
+  }, [authReady, navigate, session, userProfile, isConfiguredAdminEmail]);
 
   const checks = passwordChecks(password);
   const validPassword = Object.values(checks).every(Boolean);
@@ -87,7 +104,15 @@ const AdminSignUp = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-zinc-50 flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-xl rounded-3xl border border-emerald-500/20 bg-slate-900/80 p-8 backdrop-blur-xl">
+      <div className="relative w-full max-w-xl rounded-3xl border border-emerald-500/20 bg-slate-900/80 p-8 backdrop-blur-xl">
+        <button
+          type="button"
+          aria-label="Close admin signup"
+          onClick={handleClose}
+          className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/3 text-zinc-200 hover:bg-white/5 transition-colors"
+        >
+          ✕
+        </button>
         <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Admin Registration</p>
         <h1 className="mt-3 text-3xl font-black uppercase tracking-tight">Create Admin Account</h1>
         <p className="mt-3 text-sm text-zinc-400">

@@ -1010,6 +1010,9 @@ export default function Admin() {
             <Link to="/shop" className="rounded-full border border-white/10 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold uppercase tracking-widest text-zinc-300 hover:border-emerald-400 hover:text-emerald-300 transition-colors">
               View shop
             </Link>
+            <Link to="/admin/signup" className="rounded-full border border-emerald-400 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold uppercase tracking-widest text-emerald-300 hover:bg-emerald-400/10 hover:text-emerald-200 transition-colors">
+              Create admin account
+            </Link>
             <button onClick={() => signOut()} className="rounded-full bg-emerald-400 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold uppercase tracking-widest text-slate-950 hover:bg-emerald-300 transition-colors">
               Sign out
             </button>
