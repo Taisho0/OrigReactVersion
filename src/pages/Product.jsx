@@ -134,23 +134,23 @@ export const ProductDetail = () => {
   };
 
   return (
-    <div className="px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-12">
+    <div className="px-3 py-4 sm:px-6 sm:py-8 md:px-12 md:py-12">
       <button 
         onClick={() => navigate(-1)}
-        className="mb-6 flex items-center gap-2 text-xs sm:text-sm uppercase tracking-widest text-zinc-300 hover:text-zinc-50 transition-colors sm:mb-8 md:mb-12"
+        className="mb-4 flex items-center gap-2 text-[10px] sm:text-sm uppercase tracking-widest text-zinc-300 hover:text-zinc-50 transition-colors sm:mb-8 md:mb-12"
       >
         <ArrowLeft size={16} /> Back
       </button>
 
-      <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-24 items-start lg:items-center">
+      <div className="grid grid-cols-1 gap-4 sm:gap-8 lg:grid-cols-2 lg:gap-24 items-start lg:items-center">
         {/* Product Image */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="aspect-square sm:aspect-4/5 bg-zinc-900 rounded-sm overflow-hidden"
+          className="aspect-4/3 sm:aspect-4/5 lg:aspect-square bg-zinc-900 rounded-sm overflow-hidden"
         >
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+          <img src={product.image} alt={product.name} className="w-full h-full object-contain sm:object-cover object-center" />
         </motion.div>
 
         {/* Product Info */}
@@ -158,36 +158,36 @@ export const ProductDetail = () => {
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col justify-center space-y-5 sm:space-y-6 lg:space-y-0"
+          className="flex flex-col justify-center space-y-4 sm:space-y-6 lg:space-y-0"
         >
-          <p className="text-emerald-500 text-[10px] sm:text-sm font-bold tracking-widest uppercase mb-2 sm:mb-4">
+          <p className="text-emerald-500 text-[9px] sm:text-sm font-bold tracking-widest uppercase mb-1.5 sm:mb-4">
             {product.category}
           </p>
-          <h1 className="text-3xl sm:text-4xl md:text-7xl font-bold tracking-tighter uppercase mb-3 sm:mb-6 leading-[0.92]">
+          <h1 className="text-2xl sm:text-4xl md:text-7xl font-bold tracking-tighter uppercase mb-2.5 sm:mb-6 leading-[0.92]">
             {product.name}
           </h1>
-          <div className="mb-8 sm:mb-12">
-            <p className="text-xs sm:text-sm text-yellow-300 font-bold mb-1 sm:mb-2">Price per {product.pricingUnit || 'unit'}</p>
-            <p className="text-2xl sm:text-3xl font-light">₱{product.price}</p>
+          <div className="mb-5 sm:mb-12">
+            <p className="text-[10px] sm:text-sm text-yellow-300 font-bold mb-1 sm:mb-2">Price per {product.pricingUnit || 'unit'}</p>
+            <p className="text-xl sm:text-3xl font-light">₱{product.price}</p>
           </div>
           
-          <div className="mb-8 sm:mb-12">
-            <p className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-zinc-50 mb-2 sm:mb-3">Description</p>
-            <p className="text-sm sm:text-lg text-zinc-50 font-light leading-relaxed">
+          <div className="mb-5 sm:mb-12">
+            <p className="text-[10px] sm:text-sm font-semibold uppercase tracking-widest text-zinc-50 mb-1.5 sm:mb-3">Description</p>
+            <p className="text-xs sm:text-lg text-zinc-50 font-light leading-relaxed">
               {product.description}
             </p>
           </div>
 
           {productVariants.length > 0 && (
-            <div className="mb-8 sm:mb-12">
-              <p className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-zinc-300 mb-2 sm:mb-3">Variants</p>
-              <div className="flex flex-wrap gap-2">
+            <div className="mb-5 sm:mb-12">
+              <p className="text-[10px] sm:text-sm font-semibold uppercase tracking-widest text-zinc-300 mb-1.5 sm:mb-3">Variants</p>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {productVariants.map((variant) => (
                   <button
                     key={variant}
                     type="button"
                     onClick={() => setSelectedVariant(variant)}
-                    className={`rounded-full border px-2.5 py-1 text-[10px] sm:text-xs font-semibold uppercase tracking-widest transition-colors ${
+                    className={`rounded-full border px-2 py-1 text-[9px] sm:text-xs font-semibold uppercase tracking-widest transition-colors ${
                       selectedVariant === variant
                         ? 'border-emerald-400 bg-emerald-400 text-zinc-950'
                         : 'border-white/15 bg-white/5 text-zinc-200 hover:border-emerald-300'
@@ -200,13 +200,13 @@ export const ProductDetail = () => {
             </div>
           )}
 
-          <div className="mb-6 sm:mb-8 space-y-3 sm:space-y-4">
-            <p className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-zinc-50">Custom Size</p>
+          <div className="mb-4 sm:mb-8 space-y-2.5 sm:space-y-4">
+            <p className="text-[10px] sm:text-sm font-semibold uppercase tracking-widest text-zinc-50">Custom Size</p>
             {product.requiresDimensions ? (
               <>
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
                   <div className="space-y-2">
-                    <label className="block text-[10px] sm:text-xs font-medium text-zinc-50">Width ({product.dimensionUnit || 'm'})</label>
+                    <label className="block text-[9px] sm:text-xs font-medium text-zinc-50">Width ({product.dimensionUnit || 'm'})</label>
                     <input
                       type="number"
                       step="0.1"
@@ -233,11 +233,11 @@ export const ProductDetail = () => {
                         }
                       }}
                       placeholder="e.g. 2"
-                      className="quantity-input-no-spinner w-full rounded-2xl border border-zinc-800 bg-white/5 px-3 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-600 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 sm:px-4 sm:py-3 sm:text-base"
+                      className="quantity-input-no-spinner w-full rounded-2xl border border-zinc-800 bg-white/5 px-3 py-2 text-sm text-zinc-50 placeholder:text-zinc-600 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 sm:px-4 sm:py-3 sm:text-base"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-[10px] sm:text-xs font-medium text-zinc-50">Height ({product.dimensionUnit || 'm'})</label>
+                    <label className="block text-[9px] sm:text-xs font-medium text-zinc-50">Height ({product.dimensionUnit || 'm'})</label>
                     <input
                       type="number"
                       step="0.1"
@@ -264,28 +264,28 @@ export const ProductDetail = () => {
                         }
                       }}
                       placeholder="e.g. 3"
-                      className="quantity-input-no-spinner w-full rounded-2xl border border-zinc-800 bg-white/5 px-3 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-600 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 sm:px-4 sm:py-3 sm:text-base"
+                      className="quantity-input-no-spinner w-full rounded-2xl border border-zinc-800 bg-white/5 px-3 py-2 text-sm text-zinc-50 placeholder:text-zinc-600 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 sm:px-4 sm:py-3 sm:text-base"
                     />
                   </div>
                 </div>
                 {width && length && (
-                  <div className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2.5 sm:px-4 sm:py-3">
-                    <p className="text-[10px] sm:text-xs text-zinc-50 mb-1.5 sm:mb-2">Area: {width} × {length} = {calculateSqMeter()} {product.pricingUnit || 'sq.m'}</p>
-                    <p className="text-xs sm:text-sm font-semibold text-emerald-300">
+                  <div className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 sm:px-4 sm:py-3">
+                    <p className="text-[9px] sm:text-xs text-zinc-50 mb-1.5 sm:mb-2">Area: {width} × {length} = {calculateSqMeter()} {product.pricingUnit || 'sq.m'}</p>
+                    <p className="text-[10px] sm:text-sm font-semibold text-emerald-300">
                       {width}{product.dimensionUnit || 'm'} × {length}{product.dimensionUnit || 'm'}
                     </p>
                   </div>
                 )}
               </>
             ) : (
-              <div className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2.5 sm:px-4 sm:py-3">
-                <p className="text-xs sm:text-sm font-semibold text-emerald-300">Fixed pricing item (no size input needed).</p>
+              <div className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 sm:px-4 sm:py-3">
+                <p className="text-[10px] sm:text-sm font-semibold text-emerald-300">Fixed pricing item (no size input needed).</p>
               </div>
             )}
           </div>
 
-          <div className="mb-6 sm:mb-8 space-y-2">
-            <label className="block text-xs sm:text-sm font-semibold uppercase tracking-widest text-zinc-50">Quantity Per Order</label>
+          <div className="mb-4 sm:mb-8 space-y-2">
+            <label className="block text-[10px] sm:text-sm font-semibold uppercase tracking-widest text-zinc-50">Quantity Per Order</label>
             <input
               type="number"
               min="1"
@@ -309,21 +309,21 @@ export const ProductDetail = () => {
                   }
                 }
               }}
-              className="quantity-input-no-spinner w-full rounded-2xl border border-zinc-800 bg-white/5 px-3 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-600 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 sm:px-4 sm:py-3 sm:text-base"
+              className="quantity-input-no-spinner w-full rounded-2xl border border-zinc-800 bg-white/5 px-3 py-2 text-sm text-zinc-50 placeholder:text-zinc-600 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 sm:px-4 sm:py-3 sm:text-base"
             />
             {(product.requiresDimensions ? width && length : true) && isValidQuantity && (
-              <p className="text-sm sm:text-lg text-emerald-400 mt-2 sm:mt-3">
+              <p className="text-xs sm:text-lg text-emerald-400 mt-2 sm:mt-3">
                 Total: ₱{(parseFloat(calculatePrice()) * parsedQuantity).toFixed(2)}
               </p>
             )}
             {inputMessages.quantity && <p className="text-amber-400 text-[10px] sm:text-xs mt-1">{inputMessages.quantity}</p>}
           </div>
 
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-3 sm:space-y-6">
             <button 
               onClick={handleAdd}
               disabled={added || !isValidQuantity}
-              className={`w-full py-3.5 px-6 sm:py-5 sm:px-8 flex items-center justify-center gap-3 text-sm sm:text-lg font-bold tracking-widest uppercase transition-all duration-300 ${
+              className={`w-full py-3 px-6 sm:py-5 sm:px-8 flex items-center justify-center gap-3 text-xs sm:text-lg font-bold tracking-widest uppercase transition-all duration-300 ${
                 added 
                   ? 'bg-zinc-800 text-emerald-400 cursor-default' 
                   : !isValidQuantity
@@ -342,14 +342,14 @@ export const ProductDetail = () => {
             </button>
             <Link 
               to="/cart"
-              className="w-full py-3.5 px-6 sm:py-5 sm:px-8 flex items-center justify-center border border-zinc-800 hover:border-zinc-50 text-sm sm:text-lg font-bold tracking-widest uppercase transition-colors"
+              className="w-full py-3 px-6 sm:py-5 sm:px-8 flex items-center justify-center border border-zinc-800 hover:border-zinc-50 text-xs sm:text-lg font-bold tracking-widest uppercase transition-colors"
             >
               Go to Cart
             </Link>
           </div>
 
           {/* Product specs */}
-          <div className="mt-10 sm:mt-16 pt-8 sm:pt-12 border-t border-zinc-900 grid grid-cols-2 gap-4 sm:gap-8 text-[10px] sm:text-sm uppercase tracking-widest text-zinc-500">
+          <div className="mt-8 sm:mt-16 pt-6 sm:pt-12 border-t border-zinc-900 grid grid-cols-2 gap-3 sm:gap-8 text-[9px] sm:text-sm uppercase tracking-widest text-zinc-500">
             <div>
               <p className="text-zinc-50 mb-1 sm:mb-2 font-bold">Materials</p>
               <p>

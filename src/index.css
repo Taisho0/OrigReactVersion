@@ -350,4 +350,29 @@ main {
 }
 @media (max-width: 576px) {
   .site-nav { display: none; }
+
+  .site-footer {
+    padding: 1.25rem 1rem;
+  }
+
+  .footer-content {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 0.75rem;
+  }
+
+  .footer-section h4 {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .footer-section a {
+    font-size: 0.72rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .copyright {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    font-size: 0.75rem;
+  }
 }

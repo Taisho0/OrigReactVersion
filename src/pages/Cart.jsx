@@ -132,25 +132,25 @@ export const Cart = () => {
   }
 
   return (
-    <div className="px-3 sm:px-6 md:px-12 py-4 sm:py-8 md:py-12 max-w-7xl mx-auto">
-      <h1 className="text-2xl sm:text-4xl md:text-7xl font-bold tracking-tighter uppercase mb-6 sm:mb-8 md:mb-16">
+    <div className="px-2.5 sm:px-6 md:px-12 py-3 sm:py-8 md:py-12 max-w-7xl mx-auto">
+      <h1 className="text-2xl sm:text-4xl md:text-7xl font-bold tracking-tighter uppercase mb-4 sm:mb-8 md:mb-16">
         Your Cart
       </h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-16 items-start">
-        <div className="lg:col-span-2 space-y-3 sm:space-y-6 lg:space-y-8 min-w-0">
-          <div className="flex items-center justify-between gap-4 rounded-sm border border-zinc-900 bg-zinc-950/80 backdrop-blur-md px-4 py-3 sm:px-6 sm:py-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-16 items-start">
+        <div className="lg:col-span-2 space-y-2.5 sm:space-y-6 lg:space-y-8 min-w-0">
+          <div className="flex items-center justify-between gap-3 rounded-sm border border-zinc-900 bg-zinc-950/80 backdrop-blur-md px-3 py-2 sm:px-6 sm:py-4">
             <button
               type="button"
               onClick={toggleSelectAll}
-              className="inline-flex items-center gap-3 text-xs sm:text-sm uppercase tracking-widest text-zinc-200 hover:text-emerald-400 transition-colors"
+              className="inline-flex items-center gap-2 text-[10px] sm:text-sm uppercase tracking-widest text-zinc-200 hover:text-emerald-400 transition-colors"
             >
-              <span className={`flex h-5 w-5 items-center justify-center rounded border ${allSelected ? 'border-emerald-500 bg-emerald-500 text-zinc-950' : 'border-zinc-700 bg-transparent text-transparent'}`}>
+              <span className={`flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded border ${allSelected ? 'border-emerald-500 bg-emerald-500 text-zinc-950' : 'border-zinc-700 bg-transparent text-transparent'}`}>
                 <Check size={13} />
               </span>
               {allSelected ? 'Deselect All' : 'Select All'}
             </button>
-            <p className="text-[10px] sm:text-xs uppercase tracking-widest text-zinc-500">
+            <p className="text-[9px] sm:text-xs uppercase tracking-widest text-zinc-500">
               {selectedCartItems.length} of {cart.length} selected
             </p>
           </div>
@@ -166,41 +166,41 @@ export const Cart = () => {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                  className={`flex flex-col sm:flex-row gap-3 sm:gap-6 p-3 sm:p-6 border rounded-sm bg-zinc-950/80 backdrop-blur-md relative group overflow-hidden transition-colors ${isSelected ? 'border-emerald-500/70' : 'border-zinc-900'}`}
+                  className={`flex flex-col sm:flex-row gap-2.5 sm:gap-6 p-2.5 sm:p-6 border rounded-sm bg-zinc-950/80 backdrop-blur-md relative group overflow-hidden transition-colors ${isSelected ? 'border-emerald-500/70' : 'border-zinc-900'}`}
                 >
-                <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+                <div className="flex items-start gap-2.5 sm:gap-4 min-w-0">
                   <button
                     type="button"
                     aria-pressed={isSelected}
                     onClick={() => toggleItemSelection(selectedItemKey)}
-                    className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded border transition-colors ${isSelected ? 'border-emerald-500 bg-emerald-500 text-zinc-950' : 'border-zinc-700 bg-zinc-950 text-transparent hover:border-emerald-400'}`}
+                    className={`mt-0.5 flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded border transition-colors ${isSelected ? 'border-emerald-500 bg-emerald-500 text-zinc-950' : 'border-zinc-700 bg-zinc-950 text-transparent hover:border-emerald-400'}`}
                     title={isSelected ? 'Deselect item' : 'Select item for checkout'}
                   >
                     <Check size={14} />
                   </button>
 
-                  <Link to={`/product/${item.product.id}`} className="w-full h-28 sm:w-24 sm:h-32 md:w-32 md:h-40 shrink-0 bg-zinc-900 overflow-hidden rounded-sm">
-                    <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  <Link to={`/product/${item.product.id}`} className="w-20 h-20 sm:w-24 sm:h-32 md:w-32 md:h-40 shrink-0 self-start bg-zinc-900 overflow-hidden rounded-sm">
+                    <img src={item.product.image} alt={item.product.name} className="w-full h-full object-contain sm:object-cover object-center group-hover:scale-105 transition-transform" />
                   </Link>
                 </div>
                 
                 <div className="flex flex-col grow justify-between py-0 sm:py-2 min-w-0">
-                  <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:justify-between sm:items-start min-w-0">
+                  <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:justify-between sm:items-start min-w-0">
                     <div className="min-w-0">
-                      <p className="text-[10px] sm:text-xs text-emerald-500 font-bold uppercase tracking-widest mb-1">{item.product.category}</p>
-                      <h3 className="text-base sm:text-xl md:text-2xl font-bold leading-tight wrap-break-word">{item.product.name}</h3>
-                      <p className="mt-1 text-[10px] sm:text-xs uppercase tracking-widest text-zinc-500">Size: {item.size || 'One size'}</p>
+                      <p className="text-[9px] sm:text-xs text-emerald-500 font-bold uppercase tracking-widest mb-0.5 sm:mb-1">{item.product.category}</p>
+                      <h3 className="text-sm sm:text-xl md:text-2xl font-bold leading-tight wrap-break-word">{item.product.name}</h3>
+                      <p className="mt-0.5 sm:mt-1 text-[9px] sm:text-xs uppercase tracking-widest text-zinc-500">Size: {item.size || 'One size'}</p>
                       {item.product.basePrice && item.product.area && (
-                        <p className="mt-2 text-[10px] sm:text-xs text-zinc-400">
+                        <p className="mt-1.5 text-[9px] sm:text-xs text-zinc-400">
                           ₱{item.product.basePrice}/{item.product.pricingUnit || 'unit'} × {item.product.area} {item.product.pricingUnit || 'sq.m'}
                         </p>
                       )}
                     </div>
-                    <p className="text-lg sm:text-xl font-light shrink-0">₱{(item.product.price * item.quantity).toFixed(2)}</p>
+                    <p className="text-base sm:text-xl font-light shrink-0">₱{(item.product.price * item.quantity).toFixed(2)}</p>
                   </div>
                   
-                  <div className="flex flex-wrap justify-between items-center gap-2 sm:gap-3 mt-3 sm:mt-6">
-                    <div className="flex items-center gap-2 sm:gap-3 bg-zinc-900 rounded-full px-3 py-2 w-max max-w-full">
+                  <div className="flex flex-wrap justify-between items-center gap-2 sm:gap-3 mt-2.5 sm:mt-6">
+                    <div className="flex items-center gap-2 sm:gap-3 bg-zinc-900 rounded-full px-2.5 py-1.5 sm:px-3 sm:py-2 w-max max-w-full">
                       <button 
                         onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.size)}
                         className="text-zinc-400 hover:text-zinc-50 transition-colors"
@@ -221,7 +221,7 @@ export const Cart = () => {
                           }
                           updateQuantity(item.product.id, nextQuantity, item.size);
                         }}
-                        className="quantity-input-no-spinner w-10 sm:w-16 bg-transparent text-center text-sm font-bold text-zinc-50 outline-none"
+                        className="quantity-input-no-spinner w-9 sm:w-16 bg-transparent text-center text-xs sm:text-sm font-bold text-zinc-50 outline-none"
                         aria-label={`Quantity for ${item.product.name}`}
                       />
                       <button 
@@ -235,23 +235,23 @@ export const Cart = () => {
                     
                     <button 
                       onClick={() => handleRequestRemove(item.product.id, item.size, item.product.name)}
-                      className="text-zinc-500 hover:text-red-500 transition-colors p-1.5 self-center sm:self-auto"
+                      className="text-zinc-500 hover:text-red-500 transition-colors p-1 self-center sm:self-auto"
                     >
-                      <Trash2 size={20} />
+                        <Trash2 size={18} />
                     </button>
                   </div>
 
                   {/* Layout Upload Section */}
-                  <div className="mt-3 sm:mt-6 pt-3 sm:pt-6 border-t border-zinc-800">
-                    <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">Upload Layout/Design</p>
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+                  <div className="mt-2.5 sm:mt-6 pt-2.5 sm:pt-6 border-t border-zinc-800">
+                    <p className="text-[9px] sm:text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-2.5 sm:mb-3">Upload Layout/Design</p>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2.5 sm:gap-3">
                       <label className="flex-1">
-                        <div className="flex items-center justify-center gap-2 p-2.5 sm:p-3 border-2 border-dashed border-zinc-800 rounded hover:border-emerald-500 cursor-pointer transition-colors">
-                          <Upload size={16} className="text-zinc-500" />
-                          <span className="text-xs text-zinc-400">Choose file</span>
+                        <div className="flex items-center justify-center gap-2 p-2 sm:p-3 border-2 border-dashed border-zinc-800 rounded hover:border-emerald-500 cursor-pointer transition-colors min-h-10 sm:min-h-0">
+                          <Upload size={14} className="text-zinc-500" />
+                          <span className="text-[10px] sm:text-xs text-zinc-400">Choose file</span>
                         </div>
-                        <input 
-                          type="file" 
+                        <input
+                          type="file"
                           accept="image/*,application/pdf"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
@@ -267,26 +267,28 @@ export const Cart = () => {
                         />
                       </label>
                       {item.layoutImage && (
-                        <button 
+                        <button
                           onClick={() => updateCartItemLayout(item.product.id, item.size, null)}
-                          className="p-2 text-zinc-500 hover:text-red-500 transition-colors"
+                          className="p-1.5 text-zinc-500 hover:text-red-500 transition-colors"
                           title="Remove layout"
                         >
-                          <X size={18} />
+                          <X size={16} />
                         </button>
                       )}
                     </div>
                     {item.layoutImage && (
-                      <div className="mt-3 p-2 bg-zinc-900 rounded">
-                        <p className="text-xs text-emerald-400 mb-2">✓ Layout uploaded</p>
-                        <img src={item.layoutImage} alt="Layout preview" className="w-full h-auto max-h-32 object-contain rounded" />
+                      <div className="mt-2.5 p-2 bg-zinc-900 rounded">
+                        <p className="text-[10px] sm:text-xs text-emerald-400 mb-1.5">✓ Layout uploaded</p>
+                        <div className="flex justify-center overflow-hidden rounded">
+                          <img src={item.layoutImage} alt="Layout preview" className="block w-full max-w-full h-auto max-h-16 sm:max-h-32 object-contain rounded mx-auto" />
+                        </div>
                       </div>
                     )}
                     
                     {!item.layoutImage && isSelected && (
-                      <div className="mt-4 flex items-center gap-2 p-3 sm:p-4 bg-amber-500/10 border border-amber-500/30 rounded-sm">
+                      <div className="mt-3 flex items-center gap-2 p-2.5 sm:p-4 bg-amber-500/10 border border-amber-500/30 rounded-sm">
                         <AlertCircle size={16} className="text-amber-400 shrink-0" />
-                        <p className="text-xs sm:text-sm text-amber-200">Upload a design before this selected item can be checked out</p>
+                        <p className="text-[10px] sm:text-sm text-amber-200">Upload a design before this selected item can be checked out</p>
                       </div>
                     )}
                   </div>
@@ -297,10 +299,10 @@ export const Cart = () => {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="lg:sticky lg:top-32 p-3 sm:p-6 lg:p-8 border border-zinc-900 rounded-sm bg-zinc-950/80 backdrop-blur-md flex flex-col">
-            <h2 className="text-lg sm:text-2xl font-bold uppercase tracking-widest mb-4 sm:mb-8">Summary</h2>
+          <div className="lg:sticky lg:top-32 p-3 sm:p-6 lg:p-8 border border-zinc-900 rounded-sm bg-zinc-950/80 backdrop-blur-md flex flex-col mt-2 lg:mt-0">
+            <h2 className="text-lg sm:text-2xl font-bold uppercase tracking-widest mb-3 sm:mb-8">Summary</h2>
 
-            <div className="space-y-3 sm:space-y-4 text-sm font-medium mb-4 sm:mb-8">
+            <div className="space-y-2.5 sm:space-y-4 text-sm font-medium mb-3 sm:mb-8">
               <div className="flex justify-between">
                 <span className="text-zinc-400">Subtotal</span>
                 <span>₱{selectedCartTotal.toFixed(2)}</span>
@@ -316,13 +318,13 @@ export const Cart = () => {
             </div>
 
             <div className="p-3 sm:p-4 bg-zinc-900/50 rounded-sm border border-zinc-800">
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              <p className="text-[10px] sm:text-sm text-zinc-400 leading-relaxed">
                 Select the items you want to order, upload a design for each selected item, then use the checkout button at the bottom of the page.
               </p>
             </div>
 
-            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-zinc-800 flex flex-col gap-3">
-              <div className="flex items-center justify-between text-xs sm:text-sm uppercase tracking-widest text-zinc-500">
+            <div className="mt-3 sm:mt-6 pt-3 sm:pt-6 border-t border-zinc-800 flex flex-col gap-3">
+              <div className="flex items-center justify-between text-[10px] sm:text-sm uppercase tracking-widest text-zinc-500">
                 <span>{selectedCartItems.length} selected</span>
                 <span>Only selected items</span>
               </div>
