@@ -15,9 +15,13 @@ if (typeof window !== 'undefined') {
   });
 }
 
+const preventDragStart = (event) => {
+  event.preventDefault();
+};
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <div className="flex flex-col relative">  
+    <div className="flex flex-col relative" onDragStartCapture={preventDragStart}>  
       <AuthContextProvider>
         <StoreProvider>
           <RouterProvider router={router}/>
