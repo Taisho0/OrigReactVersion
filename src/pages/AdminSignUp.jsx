@@ -18,6 +18,7 @@ const AdminSignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -48,16 +49,31 @@ const AdminSignUp = () => {
     }
   }, [authReady, navigate, session, userProfile, isConfiguredAdminEmail]);
 
+  const isValidEmail = (value) => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(value.trim());
+  };
+
+  const isGmailAddress = (value) => {
+    return isValidEmail(value) && /@gmail\.com$/i.test(value.trim());
+  };
+
   const checks = passwordChecks(password);
   const validPassword = Object.values(checks).every(Boolean);
   const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
-  const canSubmit = validPassword && passwordsMatch && email.length > 0;
+  const validEmail = isGmailAddress(email);
+  const canSubmit = validPassword && passwordsMatch && validEmail;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
 
     if (!canSubmit) {
+      if (!validEmail) {
+        setError("Please enter a valid Gmail address.");
+        return;
+      }
+
       setError("Please satisfy the password requirements.");
       return;
     }
@@ -128,38 +144,54 @@ const AdminSignUp = () => {
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-400"
+              className={`w-full rounded-xl border bg-white/5 px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-400 ${email.length > 0 && !validEmail ? "border-red-400" : "border-white/10"}`}
               placeholder="admin@domain.com"
               autoComplete="email"
             />
+            {email.length > 0 && !validEmail && (
+              <p className="mt-2 text-xs text-red-300">Use a valid Gmail address.</p>
+            )}
           </div>
 
           <div>
             <label htmlFor="admin-signup-password" className="block text-sm text-zinc-300 mb-2">Password</label>
-            <input
-              id="admin-signup-password"
-              type="password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-400"
-              placeholder="Strong password"
-              autoComplete="new-password"
-            />
+            <div className="relative">
+              <input
+                id="admin-signup-password"
+                type={showPassword ? "text" : "password"}
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-16 text-zinc-100 focus:outline-none focus:border-emerald-400"
+                placeholder="Strong password"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-0 flex items-center px-4 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-300 hover:text-emerald-300"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
 
           <div>
             <label htmlFor="admin-signup-confirm" className="block text-sm text-zinc-300 mb-2">Confirm password</label>
             <input
               id="admin-signup-confirm"
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-400"
+              className={`w-full rounded-xl border px-4 py-3 text-zinc-100 focus:outline-none focus:border-emerald-400 ${confirmPassword.length > 0 && !passwordsMatch ? "border-red-400" : "border-white/10 bg-white/5"}`}
               placeholder="Re-enter password"
               autoComplete="new-password"
             />
+            {confirmPassword.length > 0 && !passwordsMatch && (
+              <p className="mt-2 text-xs text-red-300">Passwords do not match.</p>
+            )}
           </div>
 
           <div>

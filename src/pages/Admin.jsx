@@ -576,7 +576,7 @@ export default function Admin() {
 
     // Prevent non-admins from attempting uploads — avoids repeated storage permission errors.
     if (!userProfile || (userProfile.role !== 'admin' && !isConfiguredAdminEmail(session?.email || ''))) {
-      setShowcaseMessage('You are not recognized as an admin. Ensure your account has role="admin" in Firestore or your email is added to admin list.');
+      setShowcaseMessage('You are not recognized as an admin. ');
       window.setTimeout(() => setShowcaseMessage(''), 5000);
       return;
     }
