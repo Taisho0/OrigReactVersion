@@ -3,7 +3,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router';
 import { useStore } from '../context/StoreContext';
-import { Trash2, Plus, Minus, ArrowRight, Upload, X, AlertCircle } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowRight, Upload, X, AlertCircle, Check } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -16,13 +16,91 @@ import {
 export const Cart = () => {
   const { cart, removeFromCart, updateQuantity, updateCartItemLayout, cartTotal } = useStore();
   const navigate = useNavigate();
+  const selectedItemsStorageKey = 'theoriginals.cart.selectedItems';
 
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [pendingRemove, setPendingRemove] = React.useState(null);
+  const [selectedItems, setSelectedItems] = React.useState(() => {
+    if (typeof window === 'undefined') {
+      return new Set();
+    }
+
+    try {
+      const stored = window.localStorage.getItem(selectedItemsStorageKey);
+      const parsed = stored ? JSON.parse(stored) : [];
+      return new Set(Array.isArray(parsed) ? parsed.filter((key) => typeof key === 'string') : []);
+    } catch {
+      return new Set();
+    }
+  });
+
+  const getItemKey = (item) => `${item.product.id}::${item.size || 'default'}`;
+
+  React.useEffect(() => {
+    setSelectedItems((current) => {
+      const next = new Set();
+      cart.forEach((item) => {
+        const key = getItemKey(item);
+        if (current.has(key)) {
+          next.add(key);
+        }
+      });
+      return next;
+    });
+  }, [cart]);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(selectedItemsStorageKey, JSON.stringify(Array.from(selectedItems)));
+  }, [selectedItems]);
+
+  const selectedCartItems = cart.filter((item) => selectedItems.has(getItemKey(item)));
+  const selectedCartTotal = selectedCartItems.reduce((sum, item) => sum + (item.itemPrice || item.product.price) * item.quantity, 0);
+  const selectedHasMissingLayout = selectedCartItems.some((item) => !item.layoutImage);
+  const allSelected = cart.length > 0 && selectedItems.size === cart.length;
 
   const handleRequestRemove = (productId, size, productName) => {
     setPendingRemove({ productId, size, productName });
     setConfirmOpen(true);
+  };
+
+  const toggleItemSelection = (itemKey) => {
+    setSelectedItems((current) => {
+      const next = new Set(current);
+      if (next.has(itemKey)) {
+        next.delete(itemKey);
+      } else {
+        next.add(itemKey);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedItems((current) => {
+      if (cart.length > 0 && current.size === cart.length) {
+        return new Set();
+      }
+
+      return new Set(cart.map((item) => getItemKey(item)));
+    });
+  };
+
+  const handleCheckoutSelected = () => {
+    if (selectedCartItems.length === 0) {
+      return;
+    }
+
+    if (selectedHasMissingLayout) {
+      alert('Please upload a design for every selected item before checkout.');
+      return;
+    }
+
+    const selectedKeys = selectedCartItems.map((item) => getItemKey(item));
+    navigate(`/checkout?selectedItems=${encodeURIComponent(JSON.stringify(selectedKeys))}`);
   };
 
   const handleConfirmRemove = () => {
@@ -61,9 +139,26 @@ export const Cart = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-16 items-start">
         <div className="lg:col-span-2 space-y-3 sm:space-y-6 lg:space-y-8 min-w-0">
+          <div className="flex items-center justify-between gap-4 rounded-sm border border-zinc-900 bg-zinc-950/80 backdrop-blur-md px-4 py-3 sm:px-6 sm:py-4">
+            <button
+              type="button"
+              onClick={toggleSelectAll}
+              className="inline-flex items-center gap-3 text-xs sm:text-sm uppercase tracking-widest text-zinc-200 hover:text-emerald-400 transition-colors"
+            >
+              <span className={`flex h-5 w-5 items-center justify-center rounded border ${allSelected ? 'border-emerald-500 bg-emerald-500 text-zinc-950' : 'border-zinc-700 bg-transparent text-transparent'}`}>
+                <Check size={13} />
+              </span>
+              {allSelected ? 'Deselect All' : 'Select All'}
+            </button>
+            <p className="text-[10px] sm:text-xs uppercase tracking-widest text-zinc-500">
+              {selectedCartItems.length} of {cart.length} selected
+            </p>
+          </div>
+
           <AnimatePresence initial={false}>
             {cart.map((item) => {
-              const selectedItemKey = `${item.product.id}::${item.size || 'default'}`;
+              const selectedItemKey = getItemKey(item);
+              const isSelected = selectedItems.has(selectedItemKey);
               return (
                 <motion.div 
                   key={`${item.product.id}-${item.size || 'default'}`}
@@ -71,11 +166,23 @@ export const Cart = () => {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                  className="flex flex-col sm:flex-row gap-3 sm:gap-6 p-3 sm:p-6 border border-zinc-900 rounded-sm bg-zinc-950/80 backdrop-blur-md relative group overflow-hidden"
+                  className={`flex flex-col sm:flex-row gap-3 sm:gap-6 p-3 sm:p-6 border rounded-sm bg-zinc-950/80 backdrop-blur-md relative group overflow-hidden transition-colors ${isSelected ? 'border-emerald-500/70' : 'border-zinc-900'}`}
                 >
-                <Link to={`/product/${item.product.id}`} className="w-full h-28 sm:w-24 sm:h-32 md:w-32 md:h-40 shrink-0 bg-zinc-900 overflow-hidden rounded-sm">
-                  <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                </Link>
+                <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+                  <button
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => toggleItemSelection(selectedItemKey)}
+                    className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded border transition-colors ${isSelected ? 'border-emerald-500 bg-emerald-500 text-zinc-950' : 'border-zinc-700 bg-zinc-950 text-transparent hover:border-emerald-400'}`}
+                    title={isSelected ? 'Deselect item' : 'Select item for checkout'}
+                  >
+                    <Check size={14} />
+                  </button>
+
+                  <Link to={`/product/${item.product.id}`} className="w-full h-28 sm:w-24 sm:h-32 md:w-32 md:h-40 shrink-0 bg-zinc-900 overflow-hidden rounded-sm">
+                    <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  </Link>
+                </div>
                 
                 <div className="flex flex-col grow justify-between py-0 sm:py-2 min-w-0">
                   <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:justify-between sm:items-start min-w-0">
@@ -176,31 +283,12 @@ export const Cart = () => {
                       </div>
                     )}
                     
-                    {/* Per-Item Checkout Button */}
-                    <div className="mt-4 sm:mt-5">
-                      {!item.layoutImage && (
-                        <div className="flex items-center gap-2 p-3 sm:p-4 bg-amber-500/10 border border-amber-500/30 rounded-sm mb-3">
-                          <AlertCircle size={16} className="text-amber-400 shrink-0" />
-                          <p className="text-xs sm:text-sm text-amber-200">Please upload a design to checkout this item</p>
-                        </div>
-                      )}
-                      <button 
-                        onClick={() => {
-                          if (item.layoutImage) {
-                            navigate(`/checkout?selectedItem=${encodeURIComponent(selectedItemKey)}`);
-                          }
-                        }}
-                        disabled={!item.layoutImage}
-                        className={`w-full py-2.5 sm:py-3 px-4 rounded font-bold uppercase tracking-widest text-xs sm:text-sm transition-all flex items-center justify-center gap-2 group ${
-                          item.layoutImage 
-                            ? 'bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer' 
-                            : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-                        }`}
-                      >
-                        Checkout
-                        <ArrowRight size={16} className={`${item.layoutImage ? 'group-hover:translate-x-1' : ''} transition-transform`} />
-                      </button>
-                    </div>
+                    {!item.layoutImage && isSelected && (
+                      <div className="mt-4 flex items-center gap-2 p-3 sm:p-4 bg-amber-500/10 border border-amber-500/30 rounded-sm">
+                        <AlertCircle size={16} className="text-amber-400 shrink-0" />
+                        <p className="text-xs sm:text-sm text-amber-200">Upload a design before this selected item can be checked out</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>            );            })}
@@ -209,13 +297,13 @@ export const Cart = () => {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="lg:sticky lg:top-32 p-3 sm:p-6 lg:p-8 border border-zinc-900 rounded-sm bg-zinc-950/80 backdrop-blur-md">
+          <div className="lg:sticky lg:top-32 p-3 sm:p-6 lg:p-8 border border-zinc-900 rounded-sm bg-zinc-950/80 backdrop-blur-md flex flex-col">
             <h2 className="text-lg sm:text-2xl font-bold uppercase tracking-widest mb-4 sm:mb-8">Summary</h2>
-            
+
             <div className="space-y-3 sm:space-y-4 text-sm font-medium mb-4 sm:mb-8">
               <div className="flex justify-between">
                 <span className="text-zinc-400">Subtotal</span>
-                <span>₱{cartTotal.toFixed(2)}</span>
+                <span>₱{selectedCartTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-400">Shipping</span>
@@ -223,18 +311,41 @@ export const Cart = () => {
               </div>
               <div className="flex justify-between pt-4 border-t border-zinc-800 text-lg sm:text-xl font-bold">
                 <span>Total</span>
-                <span className="text-emerald-400">₱{cartTotal.toFixed(2)}</span>
+                <span className="text-emerald-400">₱{selectedCartTotal.toFixed(2)}</span>
               </div>
             </div>
 
             <div className="p-3 sm:p-4 bg-zinc-900/50 rounded-sm border border-zinc-800">
               <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-                To proceed with checkout, please upload a design for each item in your cart. Once uploaded, click the <span className="text-emerald-400 font-semibold">Checkout</span> button on that item to complete your order.
+                Select the items you want to order, upload a design for each selected item, then use the checkout button at the bottom of the page.
               </p>
+            </div>
+
+            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-zinc-800 flex flex-col gap-3">
+              <div className="flex items-center justify-between text-xs sm:text-sm uppercase tracking-widest text-zinc-500">
+                <span>{selectedCartItems.length} selected</span>
+                <span>Only selected items</span>
+              </div>
+              {selectedHasMissingLayout && (
+                <div className="flex items-center gap-2 rounded-sm border border-amber-500/30 bg-amber-500/10 p-3 text-amber-200">
+                  <AlertCircle size={16} className="shrink-0 text-amber-400" />
+                  <p className="text-xs sm:text-sm">One or more selected items are missing a design upload.</p>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={handleCheckoutSelected}
+                disabled={selectedCartItems.length === 0}
+                className="inline-flex items-center justify-center gap-2 rounded-sm bg-emerald-500 px-6 py-3 text-sm sm:text-base font-bold uppercase tracking-widest text-white transition-colors hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500"
+              >
+                Checkout Selected
+                <ArrowRight size={16} />
+              </button>
             </div>
           </div>
         </div>
       </div>
+
       {/* Confirm Remove Dialog */}
       <Dialog open={confirmOpen} onOpenChange={(open) => setConfirmOpen(open)}>
         <DialogContent className="bg-zinc-950/80 backdrop-blur-md">

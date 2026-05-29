@@ -7,9 +7,26 @@ export const Checkout = () => {
   const { cart, submitOrderForPaymentReview } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const selectedItemKey = new URLSearchParams(location.search).get('selectedItem') || '';
-  const selectedCartItems = selectedItemKey
-    ? cart.filter((item) => `${item.product.id}::${item.size || 'default'}` === selectedItemKey)
+  const searchParams = new URLSearchParams(location.search);
+  const selectedItemKey = searchParams.get('selectedItem') || '';
+  const selectedItemsParam = searchParams.get('selectedItems') || '';
+
+  let selectedKeys = [];
+  if (selectedItemsParam) {
+    try {
+      const parsed = JSON.parse(selectedItemsParam);
+      if (Array.isArray(parsed)) {
+        selectedKeys = parsed.filter((value) => typeof value === 'string');
+      }
+    } catch {
+      selectedKeys = selectedItemsParam.split(',').map((value) => value.trim()).filter(Boolean);
+    }
+  } else if (selectedItemKey) {
+    selectedKeys = [selectedItemKey];
+  }
+
+  const selectedCartItems = selectedKeys.length > 0
+    ? cart.filter((item) => selectedKeys.includes(`${item.product.id}::${item.size || 'default'}`))
     : cart;
   const selectedCartTotal = selectedCartItems.reduce(
     (sum, item) => sum + (item.itemPrice || item.product.price) * item.quantity,
