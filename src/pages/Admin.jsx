@@ -77,6 +77,7 @@ export default function Admin() {
   const [feedbackCollectionInbox, setFeedbackCollectionInbox] = useState([]);
   const [orderSearchQuery, setOrderSearchQuery] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('');
+  const [feedbackStarFilter, setFeedbackStarFilter] = useState('');
 
   const barGradId = useId();
 
@@ -1732,8 +1733,40 @@ export default function Admin() {
                     <p className="mt-1 text-xs sm:text-sm text-zinc-400">Messages customers submit after completing an order.</p>
                   </div>
                   <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-zinc-300">
-                    {feedbackInbox.length} item{feedbackInbox.length === 1 ? '' : 's'}
+                    {(() => {
+                      const filtered = feedbackInbox.filter((f) => !feedbackStarFilter || f.rating === parseInt(feedbackStarFilter));
+                      return `${filtered.length} item${filtered.length === 1 ? '' : 's'}`;
+                    })()}
                   </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFeedbackStarFilter('')}
+                    className={`rounded-full border px-2.5 sm:px-3 py-1.5 sm:py-2 text-[9px] sm:text-xs font-semibold uppercase tracking-[0.28em] transition ${
+                      feedbackStarFilter === ''
+                        ? 'border-emerald-400 bg-emerald-400/10 text-emerald-200'
+                        : 'border-white/10 bg-slate-950 text-zinc-300 hover:border-emerald-400 hover:text-emerald-200'
+                    }`}
+                  >
+                    All
+                  </button>
+                  {[5, 4, 3, 2, 1].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setFeedbackStarFilter(star.toString())}
+                      className={`rounded-full border px-2.5 sm:px-3 py-1.5 sm:py-2 text-[9px] sm:text-xs font-semibold uppercase tracking-[0.28em] transition flex items-center gap-1 ${
+                        feedbackStarFilter === star.toString()
+                          ? 'border-amber-400 bg-amber-400/10 text-amber-200'
+                          : 'border-white/10 bg-slate-950 text-zinc-300 hover:border-amber-400 hover:text-amber-200'
+                      }`}
+                    >
+                      <Star size={10} />
+                      {star}
+                    </button>
+                  ))}
                 </div>
 
                 {feedbackInbox.length === 0 ? (
@@ -1742,28 +1775,30 @@ export default function Admin() {
                   </div>
                 ) : (
                   <div className="grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3 max-h-112 overflow-auto pr-1">
-                    {feedbackInbox.map((feedback) => {
-                      const customerName = feedback.customerName || feedback.customerEmail || 'Customer';
-                      const submittedAt = feedback.submittedAt ? new Date(feedback.submittedAt).toLocaleString() : '';
+                    {feedbackInbox
+                      .filter((f) => !feedbackStarFilter || f.rating === parseInt(feedbackStarFilter))
+                      .map((feedback) => {
+                        const customerName = feedback.customerName || feedback.customerEmail || 'Customer';
+                        const submittedAt = feedback.submittedAt ? new Date(feedback.submittedAt).toLocaleString() : '';
 
-                      return (
-                        <article key={feedback.id} className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4 shadow-sm shadow-black/10">
-                          <div className="flex items-start justify-between gap-3 mb-3">
-                            <div className="min-w-0">
-                              <p className="text-xs font-semibold text-zinc-100 truncate">{customerName}</p>
-                              <p className="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] text-zinc-500 truncate">Order {feedback.orderId}</p>
+                        return (
+                          <article key={feedback.id} className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4 shadow-sm shadow-black/10">
+                            <div className="flex items-start justify-between gap-3 mb-3">
+                              <div className="min-w-0">
+                                <p className="text-xs font-semibold text-zinc-100 truncate">{customerName}</p>
+                                <p className="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] text-zinc-500 truncate">Order {feedback.orderId}</p>
+                              </div>
+                              <div className="flex items-center gap-1 rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-1 text-[10px] font-bold text-amber-200 shrink-0">
+                                <Star size={10} />
+                                {feedback.rating || 0}/5
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1 rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-1 text-[10px] font-bold text-amber-200 shrink-0">
-                              <Star size={10} />
-                              {feedback.rating || 0}/5
-                            </div>
-                          </div>
 
-                          <p className="text-xs sm:text-sm text-zinc-200 leading-6">{feedback.comment}</p>
-                          <p className="mt-3 text-[8px] sm:text-[10px] uppercase tracking-[0.28em] text-zinc-500">{submittedAt}</p>
-                        </article>
-                      );
-                    })}
+                            <p className="text-xs sm:text-sm text-zinc-200 leading-6">{feedback.comment}</p>
+                            <p className="mt-3 text-[8px] sm:text-[10px] uppercase tracking-[0.28em] text-zinc-500">{submittedAt}</p>
+                          </article>
+                        );
+                      })}
                   </div>
                 )}
               </div>
