@@ -323,6 +323,15 @@ export const Checkout = () => {
   return (
     <div className="px-4 sm:px-6 md:px-12 py-4 sm:py-8 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
       <div>
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={() => navigate('/cart')}
+            className="inline-flex items-center gap-2 text-xs sm:text-sm uppercase tracking-widest text-emerald-400 hover:text-emerald-100 transition-colors"
+          >
+            ← Back to Cart
+          </button>
+        </div>
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter uppercase mb-8 sm:mb-12">Checkout</h1>
         
         <form onSubmit={handleCheckout} className="space-y-5 sm:space-y-6">
