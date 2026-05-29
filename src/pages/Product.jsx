@@ -169,11 +169,6 @@ export const ProductDetail = () => {
           <div className="mb-8 sm:mb-12">
             <p className="text-xs sm:text-sm text-yellow-300 font-bold mb-1 sm:mb-2">Price per {product.pricingUnit || 'unit'}</p>
             <p className="text-2xl sm:text-3xl font-light">₱{product.price}</p>
-            {(product.requiresDimensions ? width && length : true) && (
-              <p className="text-sm sm:text-lg text-emerald-400 mt-2 sm:mt-3">
-                Total: ₱{(parseFloat(calculatePrice()) * (isValidQuantity ? parsedQuantity : 0)).toFixed(2)}
-              </p>
-            )}
           </div>
           
           <div className="mb-8 sm:mb-12">
@@ -316,6 +311,11 @@ export const ProductDetail = () => {
               }}
               className="quantity-input-no-spinner w-full rounded-2xl border border-zinc-800 bg-white/5 px-3 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-600 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 sm:px-4 sm:py-3 sm:text-base"
             />
+            {(product.requiresDimensions ? width && length : true) && isValidQuantity && (
+              <p className="text-sm sm:text-lg text-emerald-400 mt-2 sm:mt-3">
+                Total: ₱{(parseFloat(calculatePrice()) * parsedQuantity).toFixed(2)}
+              </p>
+            )}
             {inputMessages.quantity && <p className="text-amber-400 text-[10px] sm:text-xs mt-1">{inputMessages.quantity}</p>}
           </div>
 
