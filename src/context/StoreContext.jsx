@@ -16,6 +16,18 @@ const CART_STORAGE_KEY = 'theoriginals.cart';
 
 const getCartItemKey = (productId, size) => `${productId}::${size || 'default'}`;
 
+const removeCartItems = (setCartFn, itemsToRemove) => {
+  if (!Array.isArray(itemsToRemove) || itemsToRemove.length === 0) {
+    return;
+  }
+
+  const removalKeys = new Set(
+    itemsToRemove.map((item) => getCartItemKey(item?.product?.id, item?.size))
+  );
+
+  setCartFn((prev) => prev.filter((item) => !removalKeys.has(getCartItemKey(item.product.id, item.size))));
+};
+
 const ORDER_STATUS_STEPS = ['Pending Payment Approval', 'Processing', 'Shipped', 'Delivered', 'Complete', 'Payment Rejected'];
 
 const createInitialCatalog = () => {
@@ -384,8 +396,12 @@ export const StoreProvider = ({ children }) => {
     shipping = {},
     contact = {},
     payment = {},
+    items = null,
+    total = null,
   } = {}) => {
-    if (cart.length === 0 || !session?.uid) {
+    const orderItems = Array.isArray(items) && items.length > 0 ? items : cart;
+    const orderTotal = total != null ? total : cartTotal;
+    if (orderItems.length === 0 || !session?.uid) {
       return '';
     }
     const now = new Date();
@@ -399,8 +415,8 @@ export const StoreProvider = ({ children }) => {
 
     const newOrder = {
       id: orderId,
-      items: [...cart],
-      total: cartTotal,
+      items: [...orderItems],
+      total: orderTotal,
       status: 'Pending Payment Approval',
       date: now.toISOString(),
       estimatedDelivery: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
@@ -430,7 +446,11 @@ export const StoreProvider = ({ children }) => {
     };
 
     await addDoc(collection(db, 'orders'), newOrder);
-    clearCart();
+    if (Array.isArray(items) && items.length > 0) {
+      removeCartItems(setCart, orderItems);
+    } else {
+      clearCart();
+    }
     return orderId;
   };
 

@@ -1,11 +1,20 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useStore } from '../context/StoreContext';
 import { CheckCircle, Smartphone, Upload, AlertCircle } from 'lucide-react';
 
 export const Checkout = () => {
-  const { cart, cartTotal, submitOrderForPaymentReview } = useStore();
+  const { cart, submitOrderForPaymentReview } = useStore();
   const navigate = useNavigate();
+  const location = useLocation();
+  const selectedItemKey = new URLSearchParams(location.search).get('selectedItem') || '';
+  const selectedCartItems = selectedItemKey
+    ? cart.filter((item) => `${item.product.id}::${item.size || 'default'}` === selectedItemKey)
+    : cart;
+  const selectedCartTotal = selectedCartItems.reduce(
+    (sum, item) => sum + (item.itemPrice || item.product.price) * item.quantity,
+    0
+  );
   const [submittingProof, setSubmittingProof] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [orderId, setOrderId] = useState('');
@@ -29,7 +38,7 @@ export const Checkout = () => {
   const [postalCode, setPostalCode] = useState('');
   const [contactErrors, setContactErrors] = useState({});
   const [shippingErrors, setShippingErrors] = useState({});
-  const shouldRedirectToCart = cart.length === 0 && !completed;
+  const shouldRedirectToCart = selectedCartItems.length === 0 && !completed;
 
   useEffect(() => {
     if (shouldRedirectToCart) {
@@ -54,7 +63,7 @@ export const Checkout = () => {
     const generatedReference = `ORIG-${Math.random().toString(36).slice(2, 9).toUpperCase()}`;
     const requestBody = {
       reference: generatedReference,
-      amount: cartTotal,
+      amount: selectedCartTotal,
       description: `Originals Printing order ${generatedReference}`,
       customerEmail: contactEmail,
       customerName: `${firstName} ${lastName}`.trim(),
@@ -259,6 +268,8 @@ export const Checkout = () => {
           proofImage: receiptProofImage,
           proofFileName: receiptProofName,
         },
+        items: selectedCartItems,
+        total: selectedCartTotal,
       });
 
       if (!id) {
@@ -393,7 +404,7 @@ export const Checkout = () => {
                     </div>
                   )}
                 </div>
-                <p className="text-[11px] sm:text-xs text-zinc-400 text-center">Ref: {paymentReference || 'Pending'} • Amount: ₱{cartTotal.toFixed(2)}</p>
+<p className="text-[11px] sm:text-xs text-zinc-400 text-center">Ref: {paymentReference || 'Pending'} • Amount: ₱{selectedCartTotal.toFixed(2)}</p>
 
                 <label className="w-full py-2.5 sm:py-3 border border-zinc-700 text-zinc-100 text-xs sm:text-sm font-bold uppercase tracking-widest hover:border-emerald-500 hover:text-emerald-400 transition-colors flex items-center justify-center gap-2 cursor-pointer">
                   <Upload size={16} />
@@ -449,7 +460,7 @@ export const Checkout = () => {
       <div className="bg-zinc-950/80 border border-zinc-800 backdrop-blur-md p-3 sm:p-5 md:p-6 h-max">
         <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-emerald-500 mb-4 sm:mb-6">Order Summary</h2>
         <div className="space-y-3 sm:space-y-5 mb-4 sm:mb-8 max-h-[28vh] sm:max-h-[36vh] overflow-y-auto hide-scrollbar">
-          {cart.map(item => (
+          {selectedCartItems.map(item => (
             <div key={`${item.product.id}-${item.size || 'default'}`} className="border border-zinc-800 rounded p-2 bg-zinc-950/80">
               <div className="flex gap-3 sm:gap-4 mb-2.5">
                 <div className="w-12 h-14 sm:w-14 sm:h-16 bg-zinc-950 rounded-sm overflow-hidden shrink-0">
@@ -479,7 +490,7 @@ export const Checkout = () => {
         </div>
         <div className="pt-4 sm:pt-6 border-t border-zinc-800 flex justify-between items-center text-lg sm:text-xl font-bold">
           <span className="uppercase tracking-widest">Total</span>
-          <span className="text-emerald-400">₱{cartTotal.toFixed(2)}</span>
+          <span className="text-emerald-400">₱{selectedCartTotal.toFixed(2)}</span>
         </div>
       </div>
     </div>

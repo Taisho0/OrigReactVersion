@@ -62,15 +62,17 @@ export const Cart = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-16 items-start">
         <div className="lg:col-span-2 space-y-3 sm:space-y-6 lg:space-y-8 min-w-0">
           <AnimatePresence initial={false}>
-            {cart.map((item) => (
-              <motion.div 
-                key={`${item.product.id}-${item.size || 'default'}`}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                className="flex flex-col sm:flex-row gap-3 sm:gap-6 p-3 sm:p-6 border border-zinc-900 rounded-sm bg-zinc-950/80 backdrop-blur-md relative group overflow-hidden"
-              >
+            {cart.map((item) => {
+              const selectedItemKey = `${item.product.id}::${item.size || 'default'}`;
+              return (
+                <motion.div 
+                  key={`${item.product.id}-${item.size || 'default'}`}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                  className="flex flex-col sm:flex-row gap-3 sm:gap-6 p-3 sm:p-6 border border-zinc-900 rounded-sm bg-zinc-950/80 backdrop-blur-md relative group overflow-hidden"
+                >
                 <Link to={`/product/${item.product.id}`} className="w-full h-28 sm:w-24 sm:h-32 md:w-32 md:h-40 shrink-0 bg-zinc-900 overflow-hidden rounded-sm">
                   <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                 </Link>
@@ -185,7 +187,7 @@ export const Cart = () => {
                       <button 
                         onClick={() => {
                           if (item.layoutImage) {
-                            navigate('/checkout');
+                            navigate(`/checkout?selectedItem=${encodeURIComponent(selectedItemKey)}`);
                           }
                         }}
                         disabled={!item.layoutImage}
@@ -201,8 +203,7 @@ export const Cart = () => {
                     </div>
                   </div>
                 </div>
-              </motion.div>
-            ))}
+              </motion.div>            );            })}
           </AnimatePresence>
         </div>
 
