@@ -1049,7 +1049,7 @@ export default function Admin() {
                   }`}
                 >
                   <span className="inline-flex items-center gap-2">
-                    {tab.value === 'feedbacks' && <Bell size={14} />}
+                    {tab.value === 'feedbacks' && <Bell size={14} color="#15d59c" />}
                     {tab.label}
                     {tab.value === 'feedbacks' && feedbackInbox.length > 0 && (
                       <span className="rounded-full bg-emerald-400/15 px-2 py-0.5 text-[10px] font-bold tracking-normal text-emerald-300 normal-case">
@@ -1920,7 +1920,7 @@ export default function Admin() {
                   <div className="rounded-4xl border border-white/10 bg-slate-950/85 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-5 gap-4">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Daily revenue</p>
+                        <p className="text-xs uppercase tracking-[0.35em] text-zinc-400">Daily sales</p>
                         <p className="text-sm text-zinc-400">Revenue movement across the selected range.</p>
                       </div>
                       <span className="inline-flex rounded-full bg-white/5 px-2 sm:px-3 py-0.5 sm:py-1 text-[8px] sm:text-[11px] font-semibold uppercase tracking-[0.35em] text-zinc-300 shrink-0">{salesAnalytics.dailySales.length} days</span>
