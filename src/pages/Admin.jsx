@@ -1022,7 +1022,7 @@ export default function Admin() {
 
       <main className="w-full max-w-none px-3 sm:px-6 md:px-10 py-6 sm:py-10">
         <div className="grid gap-6 sm:gap-8 lg:grid-cols-[280px_1fr]">
-          <aside className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/80 p-4 sm:p-6 md:p-8">
+          <aside className="rounded-2xl sm:rounded-4xl border border-white/10 bg-slate-950/80 p-4 sm:p-6 md:p-8 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
             <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
               <p className="text-[9px] sm:text-xs uppercase tracking-[0.35em] text-emerald-400">Admin sections</p>
               <h2 className="text-lg sm:text-2xl font-black uppercase tracking-tight">Manage everything</h2>
