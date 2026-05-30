@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Outlet, Link, useNavigate } from 'react-router';
+import React, { useEffect, useState } from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router';
 import { Menu, X } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { useUserAuth } from '../auth/AuthContext';
@@ -8,9 +8,14 @@ export const Layout = () => {
   const { cart } = useStore();
   const { isAdmin, session, signOut } = useUserAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const cartOrderCount = cart.length;
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname]);
 
   const handleSignOut = async () => {
     const result = await signOut();

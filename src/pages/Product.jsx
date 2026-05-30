@@ -80,7 +80,10 @@ export const ProductDetail = () => {
   const productVariants = Array.isArray(product.variants) && product.variants.length > 0
     ? product.variants
     : [];
+  const parsedWidth = Number.parseFloat(width);
+  const parsedLength = Number.parseFloat(length);
   const parsedQuantity = Number.parseInt(quantity, 10);
+  const isValidDimensions = Number.isFinite(parsedWidth) && Number.isFinite(parsedLength) && parsedWidth > 0 && parsedLength > 0;
   const isValidQuantity = Number.isFinite(parsedQuantity) && parsedQuantity > 0;
 
   const handleAdd = () => {
@@ -90,8 +93,8 @@ export const ProductDetail = () => {
       return;
     }
 
-    if (product.requiresDimensions && (!width || !length)) {
-      alert('Please enter both width and length');
+    if (product.requiresDimensions && !isValidDimensions) {
+      alert('Please enter width and length greater than zero.');
       return;
     }
 
@@ -210,7 +213,7 @@ export const ProductDetail = () => {
                     <input
                       type="number"
                       step="0.1"
-                      min="0"
+                      min="0.1"
                       max="100"
                       value={width}
                       onChange={(e) => {
@@ -219,6 +222,10 @@ export const ProductDetail = () => {
                           if (v !== '') {
                             const parsed = parseFloat(v);
                             if (!Number.isNaN(parsed)) {
+                              if (parsed <= 0) {
+                                setWidth('');
+                                return;
+                              }
                               if (parsed > 100) {
                                 setInputMessages((prev) => ({ ...prev, width: 'Maximum is 100' }));
                                 setTimeout(() => setInputMessages((prev) => { const c = { ...prev }; if (c.width === 'Maximum is 100') delete c.width; return c; }), 2500);
@@ -241,7 +248,7 @@ export const ProductDetail = () => {
                     <input
                       type="number"
                       step="0.1"
-                      min="0"
+                      min="0.1"
                       max="100"
                       value={length}
                       onChange={(e) => {
@@ -250,6 +257,10 @@ export const ProductDetail = () => {
                           if (v !== '') {
                             const parsed = parseFloat(v);
                             if (!Number.isNaN(parsed)) {
+                              if (parsed <= 0) {
+                                setLength('');
+                                return;
+                              }
                               if (parsed > 100) {
                                 setInputMessages((prev) => ({ ...prev, length: 'Maximum is 100' }));
                                 setTimeout(() => setInputMessages((prev) => { const c = { ...prev }; if (c.length === 'Maximum is 100') delete c.length; return c; }), 2500);
@@ -268,7 +279,7 @@ export const ProductDetail = () => {
                     />
                   </div>
                 </div>
-                {width && length && (
+                {isValidDimensions && (
                   <div className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 sm:px-4 sm:py-3">
                     <p className="text-[9px] sm:text-xs text-zinc-50 mb-1.5 sm:mb-2">Area: {width} × {length} = {calculateSqMeter()} {product.pricingUnit || 'sq.m'}</p>
                     <p className="text-[10px] sm:text-sm font-semibold text-emerald-300">
@@ -311,7 +322,7 @@ export const ProductDetail = () => {
               }}
               className="quantity-input-no-spinner w-full rounded-2xl border border-zinc-800 bg-white/5 px-3 py-2 text-sm text-zinc-50 placeholder:text-zinc-600 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 sm:px-4 sm:py-3 sm:text-base"
             />
-            {(product.requiresDimensions ? width && length : true) && isValidQuantity && (
+            {(product.requiresDimensions ? isValidDimensions : true) && isValidQuantity && (
               <p className="text-xs sm:text-lg text-emerald-400 mt-2 sm:mt-3">
                 Total: ₱{(parseFloat(calculatePrice()) * parsedQuantity).toFixed(2)}
               </p>
@@ -322,11 +333,11 @@ export const ProductDetail = () => {
           <div className="space-y-3 sm:space-y-6">
             <button 
               onClick={handleAdd}
-              disabled={added || !isValidQuantity}
+              disabled={added || !isValidQuantity || (product.requiresDimensions && !isValidDimensions)}
               className={`w-full py-3 px-6 sm:py-5 sm:px-8 flex items-center justify-center gap-3 text-xs sm:text-lg font-bold tracking-widest uppercase transition-all duration-300 ${
                 added 
                   ? 'bg-zinc-800 text-emerald-400 cursor-default' 
-                  : !isValidQuantity
+                  : !isValidQuantity || (product.requiresDimensions && !isValidDimensions)
                     ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed'
                     : 'bg-zinc-50 text-zinc-950 hover:bg-emerald-400 hover:text-zinc-950'
               }`}
@@ -363,7 +374,7 @@ export const ProductDetail = () => {
             </div>
             <div>
               <p className="text-zinc-50 mb-1 sm:mb-2 font-bold">Dimensions</p>
-              {width && length ? (
+              {isValidDimensions ? (
                 <p>
                   W: {width}{product.dimensionUnit || 'm'}
                   <br />
